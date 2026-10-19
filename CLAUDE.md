@@ -81,7 +81,7 @@ TypeScript (frontend) · godog (BDD con Gherkin) · `go test` (TDD) · GitHub Ac
 │   └── CLAUDE.md
 ├── docs/specs/       # specs SDD, una carpeta por Sprint (sprint-NN/)
 ├── .github/          # CI + PR template
-└── .claude/          # hooks de Claude Code
+└── .claude/          # hooks de Claude Code y el comando /comando (ponerse al día)
 ```
 
 El frontend (React + Vite + TS) todavía no está creado: se arma cuando el equipo lo defina.
