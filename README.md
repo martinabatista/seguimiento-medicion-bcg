@@ -1,2 +1,58 @@
-# seguimiento_medicionBCG
+# seguimiento_medicionBCG — Software Metrics & Estimation
+
+Aplicación web para administrar proyectos de software y medir su estimación, planificación,
+seguimiento y calidad. Trabajo Práctico Integrador de Ingeniería y Calidad de Software 2026 — UTN FRSR.
+
 Integrantes: Batista Martina, Cabeza Florencia, Guajardo Luana
+
+- Reglas del equipo y arquitectura: [`CLAUDE.md`](CLAUDE.md)
+- Especificaciones (SDD) por Sprint: [`docs/specs/`](docs/specs/)
+- Tablero Scrum: [GitHub Projects](https://github.com/users/martinabatista/projects/4)
+
+## Requisitos
+
+- [Git](https://git-scm.com/)
+- [Go](https://go.dev/dl/) 1.27 (la versión de `backend/go.mod`)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/), para la base de datos PostgreSQL
+
+## Levantar el proyecto
+
+```bash
+git clone https://github.com/martinabatista/seguimiento-medicion-bcg.git
+cd seguimiento-medicion-bcg
+cp .env.example .env
+```
+
+Base de datos (con Docker Desktop abierto):
+
+```bash
+docker compose up -d        # PostgreSQL 17 en localhost:5434
+docker compose down         # para apagarla
+```
+
+Backend:
+
+```bash
+cd backend
+go run ./cmd/api            # API en http://localhost:8080 — probar: /api/health
+```
+
+## Tests
+
+```bash
+cd backend
+go test ./... -cover        # tests unitarios y escenarios BDD (backend/features/*.feature)
+go vet ./...
+gofmt -l .                  # no debe listar nada
+```
+
+La CI corre estos mismos controles en cada Pull Request.
+
+## Cómo trabajamos
+
+Cada historia pasa por dos ramas, siempre creadas desde `main` actualizado:
+
+1. `docs/spec-NN-slug`: se completa la spec → Pull Request que otra integrante revisa y aprueba.
+2. `feat/slug`: con la spec ya en `main`, se implementa con BDD + TDD → Pull Request con `Closes #N` (frase que se escribe en la descripción de un Pull Request para conectarlo con un Issue. N es el número del Issue).
+
+Todo entra a `main` por Pull Request, con la CI en verde y la aprobación de otra integrante.
