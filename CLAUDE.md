@@ -41,6 +41,11 @@ TypeScript (frontend) · godog (BDD con Gherkin) · `go test` (TDD) · GitHub Ac
 - **Git:** nunca commit directo a `main`. Toda rama sale de `main` actualizado, por tipo (`feat/`,
   `fix/`, `docs/`, `test/`, `refactor/`, `chore/`) → PR a `main` con CI verde y revisión de otra
   integrante. **Conventional Commits con scope = unidad** (`backend`, `frontend`, `docs`, `ci`).
+- **Commits solo cuando se piden:** el agente nunca hace `git commit` ni `git push` por su cuenta.
+  Deja los cambios en la carpeta, avisa qué archivos tocó y commitea solo cuando la integrante lo pide.
+- **Autoría:** commits y PRs salen únicamente a nombre de la integrante que está trabajando (su
+  `git config user.name` / `user.email`, con el email de su cuenta de GitHub). Prohibido agregar
+  `Co-Authored-By: Claude`, "Generated with Claude Code" o cualquier mención al agente en commits o PRs.
 - **Dos ramas por historia:** 1) `docs/spec-NN-slug` con la spec → PR que otra integrante aprueba;
   2) recién mergeada la spec, `feat/slug` con BDD + TDD + pantallas → PR con `Closes #N`.
   Tareas sin spec (fix, chore, docs sueltas) usan una sola rama.
