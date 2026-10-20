@@ -120,6 +120,46 @@ func TestParsearEstado(t *testing.T) {
 	}
 }
 
+// spec 04 RN-8 (CA-4): prioridad ascendente y, a igual prioridad, orden de creación (ID creciente).
+func TestOrdenarBacklog(t *testing.T) {
+	titulos := func(hs []Historia) []string {
+		var ts []string
+		for _, h := range hs {
+			ts = append(ts, h.Titulo)
+		}
+		return ts
+	}
+	casos := []struct {
+		nombre    string
+		historias []Historia
+		esperado  []string
+	}{
+		{"backlog vacío", nil, nil},
+		{"distintas prioridades", []Historia{
+			{ID: 1, Titulo: "Pagar pedido", Prioridad: 3},
+			{ID: 2, Titulo: "Registrar usuario", Prioridad: 1},
+			{ID: 3, Titulo: "Ver catálogo", Prioridad: 2},
+		}, []string{"Registrar usuario", "Ver catálogo", "Pagar pedido"}},
+		{"empate: gana la creada primero", []Historia{
+			{ID: 1, Titulo: "Ver catálogo", Prioridad: 2},
+			{ID: 2, Titulo: "Buscar producto", Prioridad: 2},
+			{ID: 3, Titulo: "Registrar usuario", Prioridad: 1},
+		}, []string{"Registrar usuario", "Ver catálogo", "Buscar producto"}},
+		{"empate aunque lleguen desordenadas", []Historia{
+			{ID: 9, Titulo: "Buscar producto", Prioridad: 2},
+			{ID: 4, Titulo: "Ver catálogo", Prioridad: 2},
+		}, []string{"Ver catálogo", "Buscar producto"}},
+	}
+	for _, c := range casos {
+		t.Run(c.nombre, func(t *testing.T) {
+			got := titulos(OrdenarBacklog(c.historias))
+			if strings.Join(got, "|") != strings.Join(c.esperado, "|") {
+				t.Errorf("orden = %v, se esperaba %v", got, c.esperado)
+			}
+		})
+	}
+}
+
 // Los errores de validación de la historia son datos inválidos (400); "no existe" no (404).
 func TestErroresDeHistoria(t *testing.T) {
 	invalidos := []error{
