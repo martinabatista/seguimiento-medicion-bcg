@@ -4,12 +4,20 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/martinabatista/seguimiento-medicion-bcg/backend/dominio"
 )
 
 // NewRouter arma las rutas de la API.
-func NewRouter() http.Handler {
+func NewRouter(proyectos *dominio.ServicioProyectos) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", health)
+
+	p := proyectosHandler{servicio: proyectos}
+	mux.HandleFunc("POST /api/proyectos", p.crear)
+	mux.HandleFunc("GET /api/proyectos", p.listar)
+	mux.HandleFunc("GET /api/proyectos/{id}", p.ver)
+	mux.HandleFunc("PUT /api/proyectos/{id}", p.modificar)
 	return mux
 }
 
