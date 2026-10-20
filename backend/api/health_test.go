@@ -11,7 +11,7 @@ func TestHealthRespondeOK(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/api/health", nil)
 	rec := httptest.NewRecorder()
 
-	NewRouter().ServeHTTP(rec, req)
+	routerDePrueba().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("código = %d, se esperaba %d", rec.Code, http.StatusOK)
@@ -32,7 +32,7 @@ func TestHealthRechazaMetodoNoPermitido(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/health", nil)
 	rec := httptest.NewRecorder()
 
-	NewRouter().ServeHTTP(rec, req)
+	routerDePrueba().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("código = %d, se esperaba %d", rec.Code, http.StatusMethodNotAllowed)
