@@ -27,11 +27,13 @@ func main() {
 	}
 	defer db.Close()
 
-	proyectos := dominio.NuevoServicioProyectos(postgres.NuevoRepositorioProyectos(db))
+	repoProyectos := postgres.NuevoRepositorioProyectos(db)
+	proyectos := dominio.NuevoServicioProyectos(repoProyectos)
+	backlog := dominio.NuevoServicioBacklog(repoProyectos, postgres.NuevoRepositorioHistorias(db))
 
 	addr := ":" + port
 	log.Printf("API escuchando en http://localhost%s", addr)
-	if err := http.ListenAndServe(addr, api.NewRouter(proyectos)); err != nil {
+	if err := http.ListenAndServe(addr, api.NewRouter(proyectos, backlog)); err != nil {
 		log.Fatal(err)
 	}
 }

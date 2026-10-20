@@ -44,7 +44,11 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 	m := &mundo{}
 	sc.Before(func(ctx context.Context, _ *godog.Scenario) (context.Context, error) {
 		// Cada escenario arranca con una API y un repositorio vacíos.
-		*m = mundo{api: api.NewRouter(dominio.NuevoServicioProyectos(memoria.NuevoRepositorioProyectos()))}
+		proyectos := memoria.NuevoRepositorioProyectos()
+		*m = mundo{api: api.NewRouter(
+			dominio.NuevoServicioProyectos(proyectos),
+			dominio.NuevoServicioBacklog(proyectos, memoria.NuevoRepositorioHistorias()),
+		)}
 		return ctx, nil
 	})
 
