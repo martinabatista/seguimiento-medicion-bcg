@@ -37,14 +37,19 @@ func TestFeatures(t *testing.T) {
 type mundo struct {
 	api        http.Handler
 	respuesta  *httptest.ResponseRecorder
-	proyectoID int64 // el último proyecto creado o consultado
+	proyectoID int64         // el último proyecto creado o consultado
+	backlog    estadoBacklog // pasos del backlog (spec 04), en backlog_test.go
 }
 
 func inicializarEscenario(sc *godog.ScenarioContext) {
 	m := &mundo{}
 	sc.Before(func(ctx context.Context, _ *godog.Scenario) (context.Context, error) {
 		// Cada escenario arranca con una API y un repositorio vacíos.
-		*m = mundo{api: api.NewRouter(dominio.NuevoServicioProyectos(memoria.NuevoRepositorioProyectos()))}
+		proyectos := memoria.NuevoRepositorioProyectos()
+		*m = mundo{api: api.NewRouter(
+			dominio.NuevoServicioProyectos(proyectos),
+			dominio.NuevoServicioBacklog(proyectos, memoria.NuevoRepositorioHistorias()),
+		)}
 		return ctx, nil
 	})
 
@@ -74,6 +79,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 	sc.Step(`^el resultado es "([^"]*)"$`, m.elResultadoEs)
 	sc.Step(`^veo los proyectos "([^"]*)" y "([^"]*)" en ese orden$`, m.veoLosProyectosEnOrden)
 	sc.Step(`^la lista de proyectos está vacía$`, m.laListaEstaVacia)
+
+	// Product Backlog (spec 04)
+	m.registrarPasosBacklog(sc)
 }
 
 // ---------- helpers ----------
@@ -193,6 +201,7 @@ func (m *mundo) queExisteElProyecto(nombre, inicio, fin string) error {
 	if m.respuesta.Code != http.StatusCreated {
 		return fmt.Errorf("no se pudo crear el proyecto de partida: %s", m.respuesta.Body.String())
 	}
+	m.recordarProyecto(nombre, m.proyectoID)
 	return nil
 }
 
@@ -301,10 +310,19 @@ func (m *mundo) hayProyectosRegistrados(cantidad int) error {
 	return nil
 }
 
-// elResultadoEs acepta "registrado" o el mensaje de error esperado.
+// elResultadoEs acepta "registrado" (proyecto), "registrada" o "modificada" (historia, spec 04)
+// o el mensaje de error esperado.
 func (m *mundo) elResultadoEs(resultado string) error {
-	if resultado == "registrado" {
+	switch resultado {
+	case "registrado":
 		return m.elProyectoQuedaRegistrado()
+	case "registrada":
+		return m.laHistoriaQuedaRegistrada()
+	case "modificada":
+		if m.respuesta.Code != http.StatusOK {
+			return fmt.Errorf("no se modificó: código %d, %s", m.respuesta.Code, m.respuesta.Body.String())
+		}
+		return nil
 	}
 	return m.seInformaElError(resultado)
 }

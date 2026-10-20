@@ -30,8 +30,17 @@ Endpoints disponibles:
 | `GET /api/proyectos` | Listar en orden de creación | 200 lista (`[]` si no hay) |
 | `GET /api/proyectos/{id}` | Ver un proyecto | 200 · 404 |
 | `PUT /api/proyectos/{id}` | Modificar (reemplaza los 4 datos) | 200 · 400 · 404 |
+| `POST /api/proyectos/{id}/backlog` | Crear historia en el backlog (spec 04) | 201 historia · 400 · 404 |
+| `GET /api/proyectos/{id}/backlog` | Listar el backlog por prioridad, desempate por creación | 200 lista (`[]` si no hay) · 404 |
+| `GET /api/proyectos/{id}/backlog/{historiaID}` | Ver una historia | 200 · 404 |
+| `PUT /api/proyectos/{id}/backlog/{historiaID}` | Modificar (reemplaza datos y estado) | 200 · 400 · 404 |
+| `DELETE /api/proyectos/{id}/backlog/{historiaID}` | Eliminar una historia | 204 · 404 |
 
 Proyecto en JSON: `{"id", "nombre", "descripcion", "fecha_inicio", "fecha_fin"}`, fechas `AAAA-MM-DD`.
+
+Historia en JSON: `{"id", "proyecto_id", "titulo", "descripcion", "prioridad", "criterios_aceptacion",
+"estado", "story_points"}`. `estado` es `Pendiente` | `En progreso` | `Completada` (al crear se ignora:
+siempre arranca `Pendiente`); `story_points` es `null` mientras está sin estimar.
 
 ## Decisiones técnicas
 
@@ -102,6 +111,10 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
 - `docs/specs/sprint-01/01-proyectos.md` — proyectos: `dominio/proyecto.go`, `dominio/servicio_proyectos.go`,
   `postgres/proyectos.go`, `api/proyectos.go`, `features/proyectos.feature`. Si cambia el JSON de
   proyecto o sus errores, revisar las specs 02 a 05, que cuelgan de `/api/proyectos/{id}`.
+- `docs/specs/sprint-01/04-product-backlog.md` — backlog: `dominio/historia.go`, `dominio/servicio_backlog.go`,
+  `memoria/historias.go`, `postgres/historias.go`, `postgres/esquema/02_historias.sql`, `api/backlog.go`,
+  `features/product-backlog.feature` (pasos en `features/backlog_test.go`). Las specs 05 a 08 usan la
+  historia: si cambian su estado o sus Story Points, actualizar la spec 04.
 
 ## Cómo testear
 
@@ -122,8 +135,14 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
 
 ## Trampas conocidas
 
-- _(vacío)_
+- `historias` referencia a `proyectos`: los tests de integración vacían con
+  `TRUNCATE proyectos RESTART IDENTITY CASCADE` (sin `CASCADE`, PostgreSQL no deja truncar `proyectos`).
+- Cada tabla nueva en `postgres/esquema/` obliga a recrear la base local
+  (`docker compose down -v && docker compose up -d`), o a correr solo ese archivo:
+  `docker compose exec -T db psql -U sme -d sme < backend/postgres/esquema/NN_tabla.sql`.
+- El orden del backlog (spec 04 RN-8) lo aplica el dominio (`OrdenarBacklog`), no el `ORDER BY` del SQL:
+  el repositorio puede devolver las historias en cualquier orden.
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-20 (spec 01).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-20 (spec 04).

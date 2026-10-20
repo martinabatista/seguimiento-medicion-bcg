@@ -137,7 +137,7 @@ func responderError(w http.ResponseWriter, err error) {
 	switch {
 	case errors.As(err, &invalido):
 		writeJSON(w, http.StatusBadRequest, errorJSON{invalido.Mensaje})
-	case errors.Is(err, dominio.ErrProyectoNoExiste):
+	case errors.Is(err, dominio.ErrProyectoNoExiste), errors.Is(err, dominio.ErrHistoriaNoExiste):
 		writeJSON(w, http.StatusNotFound, errorJSON{err.Error()})
 	default:
 		log.Printf("error interno: %v", err)
