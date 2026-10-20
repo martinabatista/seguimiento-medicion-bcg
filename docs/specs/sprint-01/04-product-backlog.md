@@ -1,6 +1,6 @@
 ---
 titulo: Administrar el Product Backlog
-estado: approved     # draft | in-review | approved | implemented
+estado: implemented  # draft | in-review | approved | implemented
 unidad: backend
 issue: "#7"
 sprint: 01
@@ -227,7 +227,7 @@ Característica: Administrar el Product Backlog
       | 0         | La prioridad debe ser un número entero mayor o igual a 1   |
       | -2        | La prioridad debe ser un número entero mayor o igual a 1   |
       | 2.5       | La prioridad debe ser un número entero mayor o igual a 1   |
-      |           | La prioridad es obligatoria                                |
+      | (vacío)   | La prioridad es obligatoria                                |
 
   Esquema del escenario: Validar el estado al modificar (CA-6)
     Dado que el backlog tiene la historia "Registrar usuario" con prioridad 1
@@ -257,7 +257,21 @@ Característica: Administrar el Product Backlog
     Entonces se informa el error "La historia no existe"
 ```
 
-Los pasos que no indican proyecto ("el backlog", "creo en el backlog") se refieren al proyecto de los Antecedentes, "Tienda Online".
+Los pasos que no indican proyecto ("el backlog", "creo en el backlog") se refieren al proyecto de los Antecedentes, "Tienda Online". En las tablas, `(vacío)` representa un texto vacío (Gherkin no puede escribirlo), igual que en la spec 01.
+
+## Trazabilidad
+
+Historia [#7](https://github.com/martinabatista/seguimiento-medicion-bcg/issues/7) → esta spec → criterios → escenarios de `backend/features/product-backlog.feature` → tests → código Go.
+
+| Criterio | Escenarios BDD | Tests Go | Código Go |
+|---|---|---|---|
+| CA-1 Crear | Crear una historia con todos sus datos · Crear una historia sin criterios | `TestNuevaHistoria`, `TestBacklogCrear`, `TestCrearHistoria` | `dominio/historia.go` (`NuevaHistoria`), `dominio/servicio_backlog.go` (`Crear`), `api/backlog.go` (`crear`) |
+| CA-2 Modificar | Modificar la prioridad y el estado · Una modificación inválida no cambia la historia | `TestBacklogModificar`, `TestBacklogModificarInvalidoNoCambia`, `TestModificarYVerHistoria` | `dominio/servicio_backlog.go` (`Modificar`), `api/backlog.go` (`modificar`) |
+| CA-3 Eliminar | Eliminar una historia · Eliminar dos veces la misma historia | `TestBacklogEliminar`, `TestEliminarHistoria`, `TestRepositorioHistorias` | `dominio/servicio_backlog.go` (`Eliminar`), `postgres/historias.go`, `api/backlog.go` (`eliminar`) |
+| CA-4 Listar ordenado y ver | Listar ordenado por prioridad · A igual prioridad, orden de creación · Backlog vacío · Cada proyecto ve solo su backlog · Ver una historia | `TestOrdenarBacklog`, `TestBacklogListar`, `TestBacklogObtener`, `TestListarBacklog`, `TestListarHistoriasVacio` | `dominio/historia.go` (`OrdenarBacklog`), `dominio/servicio_backlog.go` (`Listar`, `Obtener`) |
+| CA-5 Textos | Validar título, descripción y criterios · Rechazar un título con solo espacios | `TestNuevaHistoria`, `TestBacklogCrearInvalidoNoRegistra`, `TestCrearHistoriaInvalida` | `dominio/historia.go` (`NuevaHistoria`), `dominio/errores.go` |
+| CA-6 Prioridad y estado | Validar la prioridad · Validar el estado al modificar | `TestParsearPrioridad`, `TestParsearEstado`, `TestNuevaHistoria`, `TestCrearHistoriaInvalida` | `dominio/historia.go` (`ParsearPrioridad`, `ParsearEstado`) |
+| CA-7 Inexistentes | Crear en un proyecto que no existe · Ver una historia que no existe · Historia de otro proyecto | `TestBacklogProyectoInexistente`, `TestBacklogObtener`, `TestBacklogInexistente`, `TestRepositorioHistorias` | `dominio/servicio_backlog.go` (`verificarProyecto`), `memoria/historias.go`, `postgres/historias.go`, `api/proyectos.go` (`responderError`) |
 
 ## Dependencias
 
@@ -266,18 +280,18 @@ Los pasos que no indican proyecto ("el backlog", "creo en el backlog") se refier
 
 ## Tareas
 
-- [ ] `[P1]` Entidad Historia en `backend/dominio/` con las validaciones RN-2 a RN-9 (TDD, un ciclo por regla).
-- [ ] `[P1]` Tabla de historias en `backend/postgres/esquema/02_historias.sql` (o el número que siga), con referencia al proyecto.
-- [ ] `[P1]` Acceso a datos del backlog en `backend/postgres/` (crear, modificar, eliminar, listar ordenado, ver una).
-- [ ] `[P1]` Rutas de la API bajo `/api/proyectos/{id}/backlog` en `backend/api/`.
-- [ ] `[P1]` Escenarios de `backend/features/product-backlog.feature` con sus pasos en `features_test.go`.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas).
+- [x] `[P1]` Entidad Historia en `backend/dominio/` con las validaciones RN-2 a RN-9 (TDD, un ciclo por regla).
+- [x] `[P1]` Tabla de historias en `backend/postgres/esquema/02_historias.sql`, con referencia al proyecto.
+- [x] `[P1]` Acceso a datos del backlog en `backend/postgres/` (crear, modificar, eliminar, listar, ver una).
+- [x] `[P1]` Rutas de la API bajo `/api/proyectos/{id}/backlog` en `backend/api/`.
+- [x] `[P1]` Escenarios de `backend/features/product-backlog.feature` con sus pasos en `features/backlog_test.go`.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas, trampas).
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented`.
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] Spec en estado `implemented`.
