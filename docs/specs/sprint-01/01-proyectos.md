@@ -1,11 +1,11 @@
 ---
 titulo: Crear y modificar proyectos
-estado: in-review    # draft | in-review | approved | implemented
+estado: approved     # draft | in-review | approved | implemented
 unidad: backend
 issue: "#4"
 sprint: 01
 autor: Martina Batista
-aprobada_por: ""
+aprobada_por: "Florencia Cabeza"
 fecha: 2026-10-20
 specs_relacionadas: []
 ---
