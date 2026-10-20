@@ -1,6 +1,6 @@
 ---
 titulo: Administrar el Product Backlog
-estado: draft        # draft | in-review | approved | implemented
+estado: in-review    # draft | in-review | approved | implemented
 unidad: backend
 issue: "#7"
 sprint: 01
