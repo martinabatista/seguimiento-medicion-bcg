@@ -1,11 +1,11 @@
 ---
 titulo: Crear y modificar proyectos
-estado: in-review    # draft | in-review | approved | implemented
+estado: implemented  # draft | in-review | approved | implemented
 unidad: backend
 issue: "#4"
 sprint: 01
 autor: Martina Batista
-aprobada_por: ""
+aprobada_por: "Florencia Cabeza"
 fecha: 2026-10-20
 specs_relacionadas: []
 ---
@@ -213,18 +213,18 @@ Ninguna (base del resto del sistema). Las specs 02, 03, 04 y 05 dependen de esta
 
 ## Tareas
 
-- [ ] `[P1]` Entidad Proyecto en `backend/dominio/` con las validaciones RN-1 a RN-5 (TDD, un ciclo por regla).
-- [ ] `[P1]` Tabla de proyectos en `backend/postgres/esquema/01_proyectos.sql`.
-- [ ] `[P1]` Agregar el driver `pgx` y el acceso a datos de proyectos en `backend/postgres/`.
-- [ ] `[P1]` Rutas de la API para crear, modificar, listar y ver proyectos en `backend/api/`.
-- [ ] `[P1]` Escenarios de `backend/features/proyectos.feature` con sus pasos en `features_test.go`.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas).
+- [x] `[P1]` Entidad Proyecto en `backend/dominio/` con las validaciones RN-1 a RN-5 (TDD, un ciclo por regla).
+- [x] `[P1]` Tabla de proyectos en `backend/postgres/esquema/01_proyectos.sql`.
+- [x] `[P1]` Agregar el driver `pgx` y el acceso a datos de proyectos en `backend/postgres/`.
+- [x] `[P1]` Rutas de la API para crear, modificar, listar y ver proyectos en `backend/api/`.
+- [x] `[P1]` Escenarios de `backend/features/proyectos.feature` con sus pasos en `features_test.go`.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas).
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented`.
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] Spec en estado `implemented`.
