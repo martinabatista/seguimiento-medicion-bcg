@@ -12,7 +12,11 @@ import (
 )
 
 func routerDePrueba() http.Handler {
-	return NewRouter(dominio.NuevoServicioProyectos(memoria.NuevoRepositorioProyectos()))
+	proyectos := memoria.NuevoRepositorioProyectos()
+	return NewRouter(
+		dominio.NuevoServicioProyectos(proyectos),
+		dominio.NuevoServicioBacklog(proyectos, memoria.NuevoRepositorioHistorias()),
+	)
 }
 
 func pedir(t *testing.T, h http.Handler, metodo, ruta, cuerpo string) *httptest.ResponseRecorder {
