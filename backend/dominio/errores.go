@@ -24,14 +24,14 @@ var (
 	ErrProyectoNoExiste = errors.New("El proyecto no existe")
 )
 
-// Errores de la spec 04 (Product Backlog).
+// Errores de la spec 04 (Product Backlog). La descripción vacía usa ErrDescripcionObligatoria
+// de la spec 01: el mensaje es el mismo.
 var (
-	ErrTituloObligatorio              = ErrDatoInvalido{"El título es obligatorio"}
-	ErrTituloMuyLargo                 = ErrDatoInvalido{"El título no puede superar los 150 caracteres"}
-	ErrDescripcionHistoriaObligatoria = ErrDatoInvalido{"La descripción es obligatoria"}
-	ErrDescripcionHistoriaMuyLarga    = ErrDatoInvalido{"La descripción no puede superar los 1000 caracteres"}
-	ErrPrioridadInvalida              = ErrDatoInvalido{"La prioridad debe ser un número entero mayor o igual a 1"}
-	ErrCriteriosMuyLargos             = ErrDatoInvalido{"Los criterios de aceptación no pueden superar los 2000 caracteres"}
+	ErrTituloObligatorio           = ErrDatoInvalido{"El título es obligatorio"}
+	ErrTituloMuyLargo              = ErrDatoInvalido{"El título no puede superar los 150 caracteres"}
+	ErrDescripcionHistoriaMuyLarga = ErrDatoInvalido{"La descripción no puede superar los 1000 caracteres"}
+	ErrPrioridadInvalida           = ErrDatoInvalido{"La prioridad debe ser un número entero mayor o igual a 1"}
+	ErrCriteriosMuyLargos          = ErrDatoInvalido{"Los criterios de aceptación no pueden superar los 2000 caracteres"}
 
 	// ErrHistoriaNoExiste no es un dato inválido: la API lo responde como 404.
 	ErrHistoriaNoExiste = errors.New("La historia no existe")

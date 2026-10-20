@@ -26,8 +26,8 @@ func TestNuevaHistoria(t *testing.T) {
 		{"título de 150 caracteres (spec 04 RN-2, CA-5)", con(func(d *DatosHistoria) { d.Titulo = strings.Repeat("t", 150) }), nil},
 		{"título de 151 caracteres (spec 04 RN-2, CA-5)", con(func(d *DatosHistoria) { d.Titulo = strings.Repeat("t", 151) }), ErrTituloMuyLargo},
 		{"título de 150 caracteres con eñes (spec 04 RN-2, CA-5)", con(func(d *DatosHistoria) { d.Titulo = strings.Repeat("ñ", 150) }), nil},
-		{"descripción vacía (spec 04 RN-3, CA-5)", con(func(d *DatosHistoria) { d.Descripcion = "" }), ErrDescripcionHistoriaObligatoria},
-		{"descripción con solo espacios (spec 04 RN-3, CA-5)", con(func(d *DatosHistoria) { d.Descripcion = "  " }), ErrDescripcionHistoriaObligatoria},
+		{"descripción vacía (spec 04 RN-3, CA-5)", con(func(d *DatosHistoria) { d.Descripcion = "" }), ErrDescripcionObligatoria},
+		{"descripción con solo espacios (spec 04 RN-3, CA-5)", con(func(d *DatosHistoria) { d.Descripcion = "  " }), ErrDescripcionObligatoria},
 		{"descripción de 1000 caracteres (spec 04 RN-3, CA-5)", con(func(d *DatosHistoria) { d.Descripcion = strings.Repeat("d", 1000) }), nil},
 		{"descripción de 1001 caracteres (spec 04 RN-3, CA-5)", con(func(d *DatosHistoria) { d.Descripcion = strings.Repeat("d", 1001) }), ErrDescripcionHistoriaMuyLarga},
 		{"prioridad 1, la más alta (spec 04 RN-4, CA-6)", con(func(d *DatosHistoria) { d.Prioridad = 1 }), nil},
@@ -67,7 +67,7 @@ func TestNuevaHistoria(t *testing.T) {
 // Los errores de validación de la historia son datos inválidos (400); "no existe" no (404).
 func TestErroresDeHistoria(t *testing.T) {
 	invalidos := []error{
-		ErrTituloObligatorio, ErrTituloMuyLargo, ErrDescripcionHistoriaObligatoria,
+		ErrTituloObligatorio, ErrTituloMuyLargo, ErrDescripcionObligatoria,
 		ErrDescripcionHistoriaMuyLarga, ErrPrioridadInvalida, ErrCriteriosMuyLargos,
 	}
 	for _, e := range invalidos {

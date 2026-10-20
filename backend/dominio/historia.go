@@ -53,7 +53,7 @@ func NuevaHistoria(proyectoID int64, d DatosHistoria) (Historia, error) {
 	}
 	// RN-3: descripción obligatoria, hasta 1000 caracteres.
 	if strings.TrimSpace(d.Descripcion) == "" {
-		return Historia{}, ErrDescripcionHistoriaObligatoria
+		return Historia{}, ErrDescripcionObligatoria
 	}
 	if utf8.RuneCountInString(d.Descripcion) > MaxDescripcionHistoria {
 		return Historia{}, ErrDescripcionHistoriaMuyLarga
