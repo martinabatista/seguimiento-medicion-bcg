@@ -30,8 +30,10 @@ var (
 	ErrTituloObligatorio           = ErrDatoInvalido{"El título es obligatorio"}
 	ErrTituloMuyLargo              = ErrDatoInvalido{"El título no puede superar los 150 caracteres"}
 	ErrDescripcionHistoriaMuyLarga = ErrDatoInvalido{"La descripción no puede superar los 1000 caracteres"}
+	ErrPrioridadObligatoria        = ErrDatoInvalido{"La prioridad es obligatoria"}
 	ErrPrioridadInvalida           = ErrDatoInvalido{"La prioridad debe ser un número entero mayor o igual a 1"}
 	ErrCriteriosMuyLargos          = ErrDatoInvalido{"Los criterios de aceptación no pueden superar los 2000 caracteres"}
+	ErrEstadoInvalido              = ErrDatoInvalido{"El estado no es válido"}
 
 	// ErrHistoriaNoExiste no es un dato inválido: la API lo responde como 404.
 	ErrHistoriaNoExiste = errors.New("La historia no existe")

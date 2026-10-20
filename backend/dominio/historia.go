@@ -1,6 +1,7 @@
 package dominio
 
 import (
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -20,6 +21,29 @@ const (
 	EstadoEnProgreso EstadoHistoria = "En progreso"
 	EstadoCompletada EstadoHistoria = "Completada"
 )
+
+// ParsearEstado convierte un texto en estado. Se escribe exactamente como en la spec
+// (con mayúscula): cualquier otro texto es inválido (RN-7).
+func ParsearEstado(texto string) (EstadoHistoria, error) {
+	switch e := EstadoHistoria(texto); e {
+	case EstadoPendiente, EstadoEnProgreso, EstadoCompletada:
+		return e, nil
+	}
+	return "", ErrEstadoInvalido
+}
+
+// ParsearPrioridad convierte el texto de la prioridad en número (RN-4).
+// Vacío es "falta la prioridad"; con decimales, cero o negativo es inválido.
+func ParsearPrioridad(texto string) (int, error) {
+	if texto == "" {
+		return 0, ErrPrioridadObligatoria
+	}
+	p, err := strconv.Atoi(texto)
+	if err != nil || p < 1 {
+		return 0, ErrPrioridadInvalida
+	}
+	return p, nil
+}
 
 // DatosHistoria son los datos que carga la usuaria al crear o modificar una historia.
 type DatosHistoria struct {
