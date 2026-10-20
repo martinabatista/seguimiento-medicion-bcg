@@ -64,11 +64,68 @@ func TestNuevaHistoria(t *testing.T) {
 	}
 }
 
+// spec 04 RN-4 (CA-6): la prioridad llega como texto (el número del JSON).
+func TestParsearPrioridad(t *testing.T) {
+	casos := []struct {
+		nombre string
+		texto  string
+		valor  int
+		err    error
+	}{
+		{"prioridad 1", "1", 1, nil},
+		{"prioridad 1000", "1000", 1000, nil},
+		{"falta la prioridad", "", 0, ErrPrioridadObligatoria},
+		{"prioridad 0", "0", 0, ErrPrioridadInvalida},
+		{"prioridad negativa", "-2", 0, ErrPrioridadInvalida},
+		{"prioridad con decimales", "2.5", 0, ErrPrioridadInvalida},
+		{"texto que no es un número", "alta", 0, ErrPrioridadInvalida},
+	}
+	for _, c := range casos {
+		t.Run(c.nombre, func(t *testing.T) {
+			p, err := ParsearPrioridad(c.texto)
+			if !errors.Is(err, c.err) {
+				t.Fatalf("error = %v, se esperaba %v", err, c.err)
+			}
+			if p != c.valor {
+				t.Errorf("prioridad = %d, se esperaba %d", p, c.valor)
+			}
+		})
+	}
+}
+
+// spec 04 RN-7 (CA-6): solo se aceptan los tres estados, escritos exactamente así.
+func TestParsearEstado(t *testing.T) {
+	casos := []struct {
+		texto  string
+		estado EstadoHistoria
+		err    error
+	}{
+		{"Pendiente", EstadoPendiente, nil},
+		{"En progreso", EstadoEnProgreso, nil},
+		{"Completada", EstadoCompletada, nil},
+		{"Terminada", "", ErrEstadoInvalido},
+		{"pendiente", "", ErrEstadoInvalido},
+		{"", "", ErrEstadoInvalido},
+	}
+	for _, c := range casos {
+		t.Run(c.texto, func(t *testing.T) {
+			e, err := ParsearEstado(c.texto)
+			if !errors.Is(err, c.err) {
+				t.Fatalf("error = %v, se esperaba %v", err, c.err)
+			}
+			if e != c.estado {
+				t.Errorf("estado = %q, se esperaba %q", e, c.estado)
+			}
+		})
+	}
+}
+
 // Los errores de validación de la historia son datos inválidos (400); "no existe" no (404).
 func TestErroresDeHistoria(t *testing.T) {
 	invalidos := []error{
 		ErrTituloObligatorio, ErrTituloMuyLargo, ErrDescripcionObligatoria,
-		ErrDescripcionHistoriaMuyLarga, ErrPrioridadInvalida, ErrCriteriosMuyLargos,
+		ErrDescripcionHistoriaMuyLarga, ErrPrioridadObligatoria, ErrPrioridadInvalida,
+		ErrCriteriosMuyLargos, ErrEstadoInvalido,
 	}
 	for _, e := range invalidos {
 		var d ErrDatoInvalido
