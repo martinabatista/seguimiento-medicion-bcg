@@ -19,16 +19,20 @@ backend/
 
 Se crean con la primera historia que las necesite:
 - `dominio/`: entidades, reglas y cálculos — Go puro, sin HTTP ni DB.
-- `postgres/`: acceso a PostgreSQL con `pgx` (`DATABASE_URL`, ver `.env.example`) y sus
-  migraciones en `postgres/migraciones/` (ver "Decisiones técnicas").
+- `postgres/`: acceso a PostgreSQL con `database/sql` + `pgx` (`DATABASE_URL`, ver `.env.example`)
+  y las tablas en `postgres/esquema/*.sql` (ver "Decisiones técnicas").
 
 Endpoint disponible: `GET /api/health` → `{"status":"ok"}`.
 
 ## Decisiones técnicas
 
-Acordadas por el equipo el 2026-10-19. Cambiarlas requiere acuerdo de las tres y actualizar este archivo.
+Acordadas por el equipo el 2026-10-19 (acceso a datos y esquema revisados el 2026-10-20).
+Cambiarlas requiere acuerdo de las tres y actualizar este archivo.
 
-**Acceso a datos: `pgx` v5, SQL escrito a mano, sin ORM.**
+**Acceso a datos: `database/sql` (librería estándar de Go) con el driver `pgx` v5, SQL escrito a
+mano, sin ORM.**
+- Se programa contra `database/sql` (`db.QueryRow`, `db.Exec`, `rows.Scan`); `pgx` solo se registra
+  como driver con `import _ "github.com/jackc/pgx/v5/stdlib"` y `sql.Open("pgx", DATABASE_URL)`.
 - `postgres/` implementa interfaces que define el dominio; el dominio no conoce la base. Las reglas y
   los cálculos se testean con repositorios en memoria, sin base real.
 - Solo `postgres/` necesita una base real (`docker compose up -d`) para sus tests de integración.
@@ -52,16 +56,19 @@ Acordadas por el equipo el 2026-10-19. Cambiarlas requiere acuerdo de las tres y
   corresponda (400 dato inválido, 404 no existe, 409 conflicto).
 - Campos JSON en español y `snake_case` (`fecha_inicio`, `fecha_fin`).
 
-**Migraciones: `goose`, un archivo SQL por cambio.**
-- Van en `postgres/migraciones/` con número correlativo: `00001_crear_proyectos.sql`, con las
-  secciones `-- +goose Up` y `-- +goose Down`.
-- Nunca se edita una migración ya mergeada: se agrega una nueva. Si no, las bases de las tres se
-  desincronizan.
-- Cada historia crea las suyas con el número siguiente. Avisar en el chat antes de tomar un número
-  para no chocar entre ramas.
+**Tablas: archivos SQL simples en `postgres/esquema/`, sin herramienta de migraciones.**
+- Un archivo por tabla, numerado en el orden en que se crean: `01_proyectos.sql`,
+  `02_integrantes.sql`… Cada uno con su `CREATE TABLE`.
+- Docker los ejecuta en orden **solo cuando crea la base por primera vez** (los monta en
+  `/docker-entrypoint-initdb.d`, ver `docker-compose.yml`).
+- Si se agrega o cambia un archivo, cada integrante recrea su base (los datos son de prueba):
+  `docker compose down -v && docker compose up -d`.
+- Se puede editar un archivo existente mientras su historia esté abierta; avisar en el PR cuando haga
+  falta recrear la base.
+- Por qué: un TP no necesita conservar datos entre cambios, y así no se suma una herramienta más.
 
-Las tres dependencias (`pgx`, `goose`, y `godog` ya existente) se justifican en la spec de la historia
-que las incorpora (la 01 para `pgx` y `goose`).
+Las dependencias (`pgx`, y `godog` ya existente) se justifican en la spec de la historia que las
+incorpora (la 01 para `pgx`).
 
 ## Límites
 
@@ -77,7 +84,7 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
 
 - **Internas:** ninguna.
 - **Externas:** PostgreSQL (`docker compose up -d` en la raíz, puerto 5434); godog v0.16 (BDD).
-  Decididas, se agregan con la spec 01: `pgx` v5 (acceso a datos) y `goose` (migraciones).
+  Decidida, se agrega con la spec 01: `pgx` v5 (driver de PostgreSQL para `database/sql`).
   Cada dependencia nueva se justifica en la spec que la agrega.
 
 ## Specs relacionadas
