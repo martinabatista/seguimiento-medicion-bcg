@@ -1,6 +1,8 @@
 package dominio
 
 import (
+	"cmp"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -99,4 +101,16 @@ func NuevaHistoria(proyectoID int64, d DatosHistoria) (Historia, error) {
 		Criterios:   d.Criterios,
 		Estado:      EstadoPendiente,
 	}, nil
+}
+
+// OrdenarBacklog devuelve las historias ordenadas como se ve el backlog (RN-8): por prioridad
+// ascendente (1 primero) y, a igual prioridad, por orden de creación (el ID es creciente).
+// El desempate es explícito para que el orden no dependa de cómo lleguen de la base.
+// No modifica el slice recibido.
+func OrdenarBacklog(historias []Historia) []Historia {
+	ordenadas := slices.Clone(historias)
+	slices.SortFunc(ordenadas, func(a, b Historia) int {
+		return cmp.Or(cmp.Compare(a.Prioridad, b.Prioridad), cmp.Compare(a.ID, b.ID))
+	})
+	return ordenadas
 }
