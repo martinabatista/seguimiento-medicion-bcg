@@ -83,13 +83,33 @@ Para modificar, ver o eliminar, además se indica el **identificador** de la his
 
 ## Casos límite
 
-- _TODO: completar al tomar la historia (antes de implementar)._
+- Título de exactamente 150 caracteres: se acepta. Con 151: se rechaza.
+- Descripción de exactamente 1000 caracteres: se acepta. Con 1001: se rechaza.
+- Criterios de aceptación vacíos: se acepta. Con exactamente 2000 caracteres: se acepta. Con 2001: se rechaza.
+- Título o descripción con solo espacios: se rechaza, igual que vacío.
+- Título igual al de otra historia del mismo proyecto: se acepta.
+- Prioridad 1: se acepta (es la más alta). Prioridad 0 o negativa: se rechaza. Prioridad con decimales (por ejemplo, 2.5): se rechaza.
+- Prioridad muy alta (por ejemplo, 1000): se acepta; no hay máximo.
+- Dos historias con la misma prioridad: se listan en el orden en que se crearon.
+- Estado escrito distinto a los valores permitidos (por ejemplo, `Terminada` o `pendiente` en minúscula): se rechaza.
+- Listar el backlog de un proyecto sin historias: devuelve una lista vacía, no un error.
+- Eliminar una historia y volver a listar: ya no aparece; eliminarla otra vez informa que no existe.
+- Pedir una historia existente pero indicando otro proyecto: se informa que la historia no existe.
 
 ## Condiciones de error
 
 | Situación | Respuesta esperada |
 |---|---|
-| _TODO: completar al tomar la historia (antes de implementar)._ | |
+| Título vacío o con solo espacios | Dato inválido: "El título es obligatorio" |
+| Título de más de 150 caracteres | Dato inválido: "El título no puede superar los 150 caracteres" |
+| Descripción vacía o con solo espacios | Dato inválido: "La descripción es obligatoria" |
+| Descripción de más de 1000 caracteres | Dato inválido: "La descripción no puede superar los 1000 caracteres" |
+| Falta la prioridad | Dato inválido: "La prioridad es obligatoria" |
+| Prioridad menor a 1 o no entera | Dato inválido: "La prioridad debe ser un número entero mayor o igual a 1" |
+| Criterios de aceptación de más de 2000 caracteres | Dato inválido: "Los criterios de aceptación no pueden superar los 2000 caracteres" |
+| Estado distinto de `Pendiente`, `En progreso` o `Completada` | Dato inválido: "El estado no es válido" |
+| Operar sobre el backlog de un proyecto que no existe | No encontrado: "El proyecto no existe" |
+| Ver, modificar o eliminar una historia que no existe (o que es de otro proyecto) | No encontrado: "La historia no existe" |
 
 ## Criterios de aceptación
 
