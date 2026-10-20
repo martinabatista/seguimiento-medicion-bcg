@@ -26,15 +26,21 @@ cp .env.example .env
 Base de datos (con Docker Desktop abierto):
 
 ```bash
-docker compose up -d        # PostgreSQL 17 en localhost:5434
+docker compose up -d        # PostgreSQL 17 en localhost:5434; crea las tablas de backend/postgres/esquema/
 docker compose down         # para apagarla
+docker compose down -v && docker compose up -d   # recrear la base cuando cambian las tablas
 ```
 
-Backend:
+Backend: necesita la variable de entorno `DATABASE_URL` (dónde está la base). Se define **una sola
+vez** por compu, en PowerShell, y después se cierra y se vuelve a abrir VS Code:
+
+```powershell
+setx DATABASE_URL "postgres://sme:sme_dev@localhost:5434/sme?sslmode=disable"
+```
 
 ```bash
 cd backend
-go run ./cmd/api            # API en http://localhost:8080 — probar: /api/health
+go run ./cmd/api            # API en http://localhost:8080 — probar: /api/health, /api/proyectos
 ```
 
 ## Tests
@@ -42,6 +48,7 @@ go run ./cmd/api            # API en http://localhost:8080 — probar: /api/heal
 ```bash
 cd backend
 go test ./... -cover        # tests unitarios y escenarios BDD (backend/features/*.feature)
+                            # con DATABASE_URL definida, también los de integración con PostgreSQL
 go vet ./...
 gofmt -l .                  # no debe listar nada
 ```

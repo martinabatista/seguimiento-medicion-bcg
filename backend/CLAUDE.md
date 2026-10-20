@@ -14,15 +14,24 @@ backend/
 ├── go.mod / go.sum          # módulo github.com/martinabatista/seguimiento-medicion-bcg/backend
 ├── cmd/api/                 # main: levanta la API (puerto en PORT, default 8080)
 ├── api/                     # rutas REST (net/http, patrones "GET /api/...") + tests
+├── dominio/                 # entidades, reglas, casos de uso e interfaces de repositorio — Go puro
+├── memoria/                 # repositorios en memoria para los tests (sin base real)
+├── postgres/                # repositorios sobre PostgreSQL (database/sql + pgx) + tests de integración
+│   └── esquema/             # tablas: NN_tabla.sql, las ejecuta Docker al crear la base
 └── features/                # escenarios BDD *.feature (godog) + features_test.go con los pasos
 ```
 
-Se crean con la primera historia que las necesite:
-- `dominio/`: entidades, reglas y cálculos — Go puro, sin HTTP ni DB.
-- `postgres/`: acceso a PostgreSQL con `database/sql` + `pgx` (`DATABASE_URL`, ver `.env.example`)
-  y las tablas en `postgres/esquema/*.sql` (ver "Decisiones técnicas").
+Endpoints disponibles:
 
-Endpoint disponible: `GET /api/health` → `{"status":"ok"}`.
+| Método y ruta | Qué hace | Respuestas |
+|---|---|---|
+| `GET /api/health` | Estado del servicio | 200 `{"status":"ok"}` |
+| `POST /api/proyectos` | Crear proyecto (spec 01) | 201 proyecto · 400 |
+| `GET /api/proyectos` | Listar en orden de creación | 200 lista (`[]` si no hay) |
+| `GET /api/proyectos/{id}` | Ver un proyecto | 200 · 404 |
+| `PUT /api/proyectos/{id}` | Modificar (reemplaza los 4 datos) | 200 · 400 · 404 |
+
+Proyecto en JSON: `{"id", "nombre", "descripcion", "fecha_inicio", "fecha_fin"}`, fechas `AAAA-MM-DD`.
 
 ## Decisiones técnicas
 
@@ -90,6 +99,9 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
 ## Specs relacionadas
 
 - `docs/specs/sprint-00/00-setup-inicial.md` — estructura inicial y CI.
+- `docs/specs/sprint-01/01-proyectos.md` — proyectos: `dominio/proyecto.go`, `dominio/servicio_proyectos.go`,
+  `postgres/proyectos.go`, `api/proyectos.go`, `features/proyectos.feature`. Si cambia el JSON de
+  proyecto o sus errores, revisar las specs 02 a 05, que cuelgan de `/api/proyectos/{id}`.
 
 ## Cómo testear
 
@@ -98,7 +110,7 @@ cd backend
 gofmt -l .          # debe salir vacío
 go vet ./...
 go test ./... -cover   # incluye los escenarios BDD de features/
-go run ./cmd/api       # levantar la API
+go run ./cmd/api       # levantar la API (necesita DATABASE_URL, ver el README)
 ```
 
 Escenarios BDD: se escriben en `features/<funcionalidad>.feature` con `# language: es`
@@ -114,4 +126,4 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-17.
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-20 (spec 01).
