@@ -1,4 +1,5 @@
 // Package features ejecuta los escenarios BDD (*.feature) con godog como parte de go test.
+// Los pasos usan la API REST con un repositorio en memoria: no hace falta una base real.
 package features
 
 import (
@@ -7,11 +8,14 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/cucumber/godog"
 
 	"github.com/martinabatista/seguimiento-medicion-bcg/backend/api"
+	"github.com/martinabatista/seguimiento-medicion-bcg/backend/dominio"
+	"github.com/martinabatista/seguimiento-medicion-bcg/backend/memoria"
 )
 
 func TestFeatures(t *testing.T) {
@@ -31,26 +35,123 @@ func TestFeatures(t *testing.T) {
 
 // mundo guarda el estado de un escenario entre sus pasos.
 type mundo struct {
-	respuesta *httptest.ResponseRecorder
+	api        http.Handler
+	respuesta  *httptest.ResponseRecorder
+	proyectoID int64 // el último proyecto creado o consultado
 }
 
 func inicializarEscenario(sc *godog.ScenarioContext) {
 	m := &mundo{}
 	sc.Before(func(ctx context.Context, _ *godog.Scenario) (context.Context, error) {
-		*m = mundo{}
+		// Cada escenario arranca con una API y un repositorio vacíos.
+		*m = mundo{api: api.NewRouter(dominio.NuevoServicioProyectos(memoria.NuevoRepositorioProyectos()))}
 		return ctx, nil
 	})
 
+	// Estado del servicio (spec 00)
 	sc.Step(`^consulto el estado del servicio$`, m.consultoElEstadoDelServicio)
 	sc.Step(`^la respuesta tiene código (\d+)$`, m.laRespuestaTieneCodigo)
 	sc.Step(`^el estado informado es "([^"]*)"$`, m.elEstadoInformadoEs)
+
+	// Proyectos (spec 01)
+	sc.Step(`^creo un proyecto con nombre "([^"]*)", descripción "([^"]*)", inicio "([^"]*)" y fin "([^"]*)"$`, m.creoUnProyecto)
+	sc.Step(`^creo un proyecto con un nombre de (\d+) caracteres, descripción "([^"]*)", inicio "([^"]*)" y fin "([^"]*)"$`, m.creoUnProyectoConNombreDeLargo)
+	sc.Step(`^creo un proyecto con nombre "([^"]*)", una descripción de (\d+) caracteres, inicio "([^"]*)" y fin "([^"]*)"$`, m.creoUnProyectoConDescripcionDeLargo)
+	sc.Step(`^que existe el proyecto "([^"]*)" con inicio "([^"]*)" y fin "([^"]*)"$`, m.queExisteElProyecto)
+	sc.Step(`^cambio su nombre a "([^"]*)"$`, m.cambioSuNombre)
+	sc.Step(`^cambio sus fechas a inicio "([^"]*)" y fin "([^"]*)"$`, m.cambioSusFechas)
+	sc.Step(`^cambio el nombre del proyecto con identificador (\d+) a "([^"]*)"$`, m.cambioElNombreDelProyectoConID)
+	sc.Step(`^listo los proyectos$`, m.listoLosProyectos)
+	sc.Step(`^veo ese proyecto por su identificador$`, m.veoEseProyecto)
+	sc.Step(`^veo el proyecto con identificador (\d+)$`, m.veoElProyectoConID)
+	sc.Step(`^el proyecto queda registrado con un identificador$`, m.elProyectoQuedaRegistrado)
+	sc.Step(`^el proyecto tiene nombre "([^"]*)", descripción "([^"]*)", inicio "([^"]*)" y fin "([^"]*)"$`, m.elProyectoTieneTodo)
+	sc.Step(`^el proyecto tiene nombre "([^"]*)"$`, m.elProyectoTieneNombre)
+	sc.Step(`^el proyecto tiene inicio "([^"]*)" y fin "([^"]*)"$`, m.elProyectoTieneFechas)
+	sc.Step(`^se informa el error "([^"]*)"$`, m.seInformaElError)
+	sc.Step(`^no se registra ningún proyecto$`, m.noSeRegistraNingunProyecto)
+	sc.Step(`^hay (\d+) proyectos registrados$`, m.hayProyectosRegistrados)
+	sc.Step(`^el resultado es "([^"]*)"$`, m.elResultadoEs)
+	sc.Step(`^veo los proyectos "([^"]*)" y "([^"]*)" en ese orden$`, m.veoLosProyectosEnOrden)
+	sc.Step(`^la lista de proyectos está vacía$`, m.laListaEstaVacia)
 }
 
-func (m *mundo) consultoElEstadoDelServicio() error {
-	req := httptest.NewRequest(http.MethodGet, "/api/health", nil)
+// ---------- helpers ----------
+
+type proyecto struct {
+	ID          int64  `json:"id"`
+	Nombre      string `json:"nombre"`
+	Descripcion string `json:"descripcion"`
+	FechaInicio string `json:"fecha_inicio"`
+	FechaFin    string `json:"fecha_fin"`
+}
+
+// texto traduce los valores especiales de las tablas de los .feature.
+func texto(s string) string {
+	switch s {
+	case "(vacío)":
+		return ""
+	case "(solo espacios)":
+		return "   "
+	}
+	return s
+}
+
+func (m *mundo) pedir(metodo, ruta string, cuerpo any) error {
+	var lector *strings.Reader
+	if cuerpo == nil {
+		lector = strings.NewReader("")
+	} else {
+		b, err := json.Marshal(cuerpo)
+		if err != nil {
+			return err
+		}
+		lector = strings.NewReader(string(b))
+	}
 	m.respuesta = httptest.NewRecorder()
-	api.NewRouter().ServeHTTP(m.respuesta, req)
+	m.api.ServeHTTP(m.respuesta, httptest.NewRequest(metodo, ruta, lector))
 	return nil
+}
+
+func (m *mundo) crear(p proyecto) error {
+	if err := m.pedir(http.MethodPost, "/api/proyectos", p); err != nil {
+		return err
+	}
+	if m.respuesta.Code == http.StatusCreated {
+		var creado proyecto
+		if err := json.Unmarshal(m.respuesta.Body.Bytes(), &creado); err != nil {
+			return err
+		}
+		m.proyectoID = creado.ID
+	}
+	return nil
+}
+
+func (m *mundo) obtener(id int64) (proyecto, error) {
+	rec := httptest.NewRecorder()
+	m.api.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/proyectos/%d", id), nil))
+	var p proyecto
+	if rec.Code != http.StatusOK {
+		return p, fmt.Errorf("no se pudo ver el proyecto %d: código %d", id, rec.Code)
+	}
+	return p, json.Unmarshal(rec.Body.Bytes(), &p)
+}
+
+func (m *mundo) listar() ([]proyecto, error) {
+	rec := httptest.NewRecorder()
+	m.api.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/proyectos", nil))
+	var lista []proyecto
+	return lista, json.Unmarshal(rec.Body.Bytes(), &lista)
+}
+
+func (m *mundo) modificar(id int64, p proyecto) error {
+	return m.pedir(http.MethodPut, fmt.Sprintf("/api/proyectos/%d", id), p)
+}
+
+// ---------- estado del servicio (spec 00) ----------
+
+func (m *mundo) consultoElEstadoDelServicio() error {
+	return m.pedir(http.MethodGet, "/api/health", nil)
 }
 
 func (m *mundo) laRespuestaTieneCodigo(codigo int) error {
@@ -67,6 +168,161 @@ func (m *mundo) elEstadoInformadoEs(esperado string) error {
 	}
 	if body["status"] != esperado {
 		return fmt.Errorf("status = %q, se esperaba %q", body["status"], esperado)
+	}
+	return nil
+}
+
+// ---------- proyectos (spec 01): acciones ----------
+
+func (m *mundo) creoUnProyecto(nombre, descripcion, inicio, fin string) error {
+	return m.crear(proyecto{Nombre: texto(nombre), Descripcion: texto(descripcion), FechaInicio: texto(inicio), FechaFin: texto(fin)})
+}
+
+func (m *mundo) creoUnProyectoConNombreDeLargo(largo int, descripcion, inicio, fin string) error {
+	return m.crear(proyecto{Nombre: strings.Repeat("n", largo), Descripcion: descripcion, FechaInicio: inicio, FechaFin: fin})
+}
+
+func (m *mundo) creoUnProyectoConDescripcionDeLargo(nombre string, largo int, inicio, fin string) error {
+	return m.crear(proyecto{Nombre: nombre, Descripcion: strings.Repeat("d", largo), FechaInicio: inicio, FechaFin: fin})
+}
+
+func (m *mundo) queExisteElProyecto(nombre, inicio, fin string) error {
+	if err := m.crear(proyecto{Nombre: nombre, Descripcion: "Venta de ropa", FechaInicio: inicio, FechaFin: fin}); err != nil {
+		return err
+	}
+	if m.respuesta.Code != http.StatusCreated {
+		return fmt.Errorf("no se pudo crear el proyecto de partida: %s", m.respuesta.Body.String())
+	}
+	return nil
+}
+
+func (m *mundo) cambioSuNombre(nombre string) error {
+	p, err := m.obtener(m.proyectoID)
+	if err != nil {
+		return err
+	}
+	p.Nombre = nombre
+	return m.modificar(m.proyectoID, p)
+}
+
+func (m *mundo) cambioSusFechas(inicio, fin string) error {
+	p, err := m.obtener(m.proyectoID)
+	if err != nil {
+		return err
+	}
+	p.FechaInicio, p.FechaFin = inicio, fin
+	return m.modificar(m.proyectoID, p)
+}
+
+func (m *mundo) cambioElNombreDelProyectoConID(id int64, nombre string) error {
+	return m.modificar(id, proyecto{Nombre: nombre, Descripcion: "Venta de ropa", FechaInicio: "2026-11-01", FechaFin: "2026-12-15"})
+}
+
+func (m *mundo) listoLosProyectos() error {
+	return m.pedir(http.MethodGet, "/api/proyectos", nil)
+}
+
+func (m *mundo) veoEseProyecto() error {
+	return m.pedir(http.MethodGet, fmt.Sprintf("/api/proyectos/%d", m.proyectoID), nil)
+}
+
+func (m *mundo) veoElProyectoConID(id int64) error {
+	return m.pedir(http.MethodGet, fmt.Sprintf("/api/proyectos/%d", id), nil)
+}
+
+// ---------- proyectos (spec 01): verificaciones ----------
+
+func (m *mundo) elProyectoQuedaRegistrado() error {
+	if m.respuesta.Code != http.StatusCreated || m.proyectoID == 0 {
+		return fmt.Errorf("no se registró: código %d, %s", m.respuesta.Code, m.respuesta.Body.String())
+	}
+	return nil
+}
+
+func (m *mundo) elProyectoTieneTodo(nombre, descripcion, inicio, fin string) error {
+	p, err := m.obtener(m.proyectoID)
+	if err != nil {
+		return err
+	}
+	esperado := proyecto{ID: m.proyectoID, Nombre: nombre, Descripcion: descripcion, FechaInicio: inicio, FechaFin: fin}
+	if p != esperado {
+		return fmt.Errorf("proyecto = %+v, se esperaba %+v", p, esperado)
+	}
+	return nil
+}
+
+func (m *mundo) elProyectoTieneNombre(nombre string) error {
+	p, err := m.obtener(m.proyectoID)
+	if err != nil {
+		return err
+	}
+	if p.Nombre != nombre {
+		return fmt.Errorf("nombre = %q, se esperaba %q", p.Nombre, nombre)
+	}
+	return nil
+}
+
+func (m *mundo) elProyectoTieneFechas(inicio, fin string) error {
+	p, err := m.obtener(m.proyectoID)
+	if err != nil {
+		return err
+	}
+	if p.FechaInicio != inicio || p.FechaFin != fin {
+		return fmt.Errorf("fechas = %s → %s, se esperaba %s → %s", p.FechaInicio, p.FechaFin, inicio, fin)
+	}
+	return nil
+}
+
+func (m *mundo) seInformaElError(mensaje string) error {
+	var e struct {
+		Error string `json:"error"`
+	}
+	if err := json.Unmarshal(m.respuesta.Body.Bytes(), &e); err != nil {
+		return fmt.Errorf("la respuesta no es JSON válido: %w", err)
+	}
+	if e.Error != mensaje {
+		return fmt.Errorf("error = %q (código %d), se esperaba %q", e.Error, m.respuesta.Code, mensaje)
+	}
+	return nil
+}
+
+func (m *mundo) noSeRegistraNingunProyecto() error {
+	return m.hayProyectosRegistrados(0)
+}
+
+func (m *mundo) hayProyectosRegistrados(cantidad int) error {
+	lista, err := m.listar()
+	if err != nil {
+		return err
+	}
+	if len(lista) != cantidad {
+		return fmt.Errorf("hay %d proyectos, se esperaban %d", len(lista), cantidad)
+	}
+	return nil
+}
+
+// elResultadoEs acepta "registrado" o el mensaje de error esperado.
+func (m *mundo) elResultadoEs(resultado string) error {
+	if resultado == "registrado" {
+		return m.elProyectoQuedaRegistrado()
+	}
+	return m.seInformaElError(resultado)
+}
+
+func (m *mundo) veoLosProyectosEnOrden(primero, segundo string) error {
+	var lista []proyecto
+	if err := json.Unmarshal(m.respuesta.Body.Bytes(), &lista); err != nil {
+		return err
+	}
+	if len(lista) != 2 || lista[0].Nombre != primero || lista[1].Nombre != segundo {
+		return fmt.Errorf("lista = %+v, se esperaba %q y %q en ese orden", lista, primero, segundo)
+	}
+	return nil
+}
+
+func (m *mundo) laListaEstaVacia() error {
+	if strings.TrimSpace(m.respuesta.Body.String()) != "[]" {
+		return fmt.Errorf("lista = %s, se esperaba []", m.respuesta.Body.String())
 	}
 	return nil
 }
