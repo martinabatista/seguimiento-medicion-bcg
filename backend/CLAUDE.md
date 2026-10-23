@@ -38,7 +38,15 @@ Endpoints disponibles:
 | `POST /api/proyectos/{id}/integrantes` | Agregar un integrante (spec 02) | 201 integrante · 400 · 404 · 409 email repetido |
 | `GET /api/proyectos/{id}/integrantes` | Listar en orden de alta | 200 lista (`[]` si no hay) · 404 |
 | `GET /api/proyectos/{id}/integrantes/{integranteID}` | Ver un integrante | 200 · 404 |
-| `GET /api/proyectos/{id}/estado` | Estado del proyecto y resumen del backlog (spec 03) | 200 · 404 |
+| `GET /api/proyectos/{id}/estado` | Estado del proyecto, resumen del backlog (spec 03) y Sprint en curso (spec 05) | 200 · 404 |
+| `POST /api/proyectos/{id}/sprints` | Crear un Sprint (spec 05) | 201 Sprint · 400 · 404 · 409 superpuesto |
+| `GET /api/proyectos/{id}/sprints` | Listar por fecha de inicio (sin historias) | 200 lista (`[]` si no hay) · 404 |
+| `GET /api/proyectos/{id}/sprints/{sprintID}` | Ver un Sprint con sus historias | 200 · 404 |
+| `PUT /api/proyectos/{id}/sprints/{sprintID}` | Modificar el Sprint Goal `{"sprint_goal"}` | 200 · 400 · 404 · 409 cerrado |
+| `POST /api/proyectos/{id}/sprints/{sprintID}/historias` | Asignar `{"historia_id"}` | 200 Sprint · 404 · 409 |
+| `DELETE /api/proyectos/{id}/sprints/{sprintID}/historias/{historiaID}` | Quitar una historia | 200 Sprint · 404 · 409 |
+
+`DELETE /api/proyectos/{id}/backlog/{historiaID}` responde 409 si la historia está en un Sprint abierto (spec 05 CA-6).
 
 Proyecto en JSON: `{"id", "nombre", "descripcion", "fecha_inicio", "fecha_fin"}`, fechas `AAAA-MM-DD`.
 
@@ -52,7 +60,11 @@ Integrante en JSON: `{"id", "proyecto_id", "nombre", "email", "rol"}`. `rol` es 
 Estado en JSON: `{"proyecto": {…proyecto…}, "estado", "backlog": {"total", "pendientes", "en_progreso",
 "completadas", "porcentaje_completadas", "story_points_totales", "story_points_completados", "sin_estimar"}}`.
 `estado` es `No iniciado` | `En curso` | `Finalizado`, calculado con la fecha de hoy (no se guarda).
-El Sprint en curso (spec 03 CA-2) se agrega cuando exista la spec 05.
+`"sprint_en_curso"` es el Sprint abierto que incluye hoy (sin historias), o `null` (spec 05 CA-5).
+
+Sprint en JSON: `{"id", "proyecto_id", "numero", "fecha_inicio", "fecha_fin", "sprint_goal", "estado",
+"historias"}`. `estado` es `Abierto` | `Cerrado`; `historias` (lista de historias como en el backlog,
+ordenadas por prioridad) solo aparece al crear, ver, modificar, asignar y quitar, no al listar.
 
 ## Decisiones técnicas
 
@@ -130,14 +142,19 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   integrante: si cambia su JSON o su identidad (el email), actualizar la spec 02.
 - `docs/specs/sprint-01/03-estado-proyecto.md` — estado del proyecto: `dominio/estado_proyecto.go`
   (`CalcularEstado`, `ResumirBacklog`), `dominio/servicio_estado.go`, `api/estado.go`,
-  `features/estado-proyecto.feature` (pasos en `features/estado_proyecto_test.go`). **Entregada en
-  parte:** falta el Sprint en curso (CA-2, cuando exista la spec 05) y los escenarios con Story Points
-  (cuando exista la spec 07). Si cambian los estados o los Story Points de la historia (spec 04), revisar
-  `ResumirBacklog`. La spec 13 (Dashboard) va a usar este estado.
+  `features/estado-proyecto.feature` (pasos en `features/estado_proyecto_test.go`). El Sprint en curso
+  lo agregó la spec 05 (CA-5); los escenarios con Story Points esperan a la spec 07. Si cambian los
+  estados o los Story Points de la historia (spec 04), revisar `ResumirBacklog`. La spec 13 (Dashboard)
+  va a usar este estado.
 - `docs/specs/sprint-01/04-product-backlog.md` — backlog: `dominio/historia.go`, `dominio/servicio_backlog.go`,
   `memoria/historias.go`, `postgres/historias.go`, `postgres/esquema/02_historias.sql`, `api/backlog.go`,
   `features/product-backlog.feature` (pasos en `features/backlog_test.go`). Las specs 05 a 08 usan la
   historia: si cambian su estado o sus Story Points, actualizar la spec 04.
+- `docs/specs/sprint-01/05-crear-sprints.md` — Sprints: `dominio/sprint.go` (`NuevoSprint`, `SprintEnCurso`),
+  `dominio/servicio_sprints.go`, `memoria/sprints.go`, `postgres/sprints.go`, `postgres/esquema/04_sprints.sql`,
+  `api/sprints.go`, `features/sprints.feature` (pasos en `features/sprints_test.go`). También toca el
+  estado (`ServicioEstado`, CA-5) y el backlog (`ServicioBacklog.Eliminar`, CA-6). La spec 06 cierra los
+  Sprints (estado `Cerrado`) y la 10 calcula sus métricas.
 
 ## Cómo testear
 
@@ -177,7 +194,15 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
   la del paso `que hoy es "AAAA-MM-DD"` (sin ese paso, la del sistema). Hacer lo mismo en cualquier
   cálculo que dependa del día (por ejemplo, el Sprint en curso).
 - `go test -race` necesita cgo: en Windows sin gcc no corre localmente; la CI (Linux) sí lo corre.
+- Los tests de integración (`postgres/*_test.go`) usan la misma base que `go run ./cmd/api` y la dejan
+  con sus datos de prueba (por ejemplo, un Sprint cerrado). Antes de probar la API a mano, vaciarla:
+  `docker compose exec -T db psql -U sme -d sme -c "TRUNCATE proyectos RESTART IDENTITY CASCADE"`.
+- Conflictos (409): el dominio los devuelve como `ErrConflicto{Mensaje}` (como `ErrDatoInvalido` para
+  los 400) y `responderError` los traduce solo. Usarlo para las reglas nuevas que choquen con lo ya
+  registrado, en vez de agregar casos sueltos.
+- `sprint_historias` borra en cascada: si se elimina una historia del backlog (solo se puede fuera de un
+  Sprint abierto, spec 05 RN-11), sale también de los Sprints cerrados donde estuvo.
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 03, primera entrega).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 05).

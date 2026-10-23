@@ -19,14 +19,16 @@ type RepositorioHistorias interface {
 }
 
 // ServicioBacklog son los casos de uso de la spec 04. Usa el repositorio de proyectos solo para
-// verificar que el proyecto exista (RN-1).
+// verificar que el proyecto exista (RN-1) y el de Sprints para no eliminar una historia de un
+// Sprint abierto (spec 05 RN-11).
 type ServicioBacklog struct {
 	proyectos RepositorioProyectos
 	historias RepositorioHistorias
+	sprints   RepositorioSprints
 }
 
-func NuevoServicioBacklog(proyectos RepositorioProyectos, historias RepositorioHistorias) *ServicioBacklog {
-	return &ServicioBacklog{proyectos: proyectos, historias: historias}
+func NuevoServicioBacklog(proyectos RepositorioProyectos, historias RepositorioHistorias, sprints RepositorioSprints) *ServicioBacklog {
+	return &ServicioBacklog{proyectos: proyectos, historias: historias, sprints: sprints}
 }
 
 // Crear valida los datos y registra la historia en el backlog del proyecto (CA-1).
@@ -68,10 +70,18 @@ func (s *ServicioBacklog) Modificar(ctx context.Context, proyectoID, id int64, d
 	return h, nil
 }
 
-// Eliminar saca la historia del backlog (CA-3).
+// Eliminar saca la historia del backlog (CA-3). No se puede si está asignada a un Sprint abierto:
+// primero hay que quitarla del Sprint (spec 05 RN-11, CA-6).
 func (s *ServicioBacklog) Eliminar(ctx context.Context, proyectoID, id int64) error {
 	if err := verificarProyecto(ctx, s.proyectos, proyectoID); err != nil {
 		return err
+	}
+	enSprint, err := enSprintAbierto(ctx, s.sprints, proyectoID, id)
+	if err != nil {
+		return err
+	}
+	if enSprint {
+		return ErrHistoriaEnSprintAbierto
 	}
 	return s.historias.Eliminar(ctx, proyectoID, id)
 }

@@ -54,3 +54,27 @@ var (
 	// ErrIntegranteYaRegistrado es un conflicto con lo que ya hay: la API lo responde como 409.
 	ErrIntegranteYaRegistrado = errors.New("El integrante ya está registrado en el proyecto")
 )
+
+// ErrConflicto es una operación que choca con lo que ya está registrado (no con el formato de un
+// dato). La API lo responde como 409. El mensaje es el que ve la usuaria, tal cual lo define la spec.
+type ErrConflicto struct{ Mensaje string }
+
+func (e ErrConflicto) Error() string { return e.Mensaje }
+
+// Errores de la spec 05 (Sprints). Las fechas faltantes, inválidas o invertidas usan los errores
+// de la spec 01: los mensajes son los mismos.
+var (
+	ErrSprintFueraDelProyecto = ErrDatoInvalido{"El Sprint debe estar dentro de las fechas del proyecto"}
+	ErrSprintGoalObligatorio  = ErrDatoInvalido{"El Sprint Goal es obligatorio"}
+	ErrSprintGoalMuyLargo     = ErrDatoInvalido{"El Sprint Goal no puede superar los 300 caracteres"}
+
+	ErrSprintSuperpuesto       = ErrConflicto{"El Sprint se superpone con otro Sprint del proyecto"}
+	ErrSprintCerrado           = ErrConflicto{"El Sprint está cerrado"}
+	ErrHistoriaCompletada      = ErrConflicto{"La historia ya está completada"}
+	ErrHistoriaYaAsignada      = ErrConflicto{"La historia ya está asignada a un Sprint abierto"}
+	ErrHistoriaNoAsignada      = ErrConflicto{"La historia no está asignada a este Sprint"}
+	ErrHistoriaEnSprintAbierto = ErrConflicto{"La historia está asignada a un Sprint abierto"}
+
+	// ErrSprintNoExiste no es un dato inválido: la API lo responde como 404.
+	ErrSprintNoExiste = errors.New("El Sprint no existe")
+)

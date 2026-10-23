@@ -28,7 +28,7 @@ func nuevoBacklog(t *testing.T) backlogDePrueba {
 	}
 	turnos, _ := proyectos.Guardar(ctx, dominio.Proyecto{Nombre: "App Turnos", Descripcion: "Turnos médicos", FechaInicio: f("2026-11-05"), FechaFin: f("2027-01-20")})
 	return backlogDePrueba{
-		servicio:  dominio.NuevoServicioBacklog(proyectos, historias),
+		servicio:  dominio.NuevoServicioBacklog(proyectos, historias, memoria.NuevoRepositorioSprints()),
 		historias: historias,
 		tienda:    tienda.ID,
 		turnos:    turnos.ID,

@@ -30,15 +30,17 @@ func main() {
 
 	repoProyectos := postgres.NuevoRepositorioProyectos(db)
 	repoHistorias := postgres.NuevoRepositorioHistorias(db)
+	repoSprints := postgres.NuevoRepositorioSprints(db)
 	proyectos := dominio.NuevoServicioProyectos(repoProyectos)
-	backlog := dominio.NuevoServicioBacklog(repoProyectos, repoHistorias)
+	backlog := dominio.NuevoServicioBacklog(repoProyectos, repoHistorias, repoSprints)
 	integrantes := dominio.NuevoServicioIntegrantes(repoProyectos, postgres.NuevoRepositorioIntegrantes(db))
 	// La fecha de hoy del estado del proyecto (spec 03) es la fecha local del servidor.
-	estado := dominio.NuevoServicioEstado(repoProyectos, repoHistorias, time.Now)
+	estado := dominio.NuevoServicioEstado(repoProyectos, repoHistorias, repoSprints, time.Now)
+	sprints := dominio.NuevoServicioSprints(repoProyectos, repoHistorias, repoSprints)
 
 	addr := ":" + port
 	log.Printf("API escuchando en http://localhost%s", addr)
-	if err := http.ListenAndServe(addr, api.NewRouter(proyectos, backlog, integrantes, estado)); err != nil {
+	if err := http.ListenAndServe(addr, api.NewRouter(proyectos, backlog, integrantes, estado, sprints)); err != nil {
 		log.Fatal(err)
 	}
 }

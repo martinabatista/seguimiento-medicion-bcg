@@ -15,6 +15,7 @@ import (
 type estadoDePrueba struct {
 	servicio *dominio.ServicioEstado
 	backlog  *dominio.ServicioBacklog
+	sprints  *dominio.ServicioSprints
 	hoy      *time.Time
 	tienda   dominio.Proyecto // "Tienda Online", del 2026-11-01 al 2026-12-15
 	turnos   dominio.Proyecto // "App Turnos"
@@ -31,9 +32,11 @@ func nuevoEstado(t *testing.T) estadoDePrueba {
 	}
 	turnos, _ := proyectos.Guardar(ctx, dominio.Proyecto{Nombre: "App Turnos", Descripcion: "Turnos médicos", FechaInicio: f("2026-11-05"), FechaFin: f("2027-01-20")})
 	hoy := f("2026-11-20")
+	sprints := memoria.NuevoRepositorioSprints()
 	return estadoDePrueba{
-		servicio: dominio.NuevoServicioEstado(proyectos, historias, func() time.Time { return hoy }),
-		backlog:  dominio.NuevoServicioBacklog(proyectos, historias),
+		servicio: dominio.NuevoServicioEstado(proyectos, historias, sprints, func() time.Time { return hoy }),
+		backlog:  dominio.NuevoServicioBacklog(proyectos, historias, sprints),
+		sprints:  dominio.NuevoServicioSprints(proyectos, historias, sprints),
 		hoy:      &hoy,
 		tienda:   tienda,
 		turnos:   turnos,
@@ -116,5 +119,41 @@ func TestEstadoProyectoInexistente(t *testing.T) {
 	e := nuevoEstado(t)
 	if _, err := e.servicio.Consultar(context.Background(), 999); !errors.Is(err, dominio.ErrProyectoNoExiste) {
 		t.Errorf("error = %v, se esperaba %v", err, dominio.ErrProyectoNoExiste)
+	}
+}
+
+// spec 05 CA-5, RN-12: el estado informa el Sprint en curso según la fecha de hoy.
+func TestEstadoSprintEnCurso(t *testing.T) {
+	e := nuevoEstado(t)
+	ctx := context.Background()
+	s1, _ := e.sprints.Crear(ctx, e.tienda.ID, f("2026-11-01"), f("2026-11-14"), "Registrar clientes")
+	s2, _ := e.sprints.Crear(ctx, e.tienda.ID, f("2026-11-16"), f("2026-11-28"), "Catálogo")
+	casos := []struct {
+		hoy    string
+		sprint int64 // 0 = no hay Sprint en curso
+	}{
+		{"2026-11-01", s1.ID},
+		{"2026-11-14", s1.ID},
+		{"2026-11-15", 0},
+		{"2026-11-20", s2.ID},
+		{"2026-12-10", 0},
+	}
+	for _, c := range casos {
+		t.Run(c.hoy, func(t *testing.T) {
+			*e.hoy = f(c.hoy)
+			estado, err := e.servicio.Consultar(ctx, e.tienda.ID)
+			if err != nil {
+				t.Fatalf("Consultar: %v", err)
+			}
+			if c.sprint == 0 {
+				if estado.SprintEnCurso != nil {
+					t.Errorf("Sprint en curso = %+v, se esperaba ninguno", *estado.SprintEnCurso)
+				}
+				return
+			}
+			if estado.SprintEnCurso == nil || estado.SprintEnCurso.ID != c.sprint {
+				t.Errorf("Sprint en curso = %+v, se esperaba el %d", estado.SprintEnCurso, c.sprint)
+			}
+		})
 	}
 }

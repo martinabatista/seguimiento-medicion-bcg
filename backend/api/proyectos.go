@@ -135,11 +135,14 @@ func aJSON(p dominio.Proyecto) proyectoJSON {
 // (se registra en el log).
 func responderError(w http.ResponseWriter, err error) {
 	var invalido dominio.ErrDatoInvalido
+	var conflicto dominio.ErrConflicto
 	switch {
 	case errors.As(err, &invalido):
 		writeJSON(w, http.StatusBadRequest, errorJSON{invalido.Mensaje})
+	case errors.As(err, &conflicto):
+		writeJSON(w, http.StatusConflict, errorJSON{conflicto.Mensaje})
 	case errors.Is(err, dominio.ErrProyectoNoExiste), errors.Is(err, dominio.ErrHistoriaNoExiste),
-		errors.Is(err, dominio.ErrIntegranteNoExiste):
+		errors.Is(err, dominio.ErrIntegranteNoExiste), errors.Is(err, dominio.ErrSprintNoExiste):
 		writeJSON(w, http.StatusNotFound, errorJSON{err.Error()})
 	case errors.Is(err, dominio.ErrIntegranteYaRegistrado):
 		writeJSON(w, http.StatusConflict, errorJSON{err.Error()})

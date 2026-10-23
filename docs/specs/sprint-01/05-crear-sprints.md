@@ -1,11 +1,11 @@
 ---
 titulo: Crear Sprints, definir Sprint Goal y asignar historias
-estado: in-review    # draft | in-review | approved | implemented
+estado: implemented  # draft | in-review | approved | implemented
 unidad: backend
 issue: "#8"
 sprint: 01
 autor: Martina Batista
-aprobada_por: ""
+aprobada_por: "Florencia Cabeza"
 fecha: 2026-10-23
 specs_relacionadas: ["01-proyectos", "03-estado-proyecto", "04-product-backlog"]
 ---
@@ -281,19 +281,19 @@ Los pasos que no indican proyecto se refieren al de los Antecedentes, "Tienda On
 
 ## Tareas
 
-- [ ] `[P1]` Entidad Sprint en `backend/dominio/` con las reglas RN-2 a RN-13 (TDD).
-- [ ] `[P1]` Tablas de Sprints y de historias asignadas en `backend/postgres/esquema/` (siguiente número libre).
-- [ ] `[P1]` Repositorio de Sprints en `backend/postgres/` y en `backend/memoria/`.
-- [ ] `[P1]` Rutas de la API bajo `/api/proyectos/{id}/sprints` en `backend/api/`.
-- [ ] `[P1]` Sprint en curso en el estado del proyecto (spec 03) y regla de eliminación en el backlog (spec 04).
-- [ ] `[P1]` Escenarios de `backend/features/sprints.feature` con sus pasos.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints, specs relacionadas).
+- [x] `[P1]` Entidad Sprint en `backend/dominio/` con las reglas RN-2 a RN-13 (TDD).
+- [x] `[P1]` Tablas de Sprints y de historias asignadas en `backend/postgres/esquema/` (`04_sprints.sql`: `sprints` y `sprint_historias`).
+- [x] `[P1]` Repositorio de Sprints en `backend/postgres/` y en `backend/memoria/`.
+- [x] `[P1]` Rutas de la API bajo `/api/proyectos/{id}/sprints` en `backend/api/`.
+- [x] `[P1]` Sprint en curso en el estado del proyecto (spec 03) y regla de eliminación en el backlog (spec 04).
+- [x] `[P1]` Escenarios de `backend/features/sprints.feature` con sus pasos.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints, specs relacionadas).
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented`.
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] Spec en estado `implemented`.
