@@ -65,9 +65,9 @@ _TODO: completar al tomar la historia (antes de implementar)._
 - CA-1: Se calculan las horas estimadas.
 - CA-2: Se calculan las horas reales.
 - CA-3: Se calcula la desviación entre esfuerzo estimado y real.
-- CA-4: Se calcula la cantidad de defectos detectados.
-- CA-5: Se calcula la cantidad de defectos resueltos.
-- CA-6: Los cálculos se desarrollan con TDD y están cubiertos por tests unitarios Go.
+- CA-4: Los cálculos se desarrollan con TDD y están cubiertos por tests unitarios Go.
+
+> La cantidad de defectos detectados y resueltos (antes CA-4 y CA-5) pasó a la spec 11, que es la dueña de los defectos: así esta historia no depende de otra del mismo Sprint.
 
 ## Escenarios BDD
 
@@ -82,7 +82,8 @@ Escenario: <caso normal> (CA-1)
 
 ## Dependencias
 
-- Spec 09 (esfuerzo) y Spec 11 (defectos) — área de Luana.
+- Spec 09 (esfuerzo): del Sprint 2. Las horas estimadas se definen en esta spec.
+- La usa: spec 14 (reporte).
 
 ## Tareas
 

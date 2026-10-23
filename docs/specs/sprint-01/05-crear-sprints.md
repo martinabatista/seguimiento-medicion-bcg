@@ -66,6 +66,9 @@ _TODO: completar al tomar la historia (antes de implementar)._
 - CA-2: Se puede definir el Sprint Goal.
 - CA-3: Se pueden asignar historias del Product Backlog al Sprint.
 - CA-4: Una historia no puede estar asignada a dos Sprints abiertos a la vez.
+- CA-5: El estado del proyecto (`GET /api/proyectos/{id}/estado`, spec 03) informa el Sprint en curso: el Sprint abierto del proyecto cuyo período incluye la fecha de hoy (inicio y fin incluidos); si hay más de uno, el de fecha de inicio más reciente; si no hay ninguno, indica que no hay Sprint en curso.
+
+> El CA-5 viene de la spec 03 (antes era su CA-2): lo implementa esta historia porque es la que crea los Sprints, así la HU-03 no queda esperando a la HU-05.
 
 ## Escenarios BDD
 
@@ -80,7 +83,9 @@ Escenario: <caso normal> (CA-1)
 
 ## Dependencias
 
-- Spec 04 (backlog).
+- Spec 04 (backlog): implementada.
+- Spec 03 (estado del proyecto): implementada; esta historia le agrega el Sprint en curso (CA-5).
+- La usan: spec 06 (cerrar Sprint), spec 10 (métricas de avance) y spec 11 (defectos: Sprint de detección y resolución).
 
 ## Tareas
 

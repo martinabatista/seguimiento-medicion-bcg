@@ -65,6 +65,9 @@ _TODO: completar al tomar la historia (antes de implementar)._
 - CA-1: Cada defecto tiene: descripción, severidad, estado, historia relacionada, Sprint de detección y Sprint de resolución.
 - CA-2: Se puede cambiar el estado de un defecto.
 - CA-3: El Sprint de resolución se registra al resolverlo.
+- CA-4: Se calcula la cantidad de defectos detectados y la cantidad de defectos resueltos, del proyecto y de cada Sprint (por Sprint de detección y de resolución).
+
+> El CA-4 viene de la spec 12 (antes eran sus CA-4 y CA-5): lo calcula esta historia porque es la dueña de los defectos, así la HU-12 no queda esperando a la HU-11 dentro del mismo Sprint.
 
 ## Escenarios BDD
 
@@ -79,7 +82,8 @@ Escenario: <caso normal> (CA-1)
 
 ## Dependencias
 
-- Spec 04 (backlog), Spec 05 (sprints).
+- Spec 04 (backlog) y spec 05 (sprints): de Sprints anteriores.
+- La usan: spec 14 (reporte), que muestra las cantidades del CA-4.
 
 ## Tareas
 

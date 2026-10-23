@@ -63,7 +63,9 @@ _TODO: completar al tomar la historia (antes de implementar)._
 ## Criterios de aceptación
 
 - CA-1: Muestra información del estado del proyecto.
-- CA-2: Incluye representaciones gráficas de algunas métricas (las que se elijan en esta spec).
+- CA-2: Incluye representaciones gráficas de algunas métricas de avance (spec 10: Story Points planificados y completados, velocidad, porcentaje de historias completadas; las que se elijan en esta spec).
+
+> Las métricas de esfuerzo y calidad (spec 12) se hacen en el mismo Sprint que el Dashboard: no se grafican acá para no depender de ella. Se pueden sumar en el Sprint 4 si queda tiempo.
 
 ## Escenarios BDD
 
@@ -78,7 +80,8 @@ Escenario: <caso normal> (CA-1)
 
 ## Dependencias
 
-- Spec 03 (estado), Spec 10 y Spec 12 (métricas).
+- Spec 03 (estado): implementada. Spec 10 (métricas de avance): del Sprint 2.
+- La interfaz web base (Issue #15, Sprint 2).
 
 ## Tareas
 
