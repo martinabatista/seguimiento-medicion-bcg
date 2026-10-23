@@ -27,6 +27,11 @@ viene después en otra rama `feat/slug` (ver `CLAUDE.md` raíz).
 
 1. Leer la HU y su spec borrador. Si falta rol, acción o beneficio, preguntar a la integrante.
    Revisar `Dependencias` y las specs relacionadas (`specs_relacionadas`) para no contradecirlas.
+   **Chequeo de independencia (INVEST, regla del `CLAUDE.md`):** para cada criterio de aceptación,
+   verificar que lo que necesita ya exista (historia `implemented`), venga de un Sprint anterior o
+   sea de la misma dueña y se haga antes. Si un CA depende de una historia de **otra** integrante del
+   mismo Sprint o de uno posterior, **no se deja**: se propone moverlo a la historia que crea esos
+   datos, se avisa a la integrante y se anota en las dos specs. Nunca dejar un CA "esperando".
 2. Completar **todas** las secciones de la plantilla, reemplazando cada `_TODO_`:
    Historia de usuario · Objetivo · Alcance (Entra / NO entra) · Entradas (campo, tipo,
    obligatoriedad, validación) · Salidas esperadas · Reglas de negocio (`RN-k`, una por línea,
@@ -64,7 +69,9 @@ viene después en otra rama `feat/slug` (ver `CLAUDE.md` raíz).
   formato `YYYY-MM-DD`; `autor` = quien escribe la spec.
 - PR de la spec: usar `.github/pull_request_template.md`, referenciar el Issue **sin cerrarlo**
   ("Spec de #N") y pedir aprobación a otra integrante.
-- Commit sugerido (Conventional Commits, scope = unidad): `docs(docs): spec NN <slug>`.
+- **Un solo commit** para toda la spec (Conventional Commits, scope = unidad):
+  `docs(docs): spec NN <slug>`. No partirla en commits por sección; si después de pushear hay que
+  corregirla por la revisión, un commit `docs(docs): spec NN ajustes de la revisión`.
   Commitear y pushear **solo cuando la integrante lo pida**.
 
 ## Para entender, no solo generar

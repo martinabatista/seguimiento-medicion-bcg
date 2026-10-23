@@ -54,12 +54,23 @@ TypeScript (frontend) · godog (BDD con Gherkin) · `go test` (TDD) · GitHub Ac
   `docs/specs/sprint-NN/NN-slug.md` (carpeta = Sprint del Milestone; `NN` = número de la HU).
   Estados: `draft` (se escribe) → `in-review` (PR abierto) → `approved` (la aprobó **otra
   integrante**, recién ahí se programa) → `implemented` (su PR de código se mergeó a `main`).
+- **Historias independientes (INVEST):** una spec solo puede depender de historias **ya
+  implementadas**, de un **Sprint anterior** o de la **misma dueña** que se hacen antes. Ningún
+  criterio de aceptación puede quedar esperando a una historia de otra integrante del mismo Sprint
+  o de uno posterior. Si una funcionalidad necesita datos que crea otra historia futura, ese criterio
+  se mueve a la historia que crea los datos (ejemplo: el "Sprint en curso" del estado del proyecto
+  lo implementa la spec 05, no la 03). Revisar la sección `Dependencias` antes de pasar a `in-review`.
 - **BDD:** cada funcionalidad seleccionada tiene escenarios Given–When–Then (normales,
   alternativos, límite y error), automatizados con godog siempre que sea posible.
 - **TDD con evidencia en el historial:** reglas de negocio, cálculos y validaciones se desarrollan
   RED → GREEN → REFACTOR, y **cada fase es un commit separado**:
   `test(backend): ...` (rojo) → `feat(backend): ...` (verde) → `refactor(backend): ...`.
   No mezclar test e implementación en el mismo commit.
+- **Commits justos, sin relleno:** no un commit por cada cosa que se hace, sino los necesarios para
+  que el historial se entienda. Cada commit es un paso con sentido propio (un ciclo TDD por capa, no
+  por criterio); si hace falta separar más para que se entienda, se separa. Como referencia: PR de
+  spec ≈ 1 commit; PR de historia ≈ 4 a 6. Formato, typos o archivos olvidados se suman al commit
+  que corresponde antes de pushear, nunca como commit aparte. Detalle en la skill `ciclo-tdd-go`.
 - **Trazabilidad:** Historia (Issue) → Spec SDD → Criterios de aceptación → Escenarios BDD →
   Tests → Código Go. La spec referencia el Issue, el PR cierra el Issue (`Closes #N`).
 - **IA:** todo lo generado con IA se entiende, revisa y valida antes de mergear.
