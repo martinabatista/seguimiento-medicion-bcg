@@ -70,6 +70,7 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 			dominio.NuevoServicioEstado(proyectos, historias, sprints, m.fechaDeHoy),
 			dominio.NuevoServicioSprints(proyectos, historias, sprints),
 			dominio.NuevoServicioPlanningPoker(proyectos, historias, integrantes, memoria.NuevoRepositorioVotaciones(), backlog),
+			dominio.NuevoServicioMetricas(proyectos, historias, sprints),
 		)}
 		return ctx, nil
 	})
@@ -115,6 +116,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Cerrar Sprint (spec 06)
 	m.registrarPasosCerrarSprint(sc)
+
+	// Métricas de avance (spec 10)
+	m.registrarPasosMetricas(sc)
 
 	// Story Points (spec 07)
 	m.registrarPasosStoryPoints(sc)

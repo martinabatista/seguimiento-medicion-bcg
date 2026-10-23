@@ -28,6 +28,7 @@ func routerDePrueba() http.Handler {
 		dominio.NuevoServicioEstado(proyectos, historias, sprints, func() time.Time { return hoyDePrueba }),
 		dominio.NuevoServicioSprints(proyectos, historias, sprints),
 		dominio.NuevoServicioPlanningPoker(proyectos, historias, integrantes, memoria.NuevoRepositorioVotaciones(), backlog),
+		dominio.NuevoServicioMetricas(proyectos, historias, sprints),
 	)
 }
 

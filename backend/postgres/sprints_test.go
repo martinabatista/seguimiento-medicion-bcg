@@ -88,3 +88,41 @@ func TestRepositorioSprintsCompletadas(t *testing.T) {
 		t.Errorf("Listar = %+v, se esperaban las completadas", lista)
 	}
 }
+
+// spec 10 RN-4: el Sprint cerrado guarda los Story Points congelados de sus historias (NULL = sin estimar).
+func TestRepositorioSprintsStoryPointsAlCerrar(t *testing.T) {
+	historias, tienda, _ := historiasDePrueba(t)
+	r := NuevoRepositorioSprints(historias.db)
+	ctx := context.Background()
+	h1, _ := historias.Guardar(ctx, dominio.Historia{ProyectoID: tienda, Titulo: "Registrar usuario", Descripcion: "Alta", Prioridad: 1, Estado: dominio.EstadoPendiente})
+	h2, _ := historias.Guardar(ctx, dominio.Historia{ProyectoID: tienda, Titulo: "Ver catálogo", Descripcion: "Listado", Prioridad: 2, Estado: dominio.EstadoPendiente})
+	s, _ := r.Guardar(ctx, dominio.Sprint{ProyectoID: tienda, Numero: 1, FechaInicio: fecha("2026-11-01"), FechaFin: fecha("2026-11-14"), Goal: "Objetivo", Estado: dominio.SprintAbierto})
+
+	ocho := 8
+	s.Historias = []int64{h1.ID, h2.ID}
+	s.Estado = dominio.SprintCerrado
+	s.StoryPointsAlCerrar = map[int64]*int{h1.ID: &ocho, h2.ID: nil}
+	if err := r.Actualizar(ctx, s); err != nil {
+		t.Fatalf("Actualizar: %v", err)
+	}
+	visto, err := r.Obtener(ctx, tienda, s.ID)
+	if err != nil {
+		t.Fatalf("Obtener: %v", err)
+	}
+	p1, ok1 := visto.StoryPointsAlCerrar[h1.ID]
+	p2, ok2 := visto.StoryPointsAlCerrar[h2.ID]
+	if !ok1 || p1 == nil || *p1 != 8 || !ok2 || p2 != nil {
+		t.Errorf("congelados = %v, se esperaba %d → 8 y %d → sin estimar", visto.StoryPointsAlCerrar, h1.ID, h2.ID)
+	}
+	if lista, _ := r.Listar(ctx, tienda); len(lista) != 1 || lista[0].StoryPointsAlCerrar[h1.ID] == nil {
+		t.Errorf("Listar = %+v, se esperaban los congelados", lista)
+	}
+
+	// Un Sprint abierto no tiene congelados.
+	abierto, _ := r.Guardar(ctx, dominio.Sprint{ProyectoID: tienda, Numero: 2, FechaInicio: fecha("2026-11-15"), FechaFin: fecha("2026-11-28"), Goal: "Otro", Estado: dominio.SprintAbierto})
+	abierto.Historias = []int64{h2.ID}
+	r.Actualizar(ctx, abierto)
+	if visto, _ := r.Obtener(ctx, tienda, abierto.ID); visto.StoryPointsAlCerrar != nil {
+		t.Errorf("Sprint abierto: congelados = %v, se esperaba nil", visto.StoryPointsAlCerrar)
+	}
+}
