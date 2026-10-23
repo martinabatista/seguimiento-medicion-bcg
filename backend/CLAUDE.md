@@ -52,6 +52,12 @@ Endpoints disponibles:
 | `DELETE …/sprints/{sprintID}/historias/{historiaID}/completar` | Deshacer (vuelve a `En progreso`) | 200 Sprint · 404 · 409 |
 | `POST /api/proyectos/{id}/sprints/{sprintID}/cerrar` | Cerrar el Sprint (spec 06) | 200 Sprint · 404 · 409 ya cerrado |
 | `GET /api/proyectos/{id}/sprints/anteriores` | Sprints cerrados con sus historias, del más reciente al más antiguo | 200 lista · 404 |
+| `POST /api/proyectos/{id}/votaciones` | Abrir una votación de Planning Poker `{"historia_id"}` (spec 08) | 201 votación · 400 · 404 · 409 |
+| `GET /api/proyectos/{id}/votaciones/{votacionID}` | Ver la votación (sin valores de la ronda sin revelar) | 200 · 404 |
+| `POST …/votaciones/{votacionID}/votos` | Votar `{"integrante_id", "story_points"}` (solo Developers) | 200 votación · 400 · 404 · 409 |
+| `POST …/votaciones/{votacionID}/revelar` | Revelar la ronda (votaron todos los Developers) | 200 votación · 404 · 409 |
+| `POST …/votaciones/{votacionID}/rondas` | Empezar una nueva ronda | 200 votación · 404 · 409 |
+| `POST …/votaciones/{votacionID}/acordar` | Registrar la acordada `{"story_points"}`: estima la historia y cierra | 200 votación · 400 · 404 · 409 |
 
 `DELETE /api/proyectos/{id}/backlog/{historiaID}` responde 409 si la historia está en un Sprint abierto (spec 05 CA-6).
 `PUT /api/proyectos/{id}/backlog/{historiaID}` responde 409 si pone o saca `Completada` a una historia de un
@@ -76,6 +82,12 @@ Sprint en JSON: `{"id", "proyecto_id", "numero", "fecha_inicio", "fecha_fin", "s
 "historias"}`. `estado` es `Abierto` | `Cerrado`; `historias` (lista de historias como en el backlog,
 ordenadas por prioridad, cada una con `"completada_en_sprint"`) solo aparece al crear, ver, modificar,
 asignar, quitar, completar, deshacer, cerrar y en los anteriores; no al listar.
+
+Votación en JSON: `{"id", "proyecto_id", "historia_id", "estado", "ronda", "estimacion_acordada", "votaron",
+"faltan", "rondas"}`. `estado` es `Abierta` | `Cerrada`; `votaron` y `faltan` son `[{"id", "nombre"}]` de la
+ronda actual; `rondas` trae **solo las reveladas**, cada una `{"numero", "votos": [{"integrante_id", "nombre",
+"story_points"}], "hay_diferencias", "mas_bajo", "mas_alto"}` (extremos `{"story_points", "integrantes"}`).
+Los valores de una ronda sin revelar no salen en ninguna respuesta (spec 08 RN-5).
 
 ## Decisiones técnicas
 
@@ -176,6 +188,11 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   `QuitarEstimacion`), `api/story_points.go`, `features/story-points.feature` (pasos en
   `features/story_points_test.go`). Sin tabla nueva: usa `historias.story_points`. La spec 08 (Planning Poker)
   registra la estimación acordada con `Estimar` y usa la misma escala; la 10 suma estos Story Points.
+- `docs/specs/sprint-02/08-planning-poker.md` — Planning Poker: `dominio/planning_poker.go` (`Votacion`,
+  `NuevaVotacion`, `Votar`, `Revelar`, `NuevaRonda`, `Acordar`, `Vista` con los votos ocultos y las
+  diferencias), `dominio/servicio_planning_poker.go`, `memoria/votaciones.go`, `postgres/votaciones.go`,
+  `postgres/esquema/06_votaciones.sql`, `api/planning_poker.go`, `features/planning-poker.feature` (pasos en
+  `features/planning_poker_test.go`). Usa los roles de la spec 02 (solo `Developer` vota) y `Estimar` de la 07.
 
 ## Cómo testear
 
@@ -196,6 +213,10 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
 
 ## Trampas conocidas
 
+- Eliminar una historia del backlog borra sus votaciones de Planning Poker (`ON DELETE CASCADE` en
+  `06_votaciones.sql`). `votos` referencia a `integrantes`, así que el `TRUNCATE … CASCADE` también lo vacía.
+- `VistaVotacion` (dominio) es lo único que se muestra de una votación: nunca devolver `Votacion` directo
+  por la API, porque tiene los valores de la ronda sin revelar (spec 08 RN-5).
 - `historias` e `integrantes` referencian a `proyectos`: los tests de integración vacían con
   `TRUNCATE proyectos RESTART IDENTITY CASCADE` (sin `CASCADE`, PostgreSQL no deja truncar `proyectos`).
 - Cada tabla nueva en `postgres/esquema/` obliga a recrear la base local
@@ -231,4 +252,4 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 07).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 08).
