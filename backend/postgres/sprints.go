@@ -33,11 +33,15 @@ func (r *RepositorioSprints) Guardar(ctx context.Context, s dominio.Sprint) (dom
 	if s.Historias == nil {
 		s.Historias = []int64{}
 	}
+	if s.Completadas == nil {
+		s.Completadas = []int64{}
+	}
 	return s, nil
 }
 
-// Actualizar reemplaza el Sprint Goal, el estado y las historias asignadas, todo junto en una
-// transacción. Devuelve ErrSprintNoExiste si el Sprint no es de ese proyecto.
+// Actualizar reemplaza el Sprint Goal, el estado y las historias asignadas (con cuáles se completaron
+// en el Sprint, spec 06), todo junto en una transacción. Devuelve ErrSprintNoExiste si el Sprint no es
+// de ese proyecto.
 func (r *RepositorioSprints) Actualizar(ctx context.Context, s dominio.Sprint) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -61,7 +65,8 @@ func (r *RepositorioSprints) Actualizar(ctx context.Context, s dominio.Sprint) e
 	}
 	for _, historiaID := range s.Historias {
 		if _, err := tx.ExecContext(ctx,
-			`INSERT INTO sprint_historias (sprint_id, historia_id) VALUES ($1, $2)`, s.ID, historiaID); err != nil {
+			`INSERT INTO sprint_historias (sprint_id, historia_id, completada) VALUES ($1, $2, $3)`,
+			s.ID, historiaID, s.EstaCompletada(historiaID)); err != nil {
 			return fmt.Errorf("asignar historia %d al Sprint %d: %w", historiaID, s.ID, err)
 		}
 	}
@@ -96,7 +101,7 @@ func (r *RepositorioSprints) Listar(ctx context.Context, proyectoID int64) ([]do
 		return nil, fmt.Errorf("listar Sprints: %w", err)
 	}
 	for i := range sprints {
-		if sprints[i].Historias, err = r.historiasDe(ctx, sprints[i].ID); err != nil {
+		if sprints[i].Historias, sprints[i].Completadas, err = r.historiasDe(ctx, sprints[i].ID); err != nil {
 			return nil, err
 		}
 	}
@@ -116,29 +121,34 @@ func (r *RepositorioSprints) Obtener(ctx context.Context, proyectoID, id int64) 
 	if err != nil {
 		return dominio.Sprint{}, err
 	}
-	if s.Historias, err = r.historiasDe(ctx, s.ID); err != nil {
+	if s.Historias, s.Completadas, err = r.historiasDe(ctx, s.ID); err != nil {
 		return dominio.Sprint{}, err
 	}
 	return s, nil
 }
 
-// historiasDe devuelve los identificadores de las historias asignadas al Sprint.
-func (r *RepositorioSprints) historiasDe(ctx context.Context, sprintID int64) ([]int64, error) {
+// historiasDe devuelve los identificadores de las historias asignadas al Sprint y, de esas, las que
+// se completaron en él (spec 06).
+func (r *RepositorioSprints) historiasDe(ctx context.Context, sprintID int64) (asignadas, completadas []int64, err error) {
 	rows, err := r.db.QueryContext(ctx,
-		`SELECT historia_id FROM sprint_historias WHERE sprint_id = $1 ORDER BY historia_id`, sprintID)
+		`SELECT historia_id, completada FROM sprint_historias WHERE sprint_id = $1 ORDER BY historia_id`, sprintID)
 	if err != nil {
-		return nil, fmt.Errorf("historias del Sprint %d: %w", sprintID, err)
+		return nil, nil, fmt.Errorf("historias del Sprint %d: %w", sprintID, err)
 	}
 	defer rows.Close()
-	ids := []int64{}
+	asignadas, completadas = []int64{}, []int64{}
 	for rows.Next() {
 		var id int64
-		if err := rows.Scan(&id); err != nil {
-			return nil, fmt.Errorf("historias del Sprint %d: %w", sprintID, err)
+		var completada bool
+		if err := rows.Scan(&id, &completada); err != nil {
+			return nil, nil, fmt.Errorf("historias del Sprint %d: %w", sprintID, err)
 		}
-		ids = append(ids, id)
+		asignadas = append(asignadas, id)
+		if completada {
+			completadas = append(completadas, id)
+		}
 	}
-	return ids, rows.Err()
+	return asignadas, completadas, rows.Err()
 }
 
 func escanearSprint(f fila) (dominio.Sprint, error) {
