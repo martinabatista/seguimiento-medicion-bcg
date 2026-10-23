@@ -83,6 +83,7 @@ Escenario: <caso normal> (CA-1)
 ## Dependencias
 
 - Spec 02 (integrantes), Spec 07 (story points).
+- Los votos y la estimación acordada usan la escala de la spec 07 (1, 2, 3, 5, 8, 13, 21), y la estimación acordada se registra con la misma operación de la spec 07 (CA-6), con sus mismas reglas (por ejemplo, no se estima una historia completada).
 
 ## Tareas
 
