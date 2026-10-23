@@ -119,12 +119,16 @@ func (m *mundo) queElBacklogTieneHistoriasCompletadas(total, completadas int) er
 	return nil
 }
 
+// laHistoriaPasaAEstado pide el cambio de estado sin exigir que salga bien: los pasos siguientes
+// verifican el resultado (por ejemplo, el error 409 de la spec 06 CA-5).
 func (m *mundo) laHistoriaPasaAEstado(titulo, estado string) error {
 	id, ok := m.backlog.historias[titulo]
 	if !ok {
 		return fmt.Errorf("el escenario no creó la historia %q", titulo)
 	}
-	return m.cambiarEstadoDeHistoria(m.backlog.principal, id, titulo, estado)
+	return m.pedir(http.MethodPut, rutaHistoria(m.backlog.principal, id), map[string]any{
+		"titulo": titulo, "descripcion": "Alta de clientes", "prioridad": 1, "estado": estado,
+	})
 }
 
 func (m *mundo) consultoElEstadoDelProyecto() error {

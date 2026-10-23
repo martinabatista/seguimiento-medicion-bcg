@@ -64,6 +64,8 @@ type historia struct {
 	Criterios   string `json:"criterios_aceptacion"`
 	Estado      string `json:"estado"`
 	StoryPoints *int   `json:"story_points"`
+	// CompletadaEnSprint solo viene en las historias de un Sprint (spec 06).
+	CompletadaEnSprint bool `json:"completada_en_sprint"`
 }
 
 // recordarProyecto anota un proyecto creado; el primero es el de los Antecedentes.
