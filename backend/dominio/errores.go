@@ -92,3 +92,18 @@ var (
 	ErrStoryPointsObligatorios  = ErrDatoInvalido{"Los Story Points son obligatorios"}
 	ErrStoryPointsFueraDeEscala = ErrDatoInvalido{"Los Story Points deben ser un valor de la escala: " + textoEscala()}
 )
+
+// Errores de la spec 08 (Planning Poker). Abrir o acordar con una historia completada usa
+// ErrHistoriaCompletada (spec 05) y los valores de los votos usan los errores de la spec 07.
+var (
+	ErrVotacionAbierta = ErrConflicto{"La historia ya tiene una votación abierta"}
+	ErrSinDevelopers   = ErrConflicto{"El proyecto no tiene Developers para votar"}
+	ErrSoloDevelopers  = ErrConflicto{"Solo los Developers pueden votar"}
+	ErrRondaRevelada   = ErrConflicto{"La ronda ya fue revelada"}
+	ErrFaltanVotos     = ErrConflicto{"Faltan votos: todavía no votaron todos los Developers"}
+	ErrRondaSinRevelar = ErrConflicto{"Primero hay que revelar la ronda actual"}
+	ErrVotacionCerrada = ErrConflicto{"La votación está cerrada"}
+
+	// ErrVotacionNoExiste no es un conflicto: la API lo responde como 404.
+	ErrVotacionNoExiste = errors.New("La votación no existe")
+)
