@@ -65,8 +65,8 @@ func (r *RepositorioSprints) Actualizar(ctx context.Context, s dominio.Sprint) e
 	}
 	for _, historiaID := range s.Historias {
 		if _, err := tx.ExecContext(ctx,
-			`INSERT INTO sprint_historias (sprint_id, historia_id, completada) VALUES ($1, $2, $3)`,
-			s.ID, historiaID, s.EstaCompletada(historiaID)); err != nil {
+			`INSERT INTO sprint_historias (sprint_id, historia_id, completada, story_points_al_cerrar) VALUES ($1, $2, $3, $4)`,
+			s.ID, historiaID, s.EstaCompletada(historiaID), s.StoryPointsAlCerrar[historiaID]); err != nil {
 			return fmt.Errorf("asignar historia %d al Sprint %d: %w", historiaID, s.ID, err)
 		}
 	}
@@ -101,7 +101,7 @@ func (r *RepositorioSprints) Listar(ctx context.Context, proyectoID int64) ([]do
 		return nil, fmt.Errorf("listar Sprints: %w", err)
 	}
 	for i := range sprints {
-		if sprints[i].Historias, sprints[i].Completadas, err = r.historiasDe(ctx, sprints[i].ID); err != nil {
+		if err := r.cargarHistorias(ctx, &sprints[i]); err != nil {
 			return nil, err
 		}
 	}
@@ -121,34 +121,45 @@ func (r *RepositorioSprints) Obtener(ctx context.Context, proyectoID, id int64) 
 	if err != nil {
 		return dominio.Sprint{}, err
 	}
-	if s.Historias, s.Completadas, err = r.historiasDe(ctx, s.ID); err != nil {
+	if err := r.cargarHistorias(ctx, &s); err != nil {
 		return dominio.Sprint{}, err
 	}
 	return s, nil
 }
 
-// historiasDe devuelve los identificadores de las historias asignadas al Sprint y, de esas, las que
-// se completaron en él (spec 06).
-func (r *RepositorioSprints) historiasDe(ctx context.Context, sprintID int64) (asignadas, completadas []int64, err error) {
+// cargarHistorias completa el Sprint con sus historias asignadas, las que se completaron en él
+// (spec 06) y, si está cerrado, los Story Points congelados al cerrarlo (spec 10 RN-4).
+func (r *RepositorioSprints) cargarHistorias(ctx context.Context, s *dominio.Sprint) error {
 	rows, err := r.db.QueryContext(ctx,
-		`SELECT historia_id, completada FROM sprint_historias WHERE sprint_id = $1 ORDER BY historia_id`, sprintID)
+		`SELECT historia_id, completada, story_points_al_cerrar
+		 FROM sprint_historias WHERE sprint_id = $1 ORDER BY historia_id`, s.ID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("historias del Sprint %d: %w", sprintID, err)
+		return fmt.Errorf("historias del Sprint %d: %w", s.ID, err)
 	}
 	defer rows.Close()
-	asignadas, completadas = []int64{}, []int64{}
+	s.Historias, s.Completadas = []int64{}, []int64{}
+	congelados := map[int64]*int{}
 	for rows.Next() {
 		var id int64
 		var completada bool
-		if err := rows.Scan(&id, &completada); err != nil {
-			return nil, nil, fmt.Errorf("historias del Sprint %d: %w", sprintID, err)
+		var puntos sql.NullInt64
+		if err := rows.Scan(&id, &completada, &puntos); err != nil {
+			return fmt.Errorf("historias del Sprint %d: %w", s.ID, err)
 		}
-		asignadas = append(asignadas, id)
+		s.Historias = append(s.Historias, id)
 		if completada {
-			completadas = append(completadas, id)
+			s.Completadas = append(s.Completadas, id)
+		}
+		congelados[id] = nil
+		if puntos.Valid {
+			p := int(puntos.Int64)
+			congelados[id] = &p
 		}
 	}
-	return asignadas, completadas, rows.Err()
+	if s.Estado == dominio.SprintCerrado {
+		s.StoryPointsAlCerrar = congelados
+	}
+	return rows.Err()
 }
 
 func escanearSprint(f fila) (dominio.Sprint, error) {

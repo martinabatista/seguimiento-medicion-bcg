@@ -58,6 +58,7 @@ Endpoints disponibles:
 | `POST …/votaciones/{votacionID}/revelar` | Revelar la ronda (votaron todos los Developers) | 200 votación · 404 · 409 |
 | `POST …/votaciones/{votacionID}/rondas` | Empezar una nueva ronda | 200 votación · 404 · 409 |
 | `POST …/votaciones/{votacionID}/acordar` | Registrar la acordada `{"story_points"}`: estima la historia y cierra | 200 votación · 400 · 404 · 409 |
+| `GET /api/proyectos/{id}/metricas` | Métricas de avance por Sprint y del proyecto (spec 10) | 200 · 404 |
 
 `DELETE /api/proyectos/{id}/backlog/{historiaID}` responde 409 si la historia está en un Sprint abierto (spec 05 CA-6).
 `PUT /api/proyectos/{id}/backlog/{historiaID}` responde 409 si pone o saca `Completada` a una historia de un
@@ -88,6 +89,13 @@ Votación en JSON: `{"id", "proyecto_id", "historia_id", "estado", "ronda", "est
 ronda actual; `rondas` trae **solo las reveladas**, cada una `{"numero", "votos": [{"integrante_id", "nombre",
 "story_points"}], "hay_diferencias", "mas_bajo", "mas_alto"}` (extremos `{"story_points", "integrantes"}`).
 Los valores de una ronda sin revelar no salen en ninguna respuesta (spec 08 RN-5).
+
+Métricas en JSON: `{"sprints": [{"sprint_id", "numero", "estado", "parcial", "historias_planificadas",
+"historias_completadas", "porcentaje_completadas", "sin_estimar", "story_points_planificados",
+"story_points_completados"}], "sprints_cerrados", "velocidad", "totales": {"historias_planificadas",
+"historias_completadas", "porcentaje_completadas", "story_points_planificados", "story_points_completados"}}`.
+`sprints` va por fecha de inicio; `parcial` es `true` en el Sprint abierto. `velocidad` es un número con un
+decimal (6.5) o `null` sin Sprints cerrados; `totales` suma solo los Sprints cerrados.
 
 ## Decisiones técnicas
 
@@ -193,6 +201,11 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   diferencias), `dominio/servicio_planning_poker.go`, `memoria/votaciones.go`, `postgres/votaciones.go`,
   `postgres/esquema/06_votaciones.sql`, `api/planning_poker.go`, `features/planning-poker.feature` (pasos en
   `features/planning_poker_test.go`). Usa los roles de la spec 02 (solo `Developer` vota) y `Estimar` de la 07.
+- `docs/specs/sprint-02/10-metricas-avance.md` — métricas de avance: `dominio/metricas.go`
+  (`CalcularMetricasSprint`, `CalcularVelocidad`, `CalcularMetricasProyecto`), `dominio/servicio_metricas.go`,
+  `Sprint.StoryPointsAlCerrar` (los congela `ServicioSprints.Cerrar`), `postgres/esquema/07_sprint_historias_story_points.sql`,
+  `api/metricas.go`, `features/metricas-avance.feature` (pasos en `features/metricas_test.go`). El Dashboard
+  (spec 13) y el reporte (spec 14) usan estas métricas.
 
 ## Cómo testear
 
@@ -249,7 +262,12 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
   historia cambie. Para métricas por Sprint (spec 10), leer eso y no el estado actual.
 - `docker compose up -d --wait` puede decir "Healthy" mientras PostgreSQL todavía se reinicia después de
   ejecutar los `.sql` del esquema: si un `psql` justo después falla con "shutting down", esperar unos segundos.
+- Métricas de un Sprint **cerrado** (spec 10): usan `Sprint.StoryPointsAlCerrar` (columna
+  `sprint_historias.story_points_al_cerrar`), no los Story Points actuales de la historia. Solo un Sprint
+  cerrado tiene ese mapa; uno abierto lo tiene en `nil` y se calcula con los actuales.
+- La velocidad se calcula en **décimas con enteros** (`CalcularVelocidad`: 65 = 6,5) para no tener errores
+  de coma flotante; recién `api/metricas.go` la pasa a decimal para el JSON.
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 08).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 10).

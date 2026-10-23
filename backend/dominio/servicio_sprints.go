@@ -137,11 +137,21 @@ func (s *ServicioSprints) DeshacerHistoria(ctx context.Context, proyectoID, spri
 }
 
 // Cerrar pasa el Sprint a Cerrado en cualquier momento (spec 06 CA-2, RN-5). Conserva sus historias
-// y cuáles se completaron; las no completadas mantienen su estado y quedan libres (RN-6).
+// y cuáles se completaron; las no completadas mantienen su estado y quedan libres (RN-6). Además
+// congela los Story Points de sus historias para las métricas (spec 10 RN-4).
 func (s *ServicioSprints) Cerrar(ctx context.Context, proyectoID, sprintID int64) (DetalleSprint, error) {
 	sp, err := s.sprintAbierto(ctx, proyectoID, sprintID)
 	if err != nil {
 		return DetalleSprint{}, err
+	}
+	// spec 10 RN-4: se congelan los Story Points de las historias planificadas tal como están ahora.
+	sp.StoryPointsAlCerrar = map[int64]*int{}
+	for _, id := range sp.Historias {
+		h, err := s.historias.Obtener(ctx, proyectoID, id)
+		if err != nil {
+			return DetalleSprint{}, err
+		}
+		sp.StoryPointsAlCerrar[id] = h.StoryPoints
 	}
 	sp.Estado = SprintCerrado
 	return s.guardarYDetallar(ctx, sp)

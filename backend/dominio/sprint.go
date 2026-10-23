@@ -30,6 +30,9 @@ type Sprint struct {
 	Estado      EstadoSprint
 	Historias   []int64 // identificadores de las historias asignadas (lo planificado)
 	Completadas []int64 // las que se completaron en este Sprint (spec 06 RN-2); no cambia al cerrarlo (RN-8)
+	// StoryPointsAlCerrar son los Story Points de cada historia planificada al cerrar el Sprint (nil = sin
+	// estimar). Solo los tiene un Sprint cerrado: sus métricas no cambian si después se re-estima (spec 10 RN-4).
+	StoryPointsAlCerrar map[int64]*int
 }
 
 // NuevoSprint arma un Sprint del proyecto validando las reglas de la spec 05 contra los Sprints
