@@ -173,10 +173,11 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   integrante: si cambia su JSON o su identidad (el email), actualizar la spec 02.
 - `docs/specs/sprint-01/03-estado-proyecto.md` — estado del proyecto: `dominio/estado_proyecto.go`
   (`CalcularEstado`, `ResumirBacklog`), `dominio/servicio_estado.go`, `api/estado.go`,
-  `features/estado-proyecto.feature` (pasos en `features/estado_proyecto_test.go`). El Sprint en curso
-  lo agregó la spec 05 (CA-5); los escenarios con Story Points esperan a la spec 07. Si cambian los
-  estados o los Story Points de la historia (spec 04), revisar `ResumirBacklog`. La spec 13 (Dashboard)
-  va a usar este estado.
+  `features/estado-proyecto.feature` (pasos en `features/estado_proyecto_test.go`). Implementada: el
+  Sprint en curso (CA-2) lo agregó la spec 05 (CA-5, escenarios en `sprints.feature`); los escenarios con
+  Story Points estiman con la spec 07 antes de cambiar el estado de la historia. Si cambian los estados o
+  los Story Points de la historia (spec 04), revisar `ResumirBacklog`. La spec 13 (Dashboard) va a usar
+  este estado.
 - `docs/specs/sprint-01/04-product-backlog.md` — backlog: `dominio/historia.go`, `dominio/servicio_backlog.go`,
   `memoria/historias.go`, `postgres/historias.go`, `postgres/esquema/02_historias.sql`, `api/backlog.go`,
   `features/product-backlog.feature` (pasos en `features/backlog_test.go`). Las specs 05 a 08 usan la
@@ -270,4 +271,4 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 10).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 03 implementada).
