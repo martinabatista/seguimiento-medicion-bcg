@@ -1,11 +1,11 @@
 ---
 titulo: Registrar historias completadas, cerrar Sprint y consultar Sprints anteriores
-estado: in-review    # draft | in-review | approved | implemented
+estado: implemented  # draft | in-review | approved | implemented
 unidad: backend
 issue: "#9"
 sprint: 01
 autor: Martina Batista
-aprobada_por: ""
+aprobada_por: "Florencia Cabeza"
 fecha: 2026-10-23
 specs_relacionadas: ["04-product-backlog", "05-crear-sprints"]
 ---
@@ -236,18 +236,18 @@ Los pasos que no indican proyecto se refieren al de los Antecedentes, "Tienda On
 
 ## Tareas
 
-- [ ] `[P1]` Completar, deshacer y cerrar en el dominio (`Sprint`, `ServicioSprints`) con las reglas RN-1 a RN-9 (TDD).
-- [ ] `[P1]` Regla del backlog (RN-4) en `ServicioBacklog.Modificar`.
-- [ ] `[P1]` Registrar en la base qué historias se completaron en cada Sprint (siguiente archivo libre en `backend/postgres/esquema/`).
-- [ ] `[P1]` Rutas de la API para completar, deshacer, cerrar y consultar anteriores.
-- [ ] `[P1]` Escenarios de `backend/features/cerrar-sprint.feature` con sus pasos.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints, specs relacionadas).
+- [x] `[P1]` Completar, deshacer y cerrar en el dominio (`Sprint`, `ServicioSprints`) con las reglas RN-1 a RN-9 (TDD).
+- [x] `[P1]` Regla del backlog (RN-4) en `ServicioBacklog.Modificar`.
+- [x] `[P1]` Registrar en la base qué historias se completaron en cada Sprint (`05_sprint_historias_completada.sql`).
+- [x] `[P1]` Rutas de la API para completar, deshacer, cerrar y consultar anteriores.
+- [x] `[P1]` Escenarios de `backend/features/cerrar-sprint.feature` con sus pasos.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints, specs relacionadas).
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented`.
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] Spec en estado `implemented`.

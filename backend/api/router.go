@@ -41,6 +41,10 @@ func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBa
 	mux.HandleFunc("PUT /api/proyectos/{id}/sprints/{sprintID}", s.modificar)
 	mux.HandleFunc("POST /api/proyectos/{id}/sprints/{sprintID}/historias", s.asignar)
 	mux.HandleFunc("DELETE /api/proyectos/{id}/sprints/{sprintID}/historias/{historiaID}", s.quitar)
+	mux.HandleFunc("POST /api/proyectos/{id}/sprints/{sprintID}/historias/{historiaID}/completar", s.completar)
+	mux.HandleFunc("DELETE /api/proyectos/{id}/sprints/{sprintID}/historias/{historiaID}/completar", s.deshacer)
+	mux.HandleFunc("POST /api/proyectos/{id}/sprints/{sprintID}/cerrar", s.cerrar)
+	mux.HandleFunc("GET /api/proyectos/{id}/sprints/anteriores", s.anteriores)
 	return mux
 }
 

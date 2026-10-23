@@ -108,6 +108,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Sprints (spec 05)
 	m.registrarPasosSprints(sc)
+
+	// Cerrar Sprint (spec 06)
+	m.registrarPasosCerrarSprint(sc)
 }
 
 // ---------- helpers ----------

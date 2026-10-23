@@ -23,7 +23,14 @@ type sprintJSON struct {
 // detalleSprintJSON es un Sprint con sus historias, ordenadas como el backlog (spec 05 CA-3).
 type detalleSprintJSON struct {
 	sprintJSON
-	Historias []historiaJSON `json:"historias"`
+	Historias []historiaEnSprintJSON `json:"historias"`
+}
+
+// historiaEnSprintJSON es una historia del Sprint: la del backlog más si se completó en ese Sprint
+// (spec 06). En un Sprint cerrado, completada_en_sprint no cambia aunque cambie la historia (RN-8).
+type historiaEnSprintJSON struct {
+	historiaJSON
+	CompletadaEnSprint bool `json:"completada_en_sprint"`
 }
 
 // sprintEntrada es lo que llega al crear (fechas y Sprint Goal) o al modificar (solo Sprint Goal).
@@ -182,9 +189,75 @@ func sprintAJSON(s dominio.Sprint) sprintJSON {
 }
 
 func detalleSprintAJSON(d dominio.DetalleSprint) detalleSprintJSON {
-	historias := make([]historiaJSON, 0, len(d.Historias))
+	historias := make([]historiaEnSprintJSON, 0, len(d.Historias))
 	for _, h := range d.Historias {
-		historias = append(historias, historiaAJSON(h))
+		historias = append(historias, historiaEnSprintJSON{historiaAJSON(h), d.Sprint.EstaCompletada(h.ID)})
 	}
 	return detalleSprintJSON{sprintJSON: sprintAJSON(d.Sprint), Historias: historias}
+}
+
+// completar: POST /api/proyectos/{id}/sprints/{sprintID}/historias/{historiaID}/completar (spec 06 CA-1).
+func (h sprintsHandler) completar(w http.ResponseWriter, r *http.Request) {
+	proyectoID, sprintID, historiaID, err := leerIDsHistoriaDelSprint(r)
+	if err != nil {
+		responderError(w, err)
+		return
+	}
+	d, err := h.servicio.CompletarHistoria(r.Context(), proyectoID, sprintID, historiaID)
+	h.responder(w, d, err)
+}
+
+// deshacer: DELETE /api/proyectos/{id}/sprints/{sprintID}/historias/{historiaID}/completar (spec 06 CA-1).
+func (h sprintsHandler) deshacer(w http.ResponseWriter, r *http.Request) {
+	proyectoID, sprintID, historiaID, err := leerIDsHistoriaDelSprint(r)
+	if err != nil {
+		responderError(w, err)
+		return
+	}
+	d, err := h.servicio.DeshacerHistoria(r.Context(), proyectoID, sprintID, historiaID)
+	h.responder(w, d, err)
+}
+
+// cerrar: POST /api/proyectos/{id}/sprints/{sprintID}/cerrar (spec 06 CA-2, CA-3).
+func (h sprintsHandler) cerrar(w http.ResponseWriter, r *http.Request) {
+	proyectoID, sprintID, err := leerIDsSprint(r)
+	if err != nil {
+		responderError(w, err)
+		return
+	}
+	d, err := h.servicio.Cerrar(r.Context(), proyectoID, sprintID)
+	h.responder(w, d, err)
+}
+
+// anteriores: GET /api/proyectos/{id}/sprints/anteriores (spec 06 CA-4): los cerrados, con sus
+// historias, del más reciente al más antiguo.
+func (h sprintsHandler) anteriores(w http.ResponseWriter, r *http.Request) {
+	proyectoID, err := leerID(r)
+	if err != nil {
+		responderError(w, err)
+		return
+	}
+	detalles, err := h.servicio.Anteriores(r.Context(), proyectoID)
+	if err != nil {
+		responderError(w, err)
+		return
+	}
+	lista := make([]detalleSprintJSON, 0, len(detalles))
+	for _, d := range detalles {
+		lista = append(lista, detalleSprintAJSON(d))
+	}
+	writeJSON(w, http.StatusOK, lista)
+}
+
+// leerIDsHistoriaDelSprint lee el proyecto, el Sprint y la historia de la ruta.
+func leerIDsHistoriaDelSprint(r *http.Request) (proyectoID, sprintID, historiaID int64, err error) {
+	proyectoID, sprintID, err = leerIDsSprint(r)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	historiaID, err = strconv.ParseInt(r.PathValue("historiaID"), 10, 64)
+	if err != nil {
+		return 0, 0, 0, dominio.ErrHistoriaNoExiste
+	}
+	return proyectoID, sprintID, historiaID, nil
 }

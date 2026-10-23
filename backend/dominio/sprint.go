@@ -1,6 +1,7 @@
 package dominio
 
 import (
+	"slices"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -27,7 +28,8 @@ type Sprint struct {
 	FechaFin    time.Time
 	Goal        string
 	Estado      EstadoSprint
-	Historias   []int64 // identificadores de las historias asignadas
+	Historias   []int64 // identificadores de las historias asignadas (lo planificado)
+	Completadas []int64 // las que se completaron en este Sprint (spec 06 RN-2); no cambia al cerrarlo (RN-8)
 }
 
 // NuevoSprint arma un Sprint del proyecto validando las reglas de la spec 05 contra los Sprints
@@ -66,6 +68,7 @@ func NuevoSprint(p Proyecto, inicio, fin time.Time, goal string, existentes []Sp
 		Goal:        goal,
 		Estado:      SprintAbierto,
 		Historias:   []int64{},
+		Completadas: []int64{},
 	}, nil
 }
 
@@ -87,12 +90,12 @@ func seSuperponen(inicioA, finA, inicioB, finB time.Time) bool {
 
 // Tiene indica si la historia está asignada al Sprint.
 func (s Sprint) Tiene(historiaID int64) bool {
-	for _, id := range s.Historias {
-		if id == historiaID {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(s.Historias, historiaID)
+}
+
+// EstaCompletada indica si la historia se completó en este Sprint (spec 06 RN-2).
+func (s Sprint) EstaCompletada(historiaID int64) bool {
+	return slices.Contains(s.Completadas, historiaID)
 }
 
 // SprintEnCurso devuelve el Sprint abierto cuyo período incluye la fecha de hoy (RN-12). Por la

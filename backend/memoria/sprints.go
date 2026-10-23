@@ -24,8 +24,7 @@ func (r *RepositorioSprints) Guardar(_ context.Context, s dominio.Sprint) (domin
 	defer r.mu.Unlock()
 	r.ultimoID++
 	s.ID = r.ultimoID
-	s.Historias = slices.Clone(s.Historias)
-	r.sprints = append(r.sprints, s)
+	r.sprints = append(r.sprints, copia(s))
 	return copia(s), nil
 }
 
@@ -64,11 +63,15 @@ func (r *RepositorioSprints) Obtener(_ context.Context, proyectoID, id int64) (d
 	return dominio.Sprint{}, dominio.ErrSprintNoExiste
 }
 
-// copia evita que quien recibe un Sprint modifique, sin querer, la lista de historias guardada.
+// copia evita que quien recibe un Sprint modifique, sin querer, las listas de historias guardadas.
 func copia(s dominio.Sprint) dominio.Sprint {
 	s.Historias = slices.Clone(s.Historias)
 	if s.Historias == nil {
 		s.Historias = []int64{}
+	}
+	s.Completadas = slices.Clone(s.Completadas)
+	if s.Completadas == nil {
+		s.Completadas = []int64{}
 	}
 	return s
 }

@@ -102,6 +102,93 @@ func (s *ServicioSprints) QuitarHistoria(ctx context.Context, proyectoID, sprint
 		return DetalleSprint{}, ErrHistoriaNoAsignada
 	}
 	sp.Historias = slices.DeleteFunc(sp.Historias, func(id int64) bool { return id == historiaID })
+	sp.Completadas = slices.DeleteFunc(sp.Completadas, func(id int64) bool { return id == historiaID })
+	return s.guardarYDetallar(ctx, sp)
+}
+
+// CompletarHistoria marca como completada una historia del Sprint abierto: pasa a Completada en el
+// backlog y el Sprint registra que se completó en él (spec 06 CA-1, RN-1, RN-2).
+func (s *ServicioSprints) CompletarHistoria(ctx context.Context, proyectoID, sprintID, historiaID int64) (DetalleSprint, error) {
+	sp, h, err := s.historiaDelSprint(ctx, proyectoID, sprintID, historiaID)
+	if err != nil {
+		return DetalleSprint{}, err
+	}
+	if sp.EstaCompletada(historiaID) {
+		return DetalleSprint{}, ErrHistoriaCompletada
+	}
+	h.Estado = EstadoCompletada
+	sp.Completadas = append(sp.Completadas, historiaID)
+	return s.guardarHistoriaYSprint(ctx, h, sp)
+}
+
+// DeshacerHistoria vuelve a "En progreso" una historia completada en el Sprint abierto
+// (spec 06 CA-1, RN-3).
+func (s *ServicioSprints) DeshacerHistoria(ctx context.Context, proyectoID, sprintID, historiaID int64) (DetalleSprint, error) {
+	sp, h, err := s.historiaDelSprint(ctx, proyectoID, sprintID, historiaID)
+	if err != nil {
+		return DetalleSprint{}, err
+	}
+	if !sp.EstaCompletada(historiaID) {
+		return DetalleSprint{}, ErrHistoriaNoCompletada
+	}
+	h.Estado = EstadoEnProgreso
+	sp.Completadas = slices.DeleteFunc(sp.Completadas, func(id int64) bool { return id == historiaID })
+	return s.guardarHistoriaYSprint(ctx, h, sp)
+}
+
+// Cerrar pasa el Sprint a Cerrado en cualquier momento (spec 06 CA-2, RN-5). Conserva sus historias
+// y cuáles se completaron; las no completadas mantienen su estado y quedan libres (RN-6).
+func (s *ServicioSprints) Cerrar(ctx context.Context, proyectoID, sprintID int64) (DetalleSprint, error) {
+	sp, err := s.sprintAbierto(ctx, proyectoID, sprintID)
+	if err != nil {
+		return DetalleSprint{}, err
+	}
+	sp.Estado = SprintCerrado
+	return s.guardarYDetallar(ctx, sp)
+}
+
+// Anteriores devuelve los Sprints cerrados del proyecto con sus historias, del más reciente al más
+// antiguo por fecha de inicio (spec 06 CA-4, RN-9).
+func (s *ServicioSprints) Anteriores(ctx context.Context, proyectoID int64) ([]DetalleSprint, error) {
+	sprints, err := s.Listar(ctx, proyectoID)
+	if err != nil {
+		return nil, err
+	}
+	anteriores := []DetalleSprint{}
+	for _, sp := range slices.Backward(sprints) {
+		if sp.Estado != SprintCerrado {
+			continue
+		}
+		d, err := s.detallar(ctx, sp)
+		if err != nil {
+			return nil, err
+		}
+		anteriores = append(anteriores, d)
+	}
+	return anteriores, nil
+}
+
+// historiaDelSprint busca el Sprint abierto y la historia, y verifica que esté asignada a él
+// (spec 06 RN-1).
+func (s *ServicioSprints) historiaDelSprint(ctx context.Context, proyectoID, sprintID, historiaID int64) (Sprint, Historia, error) {
+	sp, err := s.sprintAbierto(ctx, proyectoID, sprintID)
+	if err != nil {
+		return Sprint{}, Historia{}, err
+	}
+	h, err := s.historias.Obtener(ctx, proyectoID, historiaID)
+	if err != nil {
+		return Sprint{}, Historia{}, err
+	}
+	if !sp.Tiene(historiaID) {
+		return Sprint{}, Historia{}, ErrHistoriaNoAsignada
+	}
+	return sp, h, nil
+}
+
+func (s *ServicioSprints) guardarHistoriaYSprint(ctx context.Context, h Historia, sp Sprint) (DetalleSprint, error) {
+	if err := s.historias.Actualizar(ctx, h); err != nil {
+		return DetalleSprint{}, err
+	}
 	return s.guardarYDetallar(ctx, sp)
 }
 

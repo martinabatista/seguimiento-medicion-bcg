@@ -59,3 +59,32 @@ func TestRepositorioSprints(t *testing.T) {
 		t.Errorf("Actualizar inexistente: error = %v", err)
 	}
 }
+
+// spec 06 RN-2, RN-6, RN-8: el Sprint guarda cuáles de sus historias se completaron en él.
+func TestRepositorioSprintsCompletadas(t *testing.T) {
+	historias, tienda, _ := historiasDePrueba(t)
+	r := NuevoRepositorioSprints(historias.db)
+	ctx := context.Background()
+	h1, _ := historias.Guardar(ctx, dominio.Historia{ProyectoID: tienda, Titulo: "Registrar usuario", Descripcion: "Alta", Prioridad: 1, Estado: dominio.EstadoPendiente})
+	h2, _ := historias.Guardar(ctx, dominio.Historia{ProyectoID: tienda, Titulo: "Ver catálogo", Descripcion: "Listado", Prioridad: 2, Estado: dominio.EstadoPendiente})
+	s, _ := r.Guardar(ctx, dominio.Sprint{ProyectoID: tienda, Numero: 1, FechaInicio: fecha("2026-11-01"), FechaFin: fecha("2026-11-14"), Goal: "Objetivo", Estado: dominio.SprintAbierto})
+	if s.Completadas == nil || len(s.Completadas) != 0 {
+		t.Errorf("Guardar: completadas = %#v, se esperaba []", s.Completadas)
+	}
+
+	s.Historias = []int64{h1.ID, h2.ID}
+	s.Completadas = []int64{h1.ID}
+	s.Estado = dominio.SprintCerrado
+	if err := r.Actualizar(ctx, s); err != nil {
+		t.Fatalf("Actualizar: %v", err)
+	}
+	visto, err := r.Obtener(ctx, tienda, s.ID)
+	slices.Sort(visto.Historias)
+	if err != nil || !slices.Equal(visto.Historias, []int64{h1.ID, h2.ID}) || !slices.Equal(visto.Completadas, []int64{h1.ID}) {
+		t.Errorf("Obtener = historias %v, completadas %v, %v; se esperaba [%d %d] y [%d]", visto.Historias, visto.Completadas, err, h1.ID, h2.ID, h1.ID)
+	}
+	lista, _ := r.Listar(ctx, tienda)
+	if len(lista) != 1 || !slices.Equal(lista[0].Completadas, []int64{h1.ID}) {
+		t.Errorf("Listar = %+v, se esperaban las completadas", lista)
+	}
+}
