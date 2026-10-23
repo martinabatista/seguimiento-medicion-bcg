@@ -62,6 +62,16 @@ func (s *ServicioBacklog) Modificar(ctx context.Context, proyectoID, id int64, d
 	if h.Estado, err = ParsearEstado(estado); err != nil {
 		return Historia{}, err
 	}
+	// spec 06 RN-4: en un Sprint abierto, "Completada" solo se pone o se saca desde el Sprint.
+	if h.Estado != actual.Estado && (h.Estado == EstadoCompletada || actual.Estado == EstadoCompletada) {
+		enSprint, err := enSprintAbierto(ctx, s.sprints, proyectoID, id)
+		if err != nil {
+			return Historia{}, err
+		}
+		if enSprint {
+			return Historia{}, ErrCompletarDesdeSprint
+		}
+	}
 	h.ID = id                          // RN-10: el identificador no cambia.
 	h.StoryPoints = actual.StoryPoints // Los Story Points no se modifican acá (specs 07 y 08).
 	if err := s.historias.Actualizar(ctx, h); err != nil {

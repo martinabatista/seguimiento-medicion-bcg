@@ -78,3 +78,10 @@ var (
 	// ErrSprintNoExiste no es un dato inválido: la API lo responde como 404.
 	ErrSprintNoExiste = errors.New("El Sprint no existe")
 )
+
+// Errores de la spec 06 (historias completadas y cierre de Sprints). Completar dos veces, el Sprint
+// cerrado y la historia no asignada usan los errores de la spec 05: los mensajes son los mismos.
+var (
+	ErrHistoriaNoCompletada = ErrConflicto{"La historia no está completada"}
+	ErrCompletarDesdeSprint = ErrConflicto{"La historia está en un Sprint abierto: se completa desde el Sprint"}
+)
