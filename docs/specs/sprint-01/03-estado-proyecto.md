@@ -1,11 +1,11 @@
 ---
 titulo: Consultar el estado de un proyecto
-estado: in-review    # draft | in-review | approved | implemented
+estado: approved     # draft | in-review | approved | implemented
 unidad: backend
 issue: "#6"
 sprint: 01
 autor: Luana Guajardo
-aprobada_por: ""
+aprobada_por: "Martina Batista"
 fecha: 2026-10-23
 specs_relacionadas: ["01-proyectos", "04-product-backlog", "05-crear-sprints", "07-story-points"]
 ---
