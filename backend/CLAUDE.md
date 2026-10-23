@@ -45,8 +45,14 @@ Endpoints disponibles:
 | `PUT /api/proyectos/{id}/sprints/{sprintID}` | Modificar el Sprint Goal `{"sprint_goal"}` | 200 · 400 · 404 · 409 cerrado |
 | `POST /api/proyectos/{id}/sprints/{sprintID}/historias` | Asignar `{"historia_id"}` | 200 Sprint · 404 · 409 |
 | `DELETE /api/proyectos/{id}/sprints/{sprintID}/historias/{historiaID}` | Quitar una historia | 200 Sprint · 404 · 409 |
+| `POST …/sprints/{sprintID}/historias/{historiaID}/completar` | Completar una historia en el Sprint (spec 06) | 200 Sprint · 404 · 409 |
+| `DELETE …/sprints/{sprintID}/historias/{historiaID}/completar` | Deshacer (vuelve a `En progreso`) | 200 Sprint · 404 · 409 |
+| `POST /api/proyectos/{id}/sprints/{sprintID}/cerrar` | Cerrar el Sprint (spec 06) | 200 Sprint · 404 · 409 ya cerrado |
+| `GET /api/proyectos/{id}/sprints/anteriores` | Sprints cerrados con sus historias, del más reciente al más antiguo | 200 lista · 404 |
 
 `DELETE /api/proyectos/{id}/backlog/{historiaID}` responde 409 si la historia está en un Sprint abierto (spec 05 CA-6).
+`PUT /api/proyectos/{id}/backlog/{historiaID}` responde 409 si pone o saca `Completada` a una historia de un
+Sprint abierto: se completa desde el Sprint (spec 06 CA-5).
 
 Proyecto en JSON: `{"id", "nombre", "descripcion", "fecha_inicio", "fecha_fin"}`, fechas `AAAA-MM-DD`.
 
@@ -64,7 +70,8 @@ Estado en JSON: `{"proyecto": {…proyecto…}, "estado", "backlog": {"total", "
 
 Sprint en JSON: `{"id", "proyecto_id", "numero", "fecha_inicio", "fecha_fin", "sprint_goal", "estado",
 "historias"}`. `estado` es `Abierto` | `Cerrado`; `historias` (lista de historias como en el backlog,
-ordenadas por prioridad) solo aparece al crear, ver, modificar, asignar y quitar, no al listar.
+ordenadas por prioridad, cada una con `"completada_en_sprint"`) solo aparece al crear, ver, modificar,
+asignar, quitar, completar, deshacer, cerrar y en los anteriores; no al listar.
 
 ## Decisiones técnicas
 
@@ -155,6 +162,11 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   `api/sprints.go`, `features/sprints.feature` (pasos en `features/sprints_test.go`). También toca el
   estado (`ServicioEstado`, CA-5) y el backlog (`ServicioBacklog.Eliminar`, CA-6). La spec 06 cierra los
   Sprints (estado `Cerrado`) y la 10 calcula sus métricas.
+- `docs/specs/sprint-01/06-cerrar-sprint.md` — cierre de Sprints: `ServicioSprints` (`CompletarHistoria`,
+  `DeshacerHistoria`, `Cerrar`, `Anteriores`), `Sprint.Completadas`, regla del backlog en
+  `ServicioBacklog.Modificar` (`cambiaCompletada`), `postgres/esquema/05_sprint_historias_completada.sql`,
+  `features/cerrar-sprint.feature` (pasos en `features/cerrar_sprint_test.go`). La spec 10 (velocidad) usa
+  `Sprint.Completadas` de los Sprints cerrados, no el estado actual de las historias (RN-8).
 
 ## Cómo testear
 
@@ -202,7 +214,12 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
   registrado, en vez de agregar casos sueltos.
 - `sprint_historias` borra en cascada: si se elimina una historia del backlog (solo se puede fuera de un
   Sprint abierto, spec 05 RN-11), sale también de los Sprints cerrados donde estuvo.
+- Lo completado **en un Sprint** se guarda en `sprint_historias.completada` (spec 06), aparte del estado
+  de la historia en el backlog: un Sprint cerrado conserva lo que se completó en él aunque después la
+  historia cambie. Para métricas por Sprint (spec 10), leer eso y no el estado actual.
+- `docker compose up -d --wait` puede decir "Healthy" mientras PostgreSQL todavía se reinicia después de
+  ejecutar los `.sql` del esquema: si un `psql` justo después falla con "shutting down", esperar unos segundos.
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 05).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 06).
