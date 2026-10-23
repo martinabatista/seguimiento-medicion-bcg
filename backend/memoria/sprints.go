@@ -2,6 +2,7 @@ package memoria
 
 import (
 	"context"
+	"maps"
 	"slices"
 	"sync"
 
@@ -72,6 +73,9 @@ func copia(s dominio.Sprint) dominio.Sprint {
 	s.Completadas = slices.Clone(s.Completadas)
 	if s.Completadas == nil {
 		s.Completadas = []int64{}
+	}
+	if s.StoryPointsAlCerrar != nil {
+		s.StoryPointsAlCerrar = maps.Clone(s.StoryPointsAlCerrar)
 	}
 	return s
 }
