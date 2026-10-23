@@ -1,11 +1,11 @@
 ---
 titulo: Métricas de avance del Sprint y del proyecto
-estado: in-review    # draft | in-review | approved | implemented
+estado: implemented  # draft | in-review | approved | implemented
 unidad: backend
 issue: "#14"
 sprint: 02
 autor: Martina Batista
-aprobada_por: ""
+aprobada_por: "Florencia Cabeza"
 fecha: 2026-10-23
 specs_relacionadas: ["05-crear-sprints", "06-cerrar-sprint", "07-story-points"]
 ---
@@ -193,17 +193,17 @@ Los pasos que no indican proyecto se refieren al de los Antecedentes, "Tienda On
 
 ## Tareas
 
-- [ ] `[P1]` Funciones de cálculo en `backend/dominio/` (métricas de un Sprint, velocidad, totales y redondeos) con TDD.
-- [ ] `[P1]` Congelar los Story Points de las historias al cerrar un Sprint (dominio y base de datos).
-- [ ] `[P1]` Caso de uso y ruta de la API para consultar las métricas de un proyecto.
-- [ ] `[P1]` Escenarios de `backend/features/metricas-avance.feature` con sus pasos.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` (endpoint, JSON, specs relacionadas).
+- [x] `[P1]` Funciones de cálculo en `backend/dominio/` (métricas de un Sprint, velocidad, totales y redondeos) con TDD.
+- [x] `[P1]` Congelar los Story Points de las historias al cerrar un Sprint (dominio y base de datos).
+- [x] `[P1]` Caso de uso y ruta de la API para consultar las métricas de un proyecto.
+- [x] `[P1]` Escenarios de `backend/features/metricas-avance.feature` con sus pasos.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoint, JSON, specs relacionadas).
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented`.
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] Spec en estado `implemented`.
