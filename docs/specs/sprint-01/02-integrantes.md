@@ -1,11 +1,11 @@
 ---
 titulo: Registrar integrantes del proyecto
-estado: in-review    # draft | in-review | approved | implemented
+estado: approved     # draft | in-review | approved | implemented
 unidad: backend
 issue: "#5"
 sprint: 01
 autor: Luana Guajardo
-aprobada_por: ""
+aprobada_por: "Martina Batista"
 fecha: 2026-10-22
 specs_relacionadas: ["01-proyectos"]
 ---
