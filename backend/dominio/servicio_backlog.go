@@ -32,7 +32,7 @@ func NuevoServicioBacklog(proyectos RepositorioProyectos, historias RepositorioH
 // Crear valida los datos y registra la historia en el backlog del proyecto (CA-1).
 // Si el proyecto no existe o algún dato es inválido, no registra nada.
 func (s *ServicioBacklog) Crear(ctx context.Context, proyectoID int64, d DatosHistoria) (Historia, error) {
-	if err := s.verificarProyecto(ctx, proyectoID); err != nil {
+	if err := verificarProyecto(ctx, s.proyectos, proyectoID); err != nil {
 		return Historia{}, err
 	}
 	h, err := NuevaHistoria(proyectoID, d)
@@ -46,7 +46,7 @@ func (s *ServicioBacklog) Crear(ctx context.Context, proyectoID int64, d DatosHi
 // proyecto y la historia existan (CA-7); después valida con las mismas reglas que al crear y el
 // estado (RN-7): si algo falla, la historia queda como estaba (RN-9).
 func (s *ServicioBacklog) Modificar(ctx context.Context, proyectoID, id int64, d DatosHistoria, estado string) (Historia, error) {
-	if err := s.verificarProyecto(ctx, proyectoID); err != nil {
+	if err := verificarProyecto(ctx, s.proyectos, proyectoID); err != nil {
 		return Historia{}, err
 	}
 	actual, err := s.historias.Obtener(ctx, proyectoID, id)
@@ -70,7 +70,7 @@ func (s *ServicioBacklog) Modificar(ctx context.Context, proyectoID, id int64, d
 
 // Eliminar saca la historia del backlog (CA-3).
 func (s *ServicioBacklog) Eliminar(ctx context.Context, proyectoID, id int64) error {
-	if err := s.verificarProyecto(ctx, proyectoID); err != nil {
+	if err := verificarProyecto(ctx, s.proyectos, proyectoID); err != nil {
 		return err
 	}
 	return s.historias.Eliminar(ctx, proyectoID, id)
@@ -78,7 +78,7 @@ func (s *ServicioBacklog) Eliminar(ctx context.Context, proyectoID, id int64) er
 
 // Listar devuelve el backlog del proyecto ordenado por prioridad y creación (CA-4, RN-8).
 func (s *ServicioBacklog) Listar(ctx context.Context, proyectoID int64) ([]Historia, error) {
-	if err := s.verificarProyecto(ctx, proyectoID); err != nil {
+	if err := verificarProyecto(ctx, s.proyectos, proyectoID); err != nil {
 		return nil, err
 	}
 	historias, err := s.historias.Listar(ctx, proyectoID)
@@ -90,14 +90,8 @@ func (s *ServicioBacklog) Listar(ctx context.Context, proyectoID int64) ([]Histo
 
 // Obtener devuelve una historia del proyecto (CA-4) o ErrHistoriaNoExiste (CA-7, RN-10).
 func (s *ServicioBacklog) Obtener(ctx context.Context, proyectoID, id int64) (Historia, error) {
-	if err := s.verificarProyecto(ctx, proyectoID); err != nil {
+	if err := verificarProyecto(ctx, s.proyectos, proyectoID); err != nil {
 		return Historia{}, err
 	}
 	return s.historias.Obtener(ctx, proyectoID, id)
-}
-
-// verificarProyecto devuelve ErrProyectoNoExiste si el backlog es de un proyecto que no existe (RN-1).
-func (s *ServicioBacklog) verificarProyecto(ctx context.Context, proyectoID int64) error {
-	_, err := s.proyectos.Obtener(ctx, proyectoID)
-	return err
 }

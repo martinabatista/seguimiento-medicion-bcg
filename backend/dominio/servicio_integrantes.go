@@ -31,7 +31,7 @@ func NuevoServicioIntegrantes(proyectos RepositorioProyectos, integrantes Reposi
 // proyecto (RN-1), después los datos (RN-2 a RN-5) y por último el email repetido (RN-6, RN-9).
 // Si algo falla, no registra nada.
 func (s *ServicioIntegrantes) Agregar(ctx context.Context, proyectoID int64, d DatosIntegrante) (Integrante, error) {
-	if err := s.verificarProyecto(ctx, proyectoID); err != nil {
+	if err := verificarProyecto(ctx, s.proyectos, proyectoID); err != nil {
 		return Integrante{}, err
 	}
 	nuevo, err := NuevoIntegrante(proyectoID, d)
@@ -52,7 +52,7 @@ func (s *ServicioIntegrantes) Agregar(ctx context.Context, proyectoID int64, d D
 
 // Listar devuelve los integrantes del proyecto en el orden en que se agregaron (CA-2, RN-7).
 func (s *ServicioIntegrantes) Listar(ctx context.Context, proyectoID int64) ([]Integrante, error) {
-	if err := s.verificarProyecto(ctx, proyectoID); err != nil {
+	if err := verificarProyecto(ctx, s.proyectos, proyectoID); err != nil {
 		return nil, err
 	}
 	return s.integrantes.Listar(ctx, proyectoID)
@@ -60,14 +60,8 @@ func (s *ServicioIntegrantes) Listar(ctx context.Context, proyectoID int64) ([]I
 
 // Obtener devuelve un integrante del proyecto (CA-2) o ErrIntegranteNoExiste (CA-6, RN-8).
 func (s *ServicioIntegrantes) Obtener(ctx context.Context, proyectoID, id int64) (Integrante, error) {
-	if err := s.verificarProyecto(ctx, proyectoID); err != nil {
+	if err := verificarProyecto(ctx, s.proyectos, proyectoID); err != nil {
 		return Integrante{}, err
 	}
 	return s.integrantes.Obtener(ctx, proyectoID, id)
-}
-
-// verificarProyecto devuelve ErrProyectoNoExiste si el proyecto no existe (RN-1).
-func (s *ServicioIntegrantes) verificarProyecto(ctx context.Context, proyectoID int64) error {
-	_, err := s.proyectos.Obtener(ctx, proyectoID)
-	return err
 }
