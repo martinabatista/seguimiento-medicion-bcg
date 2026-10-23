@@ -131,14 +131,18 @@ func aJSON(p dominio.Proyecto) proyectoJSON {
 }
 
 // responderError traduce los errores del dominio al formato común {"error": "..."}:
-// dato inválido → 400, no existe → 404, cualquier otro → 500 (se registra en el log).
+// dato inválido → 400, no existe → 404, conflicto con lo ya registrado → 409, cualquier otro → 500
+// (se registra en el log).
 func responderError(w http.ResponseWriter, err error) {
 	var invalido dominio.ErrDatoInvalido
 	switch {
 	case errors.As(err, &invalido):
 		writeJSON(w, http.StatusBadRequest, errorJSON{invalido.Mensaje})
-	case errors.Is(err, dominio.ErrProyectoNoExiste), errors.Is(err, dominio.ErrHistoriaNoExiste):
+	case errors.Is(err, dominio.ErrProyectoNoExiste), errors.Is(err, dominio.ErrHistoriaNoExiste),
+		errors.Is(err, dominio.ErrIntegranteNoExiste):
 		writeJSON(w, http.StatusNotFound, errorJSON{err.Error()})
+	case errors.Is(err, dominio.ErrIntegranteYaRegistrado):
+		writeJSON(w, http.StatusConflict, errorJSON{err.Error()})
 	default:
 		log.Printf("error interno: %v", err)
 		writeJSON(w, http.StatusInternalServerError, errorJSON{"Error interno del servidor"})

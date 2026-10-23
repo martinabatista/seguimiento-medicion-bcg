@@ -30,10 +30,11 @@ func main() {
 	repoProyectos := postgres.NuevoRepositorioProyectos(db)
 	proyectos := dominio.NuevoServicioProyectos(repoProyectos)
 	backlog := dominio.NuevoServicioBacklog(repoProyectos, postgres.NuevoRepositorioHistorias(db))
+	integrantes := dominio.NuevoServicioIntegrantes(repoProyectos, postgres.NuevoRepositorioIntegrantes(db))
 
 	addr := ":" + port
 	log.Printf("API escuchando en http://localhost%s", addr)
-	if err := http.ListenAndServe(addr, api.NewRouter(proyectos, backlog)); err != nil {
+	if err := http.ListenAndServe(addr, api.NewRouter(proyectos, backlog, integrantes)); err != nil {
 		log.Fatal(err)
 	}
 }

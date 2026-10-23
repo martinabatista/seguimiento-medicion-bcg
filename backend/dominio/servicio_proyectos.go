@@ -62,3 +62,10 @@ func (s *ServicioProyectos) Listar(ctx context.Context) ([]Proyecto, error) {
 func (s *ServicioProyectos) Obtener(ctx context.Context, id int64) (Proyecto, error) {
 	return s.repo.Obtener(ctx, id)
 }
+
+// verificarProyecto devuelve ErrProyectoNoExiste si el proyecto no existe. La usan los servicios
+// de lo que cuelga de un proyecto: backlog (spec 04 RN-1) e integrantes (spec 02 RN-1).
+func verificarProyecto(ctx context.Context, proyectos RepositorioProyectos, proyectoID int64) error {
+	_, err := proyectos.Obtener(ctx, proyectoID)
+	return err
+}

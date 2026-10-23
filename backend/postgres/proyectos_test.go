@@ -23,7 +23,8 @@ func repoDePrueba(t *testing.T) *RepositorioProyectos {
 		t.Fatalf("Abrir: %v", err)
 	}
 	t.Cleanup(func() { db.Close() })
-	// CASCADE: también vacía las tablas que referencian a proyectos (historias, spec 04).
+	// CASCADE: también vacía las tablas que referencian a proyectos (historias, spec 04;
+	// integrantes, spec 02).
 	if _, err := db.Exec("TRUNCATE proyectos RESTART IDENTITY CASCADE"); err != nil {
 		t.Fatalf("limpiar la tabla: %v", err)
 	}

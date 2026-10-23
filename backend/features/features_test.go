@@ -35,10 +35,11 @@ func TestFeatures(t *testing.T) {
 
 // mundo guarda el estado de un escenario entre sus pasos.
 type mundo struct {
-	api        http.Handler
-	respuesta  *httptest.ResponseRecorder
-	proyectoID int64         // el último proyecto creado o consultado
-	backlog    estadoBacklog // pasos del backlog (spec 04), en backlog_test.go
+	api         http.Handler
+	respuesta   *httptest.ResponseRecorder
+	proyectoID  int64             // el último proyecto creado o consultado
+	backlog     estadoBacklog     // pasos del backlog (spec 04), en backlog_test.go
+	integrantes estadoIntegrantes // pasos de integrantes (spec 02), en integrantes_test.go
 }
 
 func inicializarEscenario(sc *godog.ScenarioContext) {
@@ -49,6 +50,7 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 		*m = mundo{api: api.NewRouter(
 			dominio.NuevoServicioProyectos(proyectos),
 			dominio.NuevoServicioBacklog(proyectos, memoria.NuevoRepositorioHistorias()),
+			dominio.NuevoServicioIntegrantes(proyectos, memoria.NuevoRepositorioIntegrantes()),
 		)}
 		return ctx, nil
 	})
@@ -82,6 +84,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Product Backlog (spec 04)
 	m.registrarPasosBacklog(sc)
+
+	// Integrantes (spec 02)
+	m.registrarPasosIntegrantes(sc)
 }
 
 // ---------- helpers ----------
@@ -310,11 +315,14 @@ func (m *mundo) hayProyectosRegistrados(cantidad int) error {
 	return nil
 }
 
-// elResultadoEs acepta "registrado" (proyecto), "registrada" o "modificada" (historia, spec 04)
-// o el mensaje de error esperado.
+// elResultadoEs acepta "registrado" (proyecto, o integrante si el escenario pidió agregar uno,
+// spec 02), "registrada" o "modificada" (historia, spec 04) o el mensaje de error esperado.
 func (m *mundo) elResultadoEs(resultado string) error {
 	switch resultado {
 	case "registrado":
+		if m.integrantes.altaPedida {
+			return m.elIntegranteQuedaRegistrado()
+		}
 		return m.elProyectoQuedaRegistrado()
 	case "registrada":
 		return m.laHistoriaQuedaRegistrada()
