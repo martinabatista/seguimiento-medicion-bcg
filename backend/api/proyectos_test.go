@@ -18,11 +18,13 @@ var hoyDePrueba = time.Date(2026, 11, 20, 0, 0, 0, 0, time.UTC)
 func routerDePrueba() http.Handler {
 	proyectos := memoria.NuevoRepositorioProyectos()
 	historias := memoria.NuevoRepositorioHistorias()
+	sprints := memoria.NuevoRepositorioSprints()
 	return NewRouter(
 		dominio.NuevoServicioProyectos(proyectos),
-		dominio.NuevoServicioBacklog(proyectos, historias),
+		dominio.NuevoServicioBacklog(proyectos, historias, sprints),
 		dominio.NuevoServicioIntegrantes(proyectos, memoria.NuevoRepositorioIntegrantes()),
-		dominio.NuevoServicioEstado(proyectos, historias, func() time.Time { return hoyDePrueba }),
+		dominio.NuevoServicioEstado(proyectos, historias, sprints, func() time.Time { return hoyDePrueba }),
+		dominio.NuevoServicioSprints(proyectos, historias, sprints),
 	)
 }
 

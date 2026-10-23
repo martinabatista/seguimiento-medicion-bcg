@@ -41,6 +41,7 @@ type mundo struct {
 	proyectoID  int64             // el último proyecto creado o consultado
 	backlog     estadoBacklog     // pasos del backlog (spec 04), en backlog_test.go
 	integrantes estadoIntegrantes // pasos de integrantes (spec 02), en integrantes_test.go
+	sprints     estadoSprints     // pasos de Sprints (spec 05), en sprints_test.go
 	hoy         time.Time         // fecha de hoy fijada por un escenario (spec 03); vacía = la del sistema
 }
 
@@ -58,11 +59,13 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 		// Cada escenario arranca con una API y un repositorio vacíos.
 		proyectos := memoria.NuevoRepositorioProyectos()
 		historias := memoria.NuevoRepositorioHistorias()
+		sprints := memoria.NuevoRepositorioSprints()
 		*m = mundo{api: api.NewRouter(
 			dominio.NuevoServicioProyectos(proyectos),
-			dominio.NuevoServicioBacklog(proyectos, historias),
+			dominio.NuevoServicioBacklog(proyectos, historias, sprints),
 			dominio.NuevoServicioIntegrantes(proyectos, memoria.NuevoRepositorioIntegrantes()),
-			dominio.NuevoServicioEstado(proyectos, historias, m.fechaDeHoy),
+			dominio.NuevoServicioEstado(proyectos, historias, sprints, m.fechaDeHoy),
+			dominio.NuevoServicioSprints(proyectos, historias, sprints),
 		)}
 		return ctx, nil
 	})
@@ -102,6 +105,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Estado del proyecto (spec 03)
 	m.registrarPasosEstado(sc)
+
+	// Sprints (spec 05)
+	m.registrarPasosSprints(sc)
 }
 
 // ---------- helpers ----------
@@ -335,6 +341,9 @@ func (m *mundo) hayProyectosRegistrados(cantidad int) error {
 func (m *mundo) elResultadoEs(resultado string) error {
 	switch resultado {
 	case "registrado":
+		if m.sprints.altaPedida {
+			return m.elSprintQuedaRegistrado()
+		}
 		if m.integrantes.altaPedida {
 			return m.elIntegranteQuedaRegistrado()
 		}
