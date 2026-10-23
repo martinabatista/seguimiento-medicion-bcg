@@ -49,6 +49,7 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 		*m = mundo{api: api.NewRouter(
 			dominio.NuevoServicioProyectos(proyectos),
 			dominio.NuevoServicioBacklog(proyectos, memoria.NuevoRepositorioHistorias()),
+			dominio.NuevoServicioIntegrantes(proyectos, memoria.NuevoRepositorioIntegrantes()),
 		)}
 		return ctx, nil
 	})
