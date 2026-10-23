@@ -96,7 +96,7 @@ func (r *RepositorioHistorias) Obtener(ctx context.Context, proyectoID, id int64
 	return h, err
 }
 
-// fila es lo común entre *sql.Row y *sql.Rows para leer una historia.
+// fila es lo común entre *sql.Row y *sql.Rows para leer un registro (historias y Sprints).
 type fila interface {
 	Scan(dest ...any) error
 }

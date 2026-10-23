@@ -7,10 +7,12 @@ import (
 )
 
 // estadoJSON es el estado de un proyecto tal como sale por la API (spec 03).
+// sprint_en_curso es null si no hay Sprint en curso (spec 05 CA-5).
 type estadoJSON struct {
-	Proyecto proyectoJSON       `json:"proyecto"`
-	Estado   string             `json:"estado"`
-	Backlog  resumenBacklogJSON `json:"backlog"`
+	Proyecto      proyectoJSON       `json:"proyecto"`
+	Estado        string             `json:"estado"`
+	Backlog       resumenBacklogJSON `json:"backlog"`
+	SprintEnCurso *sprintJSON        `json:"sprint_en_curso"`
 }
 
 // resumenBacklogJSON es el resumen del avance del backlog (spec 03 CA-3).
@@ -29,7 +31,7 @@ type estadoHandler struct {
 	servicio *dominio.ServicioEstado
 }
 
-// consultar: GET /api/proyectos/{id}/estado (CA-1, CA-3, CA-4).
+// consultar: GET /api/proyectos/{id}/estado (CA-1, CA-3, CA-4; Sprint en curso: spec 05 CA-5).
 func (h estadoHandler) consultar(w http.ResponseWriter, r *http.Request) {
 	proyectoID, err := leerID(r)
 	if err != nil {
@@ -41,7 +43,7 @@ func (h estadoHandler) consultar(w http.ResponseWriter, r *http.Request) {
 		responderError(w, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, estadoJSON{
+	respuesta := estadoJSON{
 		Proyecto: aJSON(e.Proyecto),
 		Estado:   string(e.Estado),
 		Backlog: resumenBacklogJSON{
@@ -54,5 +56,10 @@ func (h estadoHandler) consultar(w http.ResponseWriter, r *http.Request) {
 			StoryPointsCompletados: e.Backlog.StoryPointsCompletados,
 			SinEstimar:             e.Backlog.SinEstimar,
 		},
-	})
+	}
+	if e.SprintEnCurso != nil {
+		s := sprintAJSON(*e.SprintEnCurso)
+		respuesta.SprintEnCurso = &s
+	}
+	writeJSON(w, http.StatusOK, respuesta)
 }
