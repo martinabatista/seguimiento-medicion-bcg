@@ -35,6 +35,9 @@ Endpoints disponibles:
 | `GET /api/proyectos/{id}/backlog/{historiaID}` | Ver una historia | 200 · 404 |
 | `PUT /api/proyectos/{id}/backlog/{historiaID}` | Modificar (reemplaza datos y estado) | 200 · 400 · 404 |
 | `DELETE /api/proyectos/{id}/backlog/{historiaID}` | Eliminar una historia | 204 · 404 |
+| `PUT /api/proyectos/{id}/backlog/{historiaID}/story-points` | Estimar `{"story_points"}` (spec 07) | 200 historia · 400 · 404 · 409 completada |
+| `DELETE /api/proyectos/{id}/backlog/{historiaID}/story-points` | Quitar la estimación (queda sin estimar) | 200 historia · 404 · 409 completada |
+| `GET /api/story-points/escala` | Escala de Story Points `{"valores": [1, 2, 3, 5, 8, 13, 21]}` | 200 |
 | `POST /api/proyectos/{id}/integrantes` | Agregar un integrante (spec 02) | 201 integrante · 400 · 404 · 409 email repetido |
 | `GET /api/proyectos/{id}/integrantes` | Listar en orden de alta | 200 lista (`[]` si no hay) · 404 |
 | `GET /api/proyectos/{id}/integrantes/{integranteID}` | Ver un integrante | 200 · 404 |
@@ -58,7 +61,8 @@ Proyecto en JSON: `{"id", "nombre", "descripcion", "fecha_inicio", "fecha_fin"}`
 
 Historia en JSON: `{"id", "proyecto_id", "titulo", "descripcion", "prioridad", "criterios_aceptacion",
 "estado", "story_points"}`. `estado` es `Pendiente` | `En progreso` | `Completada` (al crear se ignora:
-siempre arranca `Pendiente`); `story_points` es `null` mientras está sin estimar.
+siempre arranca `Pendiente`); `story_points` es `null` mientras está sin estimar. Los Story Points solo
+cambian por las rutas `…/story-points` (spec 07): el `PUT` de la historia los conserva.
 
 Integrante en JSON: `{"id", "proyecto_id", "nombre", "email", "rol"}`. `rol` es `Product Owner` |
 `Scrum Master` | `Developer`; `email` se devuelve normalizado (sin espacios al borde y en minúsculas).
@@ -167,6 +171,11 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   `ServicioBacklog.Modificar` (`cambiaCompletada`), `postgres/esquema/05_sprint_historias_completada.sql`,
   `features/cerrar-sprint.feature` (pasos en `features/cerrar_sprint_test.go`). La spec 10 (velocidad) usa
   `Sprint.Completadas` de los Sprints cerrados, no el estado actual de las historias (RN-8).
+- `docs/specs/sprint-01/07-story-points.md` — Story Points: `dominio/story_points.go` (`EscalaStoryPoints`,
+  `EnEscala`, `ParsearStoryPoints`), `dominio/servicio_story_points.go` (`ServicioBacklog.Estimar`,
+  `QuitarEstimacion`), `api/story_points.go`, `features/story-points.feature` (pasos en
+  `features/story_points_test.go`). Sin tabla nueva: usa `historias.story_points`. La spec 08 (Planning Poker)
+  registra la estimación acordada con `Estimar` y usa la misma escala; la 10 suma estos Story Points.
 
 ## Cómo testear
 
@@ -222,4 +231,4 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 06).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 07).

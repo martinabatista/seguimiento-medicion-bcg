@@ -85,3 +85,10 @@ var (
 	ErrHistoriaNoCompletada = ErrConflicto{"La historia no está completada"}
 	ErrCompletarDesdeSprint = ErrConflicto{"La historia está en un Sprint abierto: se completa desde el Sprint"}
 )
+
+// Errores de la spec 07 (Story Points). Estimar una historia completada usa ErrHistoriaCompletada
+// de la spec 05: el mensaje es el mismo. El mensaje de la escala se arma con sus valores.
+var (
+	ErrStoryPointsObligatorios  = ErrDatoInvalido{"Los Story Points son obligatorios"}
+	ErrStoryPointsFueraDeEscala = ErrDatoInvalido{"Los Story Points deben ser un valor de la escala: " + textoEscala()}
+)

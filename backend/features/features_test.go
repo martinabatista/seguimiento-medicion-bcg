@@ -111,6 +111,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Cerrar Sprint (spec 06)
 	m.registrarPasosCerrarSprint(sc)
+
+	// Story Points (spec 07)
+	m.registrarPasosStoryPoints(sc)
 }
 
 // ---------- helpers ----------
@@ -353,7 +356,7 @@ func (m *mundo) elResultadoEs(resultado string) error {
 		return m.elProyectoQuedaRegistrado()
 	case "registrada":
 		return m.laHistoriaQuedaRegistrada()
-	case "modificada":
+	case "modificada", "estimada":
 		if m.respuesta.Code != http.StatusOK {
 			return fmt.Errorf("no se modificó: código %d, %s", m.respuesta.Code, m.respuesta.Body.String())
 		}

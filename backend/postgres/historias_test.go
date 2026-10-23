@@ -108,3 +108,29 @@ func TestListarHistoriasVacio(t *testing.T) {
 		t.Errorf("Listar = %#v, %v; se esperaba una lista vacía", lista, err)
 	}
 }
+
+// spec 07 CA-1, CA-2: los Story Points se guardan, se cambian y se quitan (NULL = sin estimar).
+func TestStoryPointsDeHistoria(t *testing.T) {
+	r, tienda, _ := historiasDePrueba(t)
+	ctx := context.Background()
+	h, err := r.Guardar(ctx, dominio.Historia{ProyectoID: tienda, Titulo: "Registrar usuario", Descripcion: "d", Prioridad: 1, Estado: dominio.EstadoPendiente})
+	if err != nil {
+		t.Fatalf("Guardar: %v", err)
+	}
+	for _, sp := range []int{21, 1} {
+		h.StoryPoints = &sp
+		if err := r.Actualizar(ctx, h); err != nil {
+			t.Fatalf("Actualizar con %d: %v", sp, err)
+		}
+		if visto, _ := r.Obtener(ctx, tienda, h.ID); visto.StoryPoints == nil || *visto.StoryPoints != sp {
+			t.Errorf("Story Points = %v, se esperaba %d", visto.StoryPoints, sp)
+		}
+	}
+	h.StoryPoints = nil
+	if err := r.Actualizar(ctx, h); err != nil {
+		t.Fatalf("Actualizar sin estimar: %v", err)
+	}
+	if visto, _ := r.Obtener(ctx, tienda, h.ID); visto.StoryPoints != nil {
+		t.Errorf("Story Points = %d, se esperaba sin estimar", *visto.StoryPoints)
+	}
+}

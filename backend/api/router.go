@@ -25,6 +25,9 @@ func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBa
 	mux.HandleFunc("GET /api/proyectos/{id}/backlog/{historiaID}", b.ver)
 	mux.HandleFunc("PUT /api/proyectos/{id}/backlog/{historiaID}", b.modificar)
 	mux.HandleFunc("DELETE /api/proyectos/{id}/backlog/{historiaID}", b.eliminar)
+	mux.HandleFunc("PUT /api/proyectos/{id}/backlog/{historiaID}/story-points", b.estimar)
+	mux.HandleFunc("DELETE /api/proyectos/{id}/backlog/{historiaID}/story-points", b.quitarEstimacion)
+	mux.HandleFunc("GET /api/story-points/escala", escalaStoryPoints)
 
 	i := integrantesHandler{servicio: integrantes}
 	mux.HandleFunc("POST /api/proyectos/{id}/integrantes", i.agregar)
