@@ -38,6 +38,7 @@ Endpoints disponibles:
 | `POST /api/proyectos/{id}/integrantes` | Agregar un integrante (spec 02) | 201 integrante · 400 · 404 · 409 email repetido |
 | `GET /api/proyectos/{id}/integrantes` | Listar en orden de alta | 200 lista (`[]` si no hay) · 404 |
 | `GET /api/proyectos/{id}/integrantes/{integranteID}` | Ver un integrante | 200 · 404 |
+| `GET /api/proyectos/{id}/estado` | Estado del proyecto y resumen del backlog (spec 03) | 200 · 404 |
 
 Proyecto en JSON: `{"id", "nombre", "descripcion", "fecha_inicio", "fecha_fin"}`, fechas `AAAA-MM-DD`.
 
@@ -47,6 +48,11 @@ siempre arranca `Pendiente`); `story_points` es `null` mientras está sin estima
 
 Integrante en JSON: `{"id", "proyecto_id", "nombre", "email", "rol"}`. `rol` es `Product Owner` |
 `Scrum Master` | `Developer`; `email` se devuelve normalizado (sin espacios al borde y en minúsculas).
+
+Estado en JSON: `{"proyecto": {…proyecto…}, "estado", "backlog": {"total", "pendientes", "en_progreso",
+"completadas", "porcentaje_completadas", "story_points_totales", "story_points_completados", "sin_estimar"}}`.
+`estado` es `No iniciado` | `En curso` | `Finalizado`, calculado con la fecha de hoy (no se guarda).
+El Sprint en curso (spec 03 CA-2) se agrega cuando exista la spec 05.
 
 ## Decisiones técnicas
 
@@ -122,6 +128,12 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   `postgres/esquema/03_integrantes.sql`, `api/integrantes.go`, `features/integrantes.feature` (pasos en
   `features/integrantes_test.go`). Las specs 08 (Planning Poker) y 09 (esfuerzo) usan el id del
   integrante: si cambia su JSON o su identidad (el email), actualizar la spec 02.
+- `docs/specs/sprint-01/03-estado-proyecto.md` — estado del proyecto: `dominio/estado_proyecto.go`
+  (`CalcularEstado`, `ResumirBacklog`), `dominio/servicio_estado.go`, `api/estado.go`,
+  `features/estado-proyecto.feature` (pasos en `features/estado_proyecto_test.go`). **Entregada en
+  parte:** falta el Sprint en curso (CA-2, cuando exista la spec 05) y los escenarios con Story Points
+  (cuando exista la spec 07). Si cambian los estados o los Story Points de la historia (spec 04), revisar
+  `ResumirBacklog`. La spec 13 (Dashboard) va a usar este estado.
 - `docs/specs/sprint-01/04-product-backlog.md` — backlog: `dominio/historia.go`, `dominio/servicio_backlog.go`,
   `memoria/historias.go`, `postgres/historias.go`, `postgres/esquema/02_historias.sql`, `api/backlog.go`,
   `features/product-backlog.feature` (pasos en `features/backlog_test.go`). Las specs 05 a 08 usan la
@@ -160,8 +172,12 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
   el email se guarda ya normalizado (minúsculas, sin espacios al borde).
 - La verificación de que el proyecto existe (`verificarProyecto` en `dominio/servicio_proyectos.go`) la
   comparten todos los servicios de lo que cuelga de un proyecto: usarla en los nuevos (Sprints, etc.).
+- La fecha de hoy (spec 03) **no** se lee con `time.Now()` dentro del dominio: `ServicioEstado` recibe un
+  reloj (`func() time.Time`). `cmd/api` le pasa `time.Now`, los tests una fecha fija y los escenarios BDD
+  la del paso `que hoy es "AAAA-MM-DD"` (sin ese paso, la del sistema). Hacer lo mismo en cualquier
+  cálculo que dependa del día (por ejemplo, el Sprint en curso).
 - `go test -race` necesita cgo: en Windows sin gcc no corre localmente; la CI (Linux) sí lo corre.
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-22 (spec 02).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 03, primera entrega).
