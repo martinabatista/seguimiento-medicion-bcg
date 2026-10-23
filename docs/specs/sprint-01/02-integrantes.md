@@ -1,6 +1,6 @@
 ---
 titulo: Registrar integrantes del proyecto
-estado: approved     # draft | in-review | approved | implemented
+estado: implemented  # draft | in-review | approved | implemented
 unidad: backend
 issue: "#5"
 sprint: 01
@@ -177,10 +177,15 @@ Característica: Registrar integrantes del proyecto
     Y el proyecto tiene 1 integrante
 
     Ejemplos:
-      | email            |
-      | ana@mail.com     |
-      | ANA@Mail.com     |
-      |  ana@mail.com    |
+      | email        |
+      | ana@mail.com |
+      | ANA@Mail.com |
+
+  Escenario: El mismo email con un espacio adelante también está repetido (CA-3)
+    Dado que el proyecto tiene al integrante "Ana Pérez" con email "ana@mail.com" y rol "Developer"
+    Cuando agrego al integrante "Ana P." con email " ana@mail.com" y rol "Scrum Master"
+    Entonces se informa el error "El integrante ya está registrado en el proyecto"
+    Y el proyecto tiene 1 integrante
 
   Escenario: El mismo email puede estar en otro proyecto (CA-3)
     Dado que existe el proyecto "App Turnos" con inicio "2026-11-05" y fin "2027-01-20"
@@ -217,7 +222,7 @@ Característica: Registrar integrantes del proyecto
       | ana@mail.com       | registrado              |
       | ana.p@mail.com.ar  | registrado              |
       | (vacío)            | El email es obligatorio |
-      | (espacios)         | El email es obligatorio |
+      | (solo espacios)    | El email es obligatorio |
       | ana.mail.com       | El email no es válido   |
       | ana@@mail.com      | El email no es válido   |
       | @mail.com          | El email no es válido   |
@@ -269,7 +274,9 @@ Característica: Registrar integrantes del proyecto
     Entonces se informa el error "El integrante no existe"
 ```
 
-Los pasos que no indican proyecto ("el proyecto tiene", "agrego al integrante", "listo los integrantes") se refieren al proyecto de los Antecedentes, "Tienda Online". En las tablas, `(vacío)` representa un texto vacío y `(espacios)` un texto con solo espacios (Gherkin no puede escribirlos), igual que en las specs 01 y 04. En el `Esquema del escenario` del CA-3, el tercer email lleva un espacio adelante (`" ana@mail.com"`); al pasarlo al `.feature` se escribe explícitamente.
+Los pasos que no indican proyecto ("el proyecto tiene", "agrego al integrante", "listo los integrantes") se refieren al proyecto de los Antecedentes, "Tienda Online". En las tablas, `(vacío)` representa un texto vacío y `(solo espacios)` un texto con solo espacios (Gherkin no puede escribirlos), igual que en las specs 01 y 04.
+
+Al implementar, el email con un espacio adelante del CA-3 (`" ana@mail.com"`) pasó de la tabla del `Esquema del escenario` a un escenario propio en `backend/features/integrantes.feature` ("El mismo email con un espacio adelante también está repetido"), porque Gherkin recorta los espacios de las celdas: entre comillas en el paso, el espacio se conserva.
 
 ## Dependencias
 
@@ -278,19 +285,19 @@ Los pasos que no indican proyecto ("el proyecto tiene", "agrego al integrante", 
 
 ## Tareas
 
-- [ ] `[P1]` Entidad Integrante en `backend/dominio/` con las validaciones RN-2 a RN-5 y la normalización del email (TDD, un ciclo por regla).
-- [ ] `[P1]` Casos de uso agregar, listar y ver, con la verificación del proyecto (RN-1) y del email repetido (RN-6), y repositorio en memoria en `backend/memoria/`.
-- [ ] `[P1]` Tabla de integrantes en `backend/postgres/esquema/03_integrantes.sql`, con el email único por proyecto (RN-6).
-- [ ] `[P1]` Acceso a datos de integrantes en `backend/postgres/` con sus tests de integración.
-- [ ] `[P1]` Rutas de la API para agregar, listar y ver integrantes en `backend/api/` (`/api/proyectos/{id}/integrantes`), con 409 para el email repetido.
-- [ ] `[P1]` Escenarios de `backend/features/integrantes.feature` con sus pasos.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas, trampas: recrear la base por la tabla nueva).
+- [x] `[P1]` Entidad Integrante en `backend/dominio/` con las validaciones RN-2 a RN-5 y la normalización del email (TDD, un ciclo por regla).
+- [x] `[P1]` Casos de uso agregar, listar y ver, con la verificación del proyecto (RN-1) y del email repetido (RN-6), y repositorio en memoria en `backend/memoria/`.
+- [x] `[P1]` Tabla de integrantes en `backend/postgres/esquema/03_integrantes.sql`, con el email único por proyecto (RN-6).
+- [x] `[P1]` Acceso a datos de integrantes en `backend/postgres/` con sus tests de integración.
+- [x] `[P1]` Rutas de la API para agregar, listar y ver integrantes en `backend/api/` (`/api/proyectos/{id}/integrantes`), con 409 para el email repetido.
+- [x] `[P1]` Escenarios de `backend/features/integrantes.feature` con sus pasos.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas, trampas: recrear la base por la tabla nueva).
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented`.
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] Spec en estado `implemented`.

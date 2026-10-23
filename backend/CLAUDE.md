@@ -35,12 +35,18 @@ Endpoints disponibles:
 | `GET /api/proyectos/{id}/backlog/{historiaID}` | Ver una historia | 200 · 404 |
 | `PUT /api/proyectos/{id}/backlog/{historiaID}` | Modificar (reemplaza datos y estado) | 200 · 400 · 404 |
 | `DELETE /api/proyectos/{id}/backlog/{historiaID}` | Eliminar una historia | 204 · 404 |
+| `POST /api/proyectos/{id}/integrantes` | Agregar un integrante (spec 02) | 201 integrante · 400 · 404 · 409 email repetido |
+| `GET /api/proyectos/{id}/integrantes` | Listar en orden de alta | 200 lista (`[]` si no hay) · 404 |
+| `GET /api/proyectos/{id}/integrantes/{integranteID}` | Ver un integrante | 200 · 404 |
 
 Proyecto en JSON: `{"id", "nombre", "descripcion", "fecha_inicio", "fecha_fin"}`, fechas `AAAA-MM-DD`.
 
 Historia en JSON: `{"id", "proyecto_id", "titulo", "descripcion", "prioridad", "criterios_aceptacion",
 "estado", "story_points"}`. `estado` es `Pendiente` | `En progreso` | `Completada` (al crear se ignora:
 siempre arranca `Pendiente`); `story_points` es `null` mientras está sin estimar.
+
+Integrante en JSON: `{"id", "proyecto_id", "nombre", "email", "rol"}`. `rol` es `Product Owner` |
+`Scrum Master` | `Developer`; `email` se devuelve normalizado (sin espacios al borde y en minúsculas).
 
 ## Decisiones técnicas
 
@@ -76,7 +82,7 @@ mano, sin ORM.**
 
 **Tablas: archivos SQL simples en `postgres/esquema/`, sin herramienta de migraciones.**
 - Un archivo por tabla, numerado en el orden en que se crean: `01_proyectos.sql`,
-  `02_integrantes.sql`… Cada uno con su `CREATE TABLE`.
+  `02_historias.sql`, `03_integrantes.sql`… Cada uno con su `CREATE TABLE`.
 - Docker los ejecuta en orden **solo cuando crea la base por primera vez** (los monta en
   `/docker-entrypoint-initdb.d`, ver `docker-compose.yml`).
 - Si se agrega o cambia un archivo, cada integrante recrea su base (los datos son de prueba):
@@ -111,6 +117,11 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
 - `docs/specs/sprint-01/01-proyectos.md` — proyectos: `dominio/proyecto.go`, `dominio/servicio_proyectos.go`,
   `postgres/proyectos.go`, `api/proyectos.go`, `features/proyectos.feature`. Si cambia el JSON de
   proyecto o sus errores, revisar las specs 02 a 05, que cuelgan de `/api/proyectos/{id}`.
+- `docs/specs/sprint-01/02-integrantes.md` — integrantes: `dominio/integrante.go`,
+  `dominio/servicio_integrantes.go`, `memoria/integrantes.go`, `postgres/integrantes.go`,
+  `postgres/esquema/03_integrantes.sql`, `api/integrantes.go`, `features/integrantes.feature` (pasos en
+  `features/integrantes_test.go`). Las specs 08 (Planning Poker) y 09 (esfuerzo) usan el id del
+  integrante: si cambia su JSON o su identidad (el email), actualizar la spec 02.
 - `docs/specs/sprint-01/04-product-backlog.md` — backlog: `dominio/historia.go`, `dominio/servicio_backlog.go`,
   `memoria/historias.go`, `postgres/historias.go`, `postgres/esquema/02_historias.sql`, `api/backlog.go`,
   `features/product-backlog.feature` (pasos en `features/backlog_test.go`). Las specs 05 a 08 usan la
@@ -135,14 +146,22 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
 
 ## Trampas conocidas
 
-- `historias` referencia a `proyectos`: los tests de integración vacían con
+- `historias` e `integrantes` referencian a `proyectos`: los tests de integración vacían con
   `TRUNCATE proyectos RESTART IDENTITY CASCADE` (sin `CASCADE`, PostgreSQL no deja truncar `proyectos`).
 - Cada tabla nueva en `postgres/esquema/` obliga a recrear la base local
   (`docker compose down -v && docker compose up -d`), o a correr solo ese archivo:
   `docker compose exec -T db psql -U sme -d sme < backend/postgres/esquema/NN_tabla.sql`.
 - El orden del backlog (spec 04 RN-8) lo aplica el dominio (`OrdenarBacklog`), no el `ORDER BY` del SQL:
   el repositorio puede devolver las historias en cualquier orden.
+- Email repetido de un integrante (spec 02 RN-6): lo controla el servicio y **también** la restricción
+  `integrantes_email_unico` de la tabla, para dos altas simultáneas. `postgres/integrantes.go` traduce esa
+  violación (código `23505`) a `ErrIntegranteYaRegistrado`, que la API responde como 409. Si se renombra
+  la restricción en el SQL, hay que cambiarla también en el repositorio. La comparación funciona porque
+  el email se guarda ya normalizado (minúsculas, sin espacios al borde).
+- La verificación de que el proyecto existe (`verificarProyecto` en `dominio/servicio_proyectos.go`) la
+  comparten todos los servicios de lo que cuelga de un proyecto: usarla en los nuevos (Sprints, etc.).
+- `go test -race` necesita cgo: en Windows sin gcc no corre localmente; la CI (Linux) sí lo corre.
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-20 (spec 04).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-22 (spec 02).
