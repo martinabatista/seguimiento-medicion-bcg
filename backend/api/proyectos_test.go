@@ -6,17 +6,23 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/martinabatista/seguimiento-medicion-bcg/backend/dominio"
 	"github.com/martinabatista/seguimiento-medicion-bcg/backend/memoria"
 )
 
+// hoyDePrueba es la fecha de hoy fija de los tests de la API (spec 03): cae dentro de tiendaJSON.
+var hoyDePrueba = time.Date(2026, 11, 20, 0, 0, 0, 0, time.UTC)
+
 func routerDePrueba() http.Handler {
 	proyectos := memoria.NuevoRepositorioProyectos()
+	historias := memoria.NuevoRepositorioHistorias()
 	return NewRouter(
 		dominio.NuevoServicioProyectos(proyectos),
-		dominio.NuevoServicioBacklog(proyectos, memoria.NuevoRepositorioHistorias()),
+		dominio.NuevoServicioBacklog(proyectos, historias),
 		dominio.NuevoServicioIntegrantes(proyectos, memoria.NuevoRepositorioIntegrantes()),
+		dominio.NuevoServicioEstado(proyectos, historias, func() time.Time { return hoyDePrueba }),
 	)
 }
 

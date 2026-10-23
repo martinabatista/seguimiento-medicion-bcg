@@ -1,11 +1,11 @@
 ---
 titulo: Consultar el estado de un proyecto
-estado: in-review    # draft | in-review | approved | implemented
+estado: approved     # draft | in-review | approved | implemented
 unidad: backend
 issue: "#6"
 sprint: 01
 autor: Luana Guajardo
-aprobada_por: ""
+aprobada_por: "Martina Batista"
 fecha: 2026-10-23
 specs_relacionadas: ["01-proyectos", "04-product-backlog", "05-crear-sprints", "07-story-points"]
 ---
@@ -237,12 +237,12 @@ Los escenarios del CA-3 que cargan historias **con** Story Points ("con 5 Story 
 
 Primera entrega (CA-1, CA-3, CA-4):
 
-- [ ] `[P1]` Cálculo del estado del proyecto según la fecha de hoy en `backend/dominio/` (RN-2, TDD).
-- [ ] `[P1]` Cálculo del resumen del backlog en `backend/dominio/`: cantidades, porcentaje redondeado y Story Points (RN-4 a RN-6, TDD).
-- [ ] `[P1]` Caso de uso "consultar estado" que verifica el proyecto (RN-1) y arma la respuesta con la fecha de hoy que recibe.
-- [ ] `[P1]` Ruta de la API para consultar el estado (`/api/proyectos/{id}/estado`), con la fecha del día tomada del sistema.
-- [ ] `[P1]` Escenarios de `backend/features/estado-proyecto.feature` (CA-1, CA-3 sin Story Points, CA-4) con sus pasos.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` (endpoint, specs relacionadas).
+- [x] `[P1]` Cálculo del estado del proyecto según la fecha de hoy en `backend/dominio/` (RN-2, TDD).
+- [x] `[P1]` Cálculo del resumen del backlog en `backend/dominio/`: cantidades, porcentaje redondeado y Story Points (RN-4 a RN-6, TDD).
+- [x] `[P1]` Caso de uso "consultar estado" que verifica el proyecto (RN-1) y arma la respuesta con la fecha de hoy que recibe.
+- [x] `[P1]` Ruta de la API para consultar el estado (`/api/proyectos/{id}/estado`), con la fecha del día tomada del sistema.
+- [x] `[P1]` Escenarios de `backend/features/estado-proyecto.feature` (CA-1, CA-3 sin Story Points, CA-4) con sus pasos.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoint, specs relacionadas).
 
 Segunda entrega (CA-2, después de la spec 05):
 

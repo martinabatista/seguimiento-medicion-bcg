@@ -9,7 +9,7 @@ import (
 )
 
 // NewRouter arma las rutas de la API.
-func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBacklog, integrantes *dominio.ServicioIntegrantes) http.Handler {
+func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBacklog, integrantes *dominio.ServicioIntegrantes, estado *dominio.ServicioEstado) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", health)
 
@@ -30,6 +30,9 @@ func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBa
 	mux.HandleFunc("POST /api/proyectos/{id}/integrantes", i.agregar)
 	mux.HandleFunc("GET /api/proyectos/{id}/integrantes", i.listar)
 	mux.HandleFunc("GET /api/proyectos/{id}/integrantes/{integranteID}", i.ver)
+
+	e := estadoHandler{servicio: estado}
+	mux.HandleFunc("GET /api/proyectos/{id}/estado", e.consultar)
 	return mux
 }
 

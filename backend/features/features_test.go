@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cucumber/godog"
 
@@ -40,6 +41,15 @@ type mundo struct {
 	proyectoID  int64             // el último proyecto creado o consultado
 	backlog     estadoBacklog     // pasos del backlog (spec 04), en backlog_test.go
 	integrantes estadoIntegrantes // pasos de integrantes (spec 02), en integrantes_test.go
+	hoy         time.Time         // fecha de hoy fijada por un escenario (spec 03); vacía = la del sistema
+}
+
+// fechaDeHoy es el reloj que usa la API en los escenarios: la fecha fijada o, si no, la del sistema.
+func (m *mundo) fechaDeHoy() time.Time {
+	if m.hoy.IsZero() {
+		return time.Now()
+	}
+	return m.hoy
 }
 
 func inicializarEscenario(sc *godog.ScenarioContext) {
@@ -47,10 +57,12 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 	sc.Before(func(ctx context.Context, _ *godog.Scenario) (context.Context, error) {
 		// Cada escenario arranca con una API y un repositorio vacíos.
 		proyectos := memoria.NuevoRepositorioProyectos()
+		historias := memoria.NuevoRepositorioHistorias()
 		*m = mundo{api: api.NewRouter(
 			dominio.NuevoServicioProyectos(proyectos),
-			dominio.NuevoServicioBacklog(proyectos, memoria.NuevoRepositorioHistorias()),
+			dominio.NuevoServicioBacklog(proyectos, historias),
 			dominio.NuevoServicioIntegrantes(proyectos, memoria.NuevoRepositorioIntegrantes()),
+			dominio.NuevoServicioEstado(proyectos, historias, m.fechaDeHoy),
 		)}
 		return ctx, nil
 	})
@@ -87,6 +99,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Integrantes (spec 02)
 	m.registrarPasosIntegrantes(sc)
+
+	// Estado del proyecto (spec 03)
+	m.registrarPasosEstado(sc)
 }
 
 // ---------- helpers ----------
