@@ -38,3 +38,19 @@ var (
 	// ErrHistoriaNoExiste no es un dato inválido: la API lo responde como 404.
 	ErrHistoriaNoExiste = errors.New("La historia no existe")
 )
+
+// Errores de la spec 02 (integrantes). El nombre vacío usa ErrNombreObligatorio de la spec 01:
+// el mensaje es el mismo.
+var (
+	ErrNombreIntegranteMuyLargo = ErrDatoInvalido{"El nombre no puede superar los 100 caracteres"}
+	ErrEmailObligatorio         = ErrDatoInvalido{"El email es obligatorio"}
+	ErrEmailInvalido            = ErrDatoInvalido{"El email no es válido"}
+	ErrEmailMuyLargo            = ErrDatoInvalido{"El email no puede superar los 254 caracteres"}
+	ErrRolObligatorio           = ErrDatoInvalido{"El rol es obligatorio"}
+	ErrRolInvalido              = ErrDatoInvalido{"El rol no es válido"}
+
+	// ErrIntegranteNoExiste no es un dato inválido: la API lo responde como 404.
+	ErrIntegranteNoExiste = errors.New("El integrante no existe")
+	// ErrIntegranteYaRegistrado es un conflicto con lo que ya hay: la API lo responde como 409.
+	ErrIntegranteYaRegistrado = errors.New("El integrante ya está registrado en el proyecto")
+)
