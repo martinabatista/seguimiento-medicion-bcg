@@ -297,7 +297,7 @@ Al implementar, el email con un espacio adelante del CA-3 (`" ana@mail.com"`) pa
 
 - [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
 - [x] Escenarios BDD automatizados y en verde.
-- [ ] CI en verde (gofmt / vet / tests / lint / build).
+- [x] CI en verde (gofmt / vet / tests / lint / build).
 - [x] Criterios de aceptación verificados.
 - [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
 - [x] Spec en estado `implemented`.
