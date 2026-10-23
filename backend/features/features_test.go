@@ -99,6 +99,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Integrantes (spec 02)
 	m.registrarPasosIntegrantes(sc)
+
+	// Estado del proyecto (spec 03)
+	m.registrarPasosEstado(sc)
 }
 
 // ---------- helpers ----------
