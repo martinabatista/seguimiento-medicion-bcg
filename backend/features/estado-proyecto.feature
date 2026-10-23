@@ -1,7 +1,6 @@
 # language: es
-# Spec 03 — Consultar el estado de un proyecto (Issue #6). Primera entrega: CA-1, CA-3 y CA-4.
-# Se agregan después (ver la spec): los escenarios del CA-2 (Sprint en curso), cuando exista la
-# spec 05, y los del CA-3 que cargan historias con Story Points, cuando exista la spec 07.
+# Spec 03 — Consultar el estado de un proyecto (Issue #6): CA-1, CA-3 y CA-4.
+# El CA-2 (Sprint en curso) lo implementa la spec 05 (CA-5): sus escenarios están en sprints.feature.
 Característica: Consultar el estado de un proyecto
   Para saber cómo viene avanzando
   Como integrante del equipo
@@ -30,6 +29,22 @@ Característica: Consultar el estado de un proyecto
       | 2026-12-15 | En curso    |
       | 2026-12-16 | Finalizado  |
       | 2027-03-01 | Finalizado  |
+
+  Escenario: Resumen del backlog con historias en todos los estados (CA-3)
+    Dado que el backlog tiene la historia "Registrar usuario" en estado "Completada" con 5 Story Points
+    Y que el backlog tiene la historia "Ver catálogo" en estado "Completada" con 3 Story Points
+    Y que el backlog tiene la historia "Buscar producto" en estado "En progreso" con 8 Story Points
+    Y que el backlog tiene la historia "Pagar pedido" en estado "Pendiente" sin estimar
+    Cuando consulto el estado del proyecto
+    Entonces el resumen del backlog tiene 4 historias: 1 pendiente, 1 en progreso y 2 completadas
+    Y el porcentaje de historias completadas es 50
+    Y los Story Points son 16 en total y 8 completados, con 1 historia sin estimar
+
+  Escenario: Una historia estimada que no está completada suma solo al total (CA-3)
+    Dado que el backlog tiene la historia "Registrar usuario" en estado "Pendiente" con 13 Story Points
+    Y que el backlog tiene la historia "Ver catálogo" en estado "Completada" sin estimar
+    Cuando consulto el estado del proyecto
+    Entonces los Story Points son 13 en total y 0 completados, con 1 historia sin estimar
 
   Escenario: Resumen de un backlog vacío (CA-3)
     Cuando consulto el estado del proyecto
