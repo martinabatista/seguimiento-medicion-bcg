@@ -63,7 +63,7 @@ func (s *ServicioBacklog) Modificar(ctx context.Context, proyectoID, id int64, d
 		return Historia{}, err
 	}
 	// spec 06 RN-4: en un Sprint abierto, "Completada" solo se pone o se saca desde el Sprint.
-	if h.Estado != actual.Estado && (h.Estado == EstadoCompletada || actual.Estado == EstadoCompletada) {
+	if cambiaCompletada(actual.Estado, h.Estado) {
 		enSprint, err := enSprintAbierto(ctx, s.sprints, proyectoID, id)
 		if err != nil {
 			return Historia{}, err
@@ -114,4 +114,10 @@ func (s *ServicioBacklog) Obtener(ctx context.Context, proyectoID, id int64) (Hi
 		return Historia{}, err
 	}
 	return s.historias.Obtener(ctx, proyectoID, id)
+}
+
+// cambiaCompletada indica si el cambio de estado pone o saca a la historia de "Completada"
+// (spec 06 RN-4). Pasar de Pendiente a En progreso, o al revés, no cuenta.
+func cambiaCompletada(antes, despues EstadoHistoria) bool {
+	return antes != despues && (antes == EstadoCompletada || despues == EstadoCompletada)
 }
