@@ -9,7 +9,7 @@ import (
 )
 
 // NewRouter arma las rutas de la API.
-func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBacklog, integrantes *dominio.ServicioIntegrantes, estado *dominio.ServicioEstado, sprints *dominio.ServicioSprints) http.Handler {
+func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBacklog, integrantes *dominio.ServicioIntegrantes, estado *dominio.ServicioEstado, sprints *dominio.ServicioSprints, poker *dominio.ServicioPlanningPoker) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", health)
 
@@ -48,6 +48,14 @@ func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBa
 	mux.HandleFunc("DELETE /api/proyectos/{id}/sprints/{sprintID}/historias/{historiaID}/completar", s.deshacer)
 	mux.HandleFunc("POST /api/proyectos/{id}/sprints/{sprintID}/cerrar", s.cerrar)
 	mux.HandleFunc("GET /api/proyectos/{id}/sprints/anteriores", s.anteriores)
+
+	pp := pokerHandler{servicio: poker}
+	mux.HandleFunc("POST /api/proyectos/{id}/votaciones", pp.abrir)
+	mux.HandleFunc("GET /api/proyectos/{id}/votaciones/{votacionID}", pp.ver)
+	mux.HandleFunc("POST /api/proyectos/{id}/votaciones/{votacionID}/votos", pp.votar)
+	mux.HandleFunc("POST /api/proyectos/{id}/votaciones/{votacionID}/revelar", pp.revelar)
+	mux.HandleFunc("POST /api/proyectos/{id}/votaciones/{votacionID}/rondas", pp.nuevaRonda)
+	mux.HandleFunc("POST /api/proyectos/{id}/votaciones/{votacionID}/acordar", pp.acordar)
 	return mux
 }
 

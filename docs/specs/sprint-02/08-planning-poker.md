@@ -1,11 +1,11 @@
 ---
 titulo: Planning Poker
-estado: in-review    # draft | in-review | approved | implemented
+estado: implemented  # draft | in-review | approved | implemented
 unidad: backend
 issue: "#12"
 sprint: 02
 autor: Florencia Cabeza
-aprobada_por: ""
+aprobada_por: "Martina Batista"
 fecha: 2026-10-23
 specs_relacionadas: ["02-integrantes", "04-product-backlog", "07-story-points"]
 ---
@@ -115,7 +115,7 @@ Origen: Consigna — Requerimiento 4 (mecanismo de Planning Poker: registrar est
 | El integrante no existe (o es de otro proyecto) | No encontrado: "El integrante no existe" |
 | La votación no existe (o es de otro proyecto) | No encontrado: "La votación no existe" |
 
-Si hay más de un problema, primero se informa lo que no existe (404), después el dato inválido (400) y por último el conflicto (409).
+Si hay más de un problema, primero se informa un pedido mal armado o un valor fuera de la escala (400), después lo que no existe (404) y por último el conflicto (409): el mismo orden que el resto de la API (specs 01, 04 y 07).
 
 ## Criterios de aceptación
 
@@ -340,6 +340,21 @@ Característica: Planning Poker
 
 Los pasos que no indican proyecto se refieren al proyecto de los Antecedentes, "Tienda Online". En las tablas, `(vacío)` representa un valor que falta (Gherkin no puede escribirlo), igual que en las specs 01, 04 y 07. Los pasos de proyectos, integrantes, backlog y Story Points (`que existe el proyecto…`, `que el proyecto tiene al integrante…`, `que el backlog tiene la historia…`, `la historia "…" tiene N Story Points`, `la historia "…" está sin estimar`) ya existen en las specs 01, 02, 04 y 07 y se reutilizan.
 
+## Trazabilidad
+
+Historia [#12](https://github.com/martinabatista/seguimiento-medicion-bcg/issues/12) → esta spec → criterios → escenarios de `backend/features/planning-poker.feature` → tests → código Go.
+
+| Criterio | Escenarios BDD | Tests Go | Código Go |
+|---|---|---|---|
+| CA-1 Abrir | Abrir una votación · No se pueden abrir dos · Historia completada · Proyecto sin Developers | `TestNuevaVotacion`, `TestPlanningPokerAbrirErrores`, `TestAbrirVotacion` | `dominio/planning_poker.go` (`NuevaVotacion`), `dominio/servicio_planning_poker.go` (`Abrir`), `api/planning_poker.go` (`abrir`), `postgres/esquema/06_votaciones.sql` |
+| CA-2 Votar | Un Developer vota · Cambia su voto · No es Developer · Solo valores de la escala | `TestVotar`, `TestPlanningPokerVotarErrores`, `TestPlanningPokerErrores` | `dominio/planning_poker.go` (`Votar`), `api/planning_poker.go` (`votar`) |
+| CA-3 Votos ocultos | Los votos están ocultos hasta revelar | `TestVistaDeVotacion`, `TestVotosOcultosEnLaAPI` | `dominio/planning_poker.go` (`Vista`), `api/planning_poker.go` (`votacionAJSON`) |
+| CA-4 Revelar | Revelar cuando votaron todos · Falta un voto · Ronda revelada no admite votos | `TestRevelar`, `TestRevelarVotacion` | `dominio/planning_poker.go` (`Revelar`) |
+| CA-5 Diferencias | Detectar diferencias · Sin diferencias · Empate en el más bajo | `TestResultadoDeRonda`, `TestRevelarVotacion` | `dominio/planning_poker.go` (`revelar`, `quienesVotaron`) |
+| CA-6 Nueva ronda | Empezar una nueva ronda · Sin revelar la actual | `TestNuevaRonda`, `TestNuevaRondaYAcordar`, `TestRepositorioVotaciones` | `dominio/planning_poker.go` (`NuevaRonda`), `postgres/votaciones.go` |
+| CA-7 Acordar | Registrar la acordada · Un valor que nadie votó · Sin revelar · Fuera de la escala · Votación cerrada · Abrir otra después de cerrar | `TestAcordar`, `TestPlanningPokerRecorridoCompleto`, `TestPlanningPokerAcordarHistoriaCompletada`, `TestNuevaRondaYAcordar` | `dominio/planning_poker.go` (`Acordar`), `dominio/servicio_planning_poker.go` (`Acordar` → `ServicioBacklog.Estimar`, spec 07) |
+| CA-8 Inexistentes | Historia que no existe · Votación que no existe · Integrante de otro proyecto | `TestPlanningPokerAbrirErrores`, `TestPlanningPokerVotarErrores`, `TestPlanningPokerErrores`, `TestRepositorioVotaciones` | `dominio/servicio_planning_poker.go` (`votacionConEquipo`), `api/planning_poker.go` (`leerIDsVotacion`) |
+
 ## Dependencias
 
 - Spec 02 (integrantes y sus roles): implementada.
@@ -350,18 +365,18 @@ Los pasos que no indican proyecto se refieren al proyecto de los Antecedentes, "
 
 ## Tareas
 
-- [ ] `[P1]` Votación, rondas, votos y cálculo de diferencias (RN-1 a RN-10) en `backend/dominio/` (TDD).
-- [ ] `[P1]` Casos de uso abrir, votar, ver, revelar, nueva ronda y registrar la acordada, usando la operación estimar de la spec 07.
-- [ ] `[P1]` Tablas de votaciones y votos en `backend/postgres/esquema/` y su repositorio en `backend/postgres/`.
-- [ ] `[P1]` Rutas de la API de Planning Poker en `backend/api/`.
-- [ ] `[P1]` Escenarios de `backend/features/planning-poker.feature` con sus pasos.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas, trampas).
+- [x] `[P1]` Votación, rondas, votos y cálculo de diferencias (RN-1 a RN-10) en `backend/dominio/` (TDD).
+- [x] `[P1]` Casos de uso abrir, votar, ver, revelar, nueva ronda y registrar la acordada, usando la operación estimar de la spec 07.
+- [x] `[P1]` Tablas de votaciones, rondas y votos en `backend/postgres/esquema/06_votaciones.sql` y su repositorio en `backend/postgres/votaciones.go`.
+- [x] `[P1]` Rutas de la API de Planning Poker en `backend/api/`.
+- [x] `[P1]` Escenarios de `backend/features/planning-poker.feature` con sus pasos en `features/planning_poker_test.go`.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas, trampas).
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented`.
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] Spec en estado `implemented`.

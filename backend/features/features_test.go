@@ -42,6 +42,7 @@ type mundo struct {
 	backlog     estadoBacklog     // pasos del backlog (spec 04), en backlog_test.go
 	integrantes estadoIntegrantes // pasos de integrantes (spec 02), en integrantes_test.go
 	sprints     estadoSprints     // pasos de Sprints (spec 05), en sprints_test.go
+	poker       estadoPoker       // pasos de Planning Poker (spec 08), en planning_poker_test.go
 	hoy         time.Time         // fecha de hoy fijada por un escenario (spec 03); vacía = la del sistema
 }
 
@@ -60,12 +61,15 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 		proyectos := memoria.NuevoRepositorioProyectos()
 		historias := memoria.NuevoRepositorioHistorias()
 		sprints := memoria.NuevoRepositorioSprints()
+		integrantes := memoria.NuevoRepositorioIntegrantes()
+		backlog := dominio.NuevoServicioBacklog(proyectos, historias, sprints)
 		*m = mundo{api: api.NewRouter(
 			dominio.NuevoServicioProyectos(proyectos),
-			dominio.NuevoServicioBacklog(proyectos, historias, sprints),
-			dominio.NuevoServicioIntegrantes(proyectos, memoria.NuevoRepositorioIntegrantes()),
+			backlog,
+			dominio.NuevoServicioIntegrantes(proyectos, integrantes),
 			dominio.NuevoServicioEstado(proyectos, historias, sprints, m.fechaDeHoy),
 			dominio.NuevoServicioSprints(proyectos, historias, sprints),
+			dominio.NuevoServicioPlanningPoker(proyectos, historias, integrantes, memoria.NuevoRepositorioVotaciones(), backlog),
 		)}
 		return ctx, nil
 	})
@@ -114,6 +118,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Story Points (spec 07)
 	m.registrarPasosStoryPoints(sc)
+
+	// Planning Poker (spec 08)
+	m.registrarPasosPlanningPoker(sc)
 }
 
 // ---------- helpers ----------
@@ -356,7 +363,7 @@ func (m *mundo) elResultadoEs(resultado string) error {
 		return m.elProyectoQuedaRegistrado()
 	case "registrada":
 		return m.laHistoriaQuedaRegistrada()
-	case "modificada", "estimada":
+	case "modificada", "estimada", "votado":
 		if m.respuesta.Code != http.StatusOK {
 			return fmt.Errorf("no se modificó: código %d, %s", m.respuesta.Code, m.respuesta.Body.String())
 		}
