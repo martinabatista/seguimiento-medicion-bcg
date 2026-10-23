@@ -1,11 +1,11 @@
 ---
 titulo: Estimar historias con Story Points
-estado: in-review    # draft | in-review | approved | implemented
+estado: implemented  # draft | in-review | approved | implemented
 unidad: backend
 issue: "#10"
 sprint: 01
 autor: Florencia Cabeza
-aprobada_por: ""
+aprobada_por: "Martina Batista"
 fecha: 2026-10-23
 specs_relacionadas: ["04-product-backlog", "06-cerrar-sprint", "08-planning-poker"]
 ---
@@ -216,6 +216,19 @@ Característica: Estimar historias con Story Points
 
 Los pasos que no indican proyecto se refieren al proyecto de los Antecedentes, "Tienda Online". En las tablas, `(vacío)` representa un valor que falta (Gherkin no puede escribirlo), igual que en las specs 01 y 04. Los pasos del backlog y del Sprint (`que el backlog tiene la historia…`, `que existe un Sprint…`, `que completé en el Sprint…`, `deshago en el Sprint…`) ya existen en las specs 04, 05 y 06 y se reutilizan.
 
+## Trazabilidad
+
+Historia [#10](https://github.com/martinabatista/seguimiento-medicion-bcg/issues/10) → esta spec → criterios → escenarios de `backend/features/story-points.feature` → tests → código Go.
+
+| Criterio | Escenarios BDD | Tests Go | Código Go |
+|---|---|---|---|
+| CA-1 Asignar | Asignar Story Points a una historia sin estimar · Estimar una historia en progreso | `TestEstimar`, `TestEstimarEnProgreso`, `TestEstimarHistoria`, `TestStoryPointsDeHistoria` | `dominio/servicio_story_points.go` (`Estimar`), `api/story_points.go` (`estimar`) |
+| CA-2 Cambiar y quitar | Cambiar la estimación · Quitar la estimación · Quitar la de una historia sin estimar | `TestEstimar`, `TestQuitarEstimacion`, `TestQuitarEstimacionHistoria`, `TestStoryPointsDeHistoria` | `dominio/servicio_story_points.go` (`QuitarEstimacion`, `cambiarEstimacion`), `api/story_points.go` (`quitarEstimacion`) |
+| CA-3 Solo la escala | Solo se aceptan valores de la escala · Un valor fuera de la escala no cambia la estimación | `TestEnEscala`, `TestParsearStoryPoints`, `TestErroresDeStoryPoints`, `TestEstimarFueraDeEscalaNoCambia`, `TestEstimarHistoriaInvalida` | `dominio/story_points.go` (`EnEscala`, `ParsearStoryPoints`), `dominio/errores.go` |
+| CA-4 Completadas | No se puede estimar una completada · No se puede quitar la de una completada · Completada y deshecha se vuelve a estimar | `TestEstimarCompletada`, `TestEstimarHistoriaCompletada` | `dominio/servicio_story_points.go` (`cambiarEstimacion`) |
+| CA-5 Consultar la escala | Consultar la escala de Story Points | `TestEscalaStoryPoints`, `TestConsultarEscalaStoryPoints` | `dominio/story_points.go` (`EscalaStoryPoints`), `api/story_points.go` (`escalaStoryPoints`) |
+| CA-6 Inexistentes | Estimar en un proyecto que no existe · Historia que no existe · Historia de otro proyecto | `TestEstimarInexistente`, `TestEstimarHistoriaInexistente` | `dominio/servicio_story_points.go` (`cambiarEstimacion`), `api/backlog.go` (`leerIDs`) |
+
 ## Dependencias
 
 - Spec 04 (backlog): implementada. La historia ya tiene el dato de Story Points, que arranca sin estimar.
@@ -225,19 +238,19 @@ Los pasos que no indican proyecto se refieren al proyecto de los Antecedentes, "
 
 ## Tareas
 
-- [ ] `[P1]` Escala de Story Points y sus reglas (RN-1, RN-2, RN-4) en `backend/dominio/` (TDD).
-- [ ] `[P1]` Casos de uso asignar/cambiar, quitar la estimación y consultar la escala (RN-3, RN-5, RN-6).
-- [ ] `[P1]` Rutas de la API para estimar, quitar la estimación y consultar la escala en `backend/api/`.
-- [ ] `[P1]` Escenarios de `backend/features/story-points.feature` con sus pasos.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas).
+- [x] `[P1]` Escala de Story Points y sus reglas (RN-1, RN-2, RN-4) en `backend/dominio/` (TDD).
+- [x] `[P1]` Casos de uso asignar/cambiar, quitar la estimación y consultar la escala (RN-3, RN-5, RN-6).
+- [x] `[P1]` Rutas de la API para estimar, quitar la estimación y consultar la escala en `backend/api/`.
+- [x] `[P1]` Escenarios de `backend/features/story-points.feature` con sus pasos en `features/story_points_test.go`.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas).
 
 No hace falta tabla nueva: la tabla de historias (spec 04) ya guarda los Story Points.
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented`.
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] Spec en estado `implemented`.
