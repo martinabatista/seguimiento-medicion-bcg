@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/martinabatista/seguimiento-medicion-bcg/backend/api"
 	"github.com/martinabatista/seguimiento-medicion-bcg/backend/dominio"
@@ -28,13 +29,16 @@ func main() {
 	defer db.Close()
 
 	repoProyectos := postgres.NuevoRepositorioProyectos(db)
+	repoHistorias := postgres.NuevoRepositorioHistorias(db)
 	proyectos := dominio.NuevoServicioProyectos(repoProyectos)
-	backlog := dominio.NuevoServicioBacklog(repoProyectos, postgres.NuevoRepositorioHistorias(db))
+	backlog := dominio.NuevoServicioBacklog(repoProyectos, repoHistorias)
 	integrantes := dominio.NuevoServicioIntegrantes(repoProyectos, postgres.NuevoRepositorioIntegrantes(db))
+	// La fecha de hoy del estado del proyecto (spec 03) es la fecha local del servidor.
+	estado := dominio.NuevoServicioEstado(repoProyectos, repoHistorias, time.Now)
 
 	addr := ":" + port
 	log.Printf("API escuchando en http://localhost%s", addr)
-	if err := http.ListenAndServe(addr, api.NewRouter(proyectos, backlog, integrantes)); err != nil {
+	if err := http.ListenAndServe(addr, api.NewRouter(proyectos, backlog, integrantes, estado)); err != nil {
 		log.Fatal(err)
 	}
 }
