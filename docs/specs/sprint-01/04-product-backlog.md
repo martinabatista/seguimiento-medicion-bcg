@@ -276,7 +276,7 @@ Historia [#7](https://github.com/martinabatista/seguimiento-medicion-bcg/issues/
 ## Dependencias
 
 - Spec 01 (proyectos): el backlog pertenece a un proyecto existente.
-- La usan: spec 05 (asignar historias a un Sprint), spec 06 (completar historias y cerrar el Sprint), spec 07 (Story Points) y spec 08 (Planning Poker). Si esas specs cambian el estado o los Story Points de forma automática, se actualiza esta.
+- La usan: spec 05 (asignar historias a un Sprint), spec 06 (completar historias y cerrar el Sprint), spec 07 (Story Points), spec 08 (Planning Poker) y spec 09 (registro de esfuerzo; agrega que no se puede eliminar una historia con esfuerzo registrado, RN-10). Si esas specs cambian el estado o los Story Points de forma automática, se actualiza esta.
 
 ## Tareas
 
