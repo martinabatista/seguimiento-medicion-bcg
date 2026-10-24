@@ -143,7 +143,7 @@ func responderError(w http.ResponseWriter, err error) {
 		writeJSON(w, http.StatusConflict, errorJSON{conflicto.Mensaje})
 	case errors.Is(err, dominio.ErrProyectoNoExiste), errors.Is(err, dominio.ErrHistoriaNoExiste),
 		errors.Is(err, dominio.ErrIntegranteNoExiste), errors.Is(err, dominio.ErrSprintNoExiste),
-		errors.Is(err, dominio.ErrVotacionNoExiste):
+		errors.Is(err, dominio.ErrVotacionNoExiste), errors.Is(err, dominio.ErrRegistroEsfuerzoNoExiste):
 		writeJSON(w, http.StatusNotFound, errorJSON{err.Error()})
 	case errors.Is(err, dominio.ErrIntegranteYaRegistrado):
 		writeJSON(w, http.StatusConflict, errorJSON{err.Error()})

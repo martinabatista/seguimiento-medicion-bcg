@@ -9,7 +9,7 @@ import (
 )
 
 // NewRouter arma las rutas de la API.
-func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBacklog, integrantes *dominio.ServicioIntegrantes, estado *dominio.ServicioEstado, sprints *dominio.ServicioSprints, poker *dominio.ServicioPlanningPoker, metricas *dominio.ServicioMetricas) http.Handler {
+func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBacklog, integrantes *dominio.ServicioIntegrantes, estado *dominio.ServicioEstado, sprints *dominio.ServicioSprints, poker *dominio.ServicioPlanningPoker, metricas *dominio.ServicioMetricas, esfuerzo *dominio.ServicioEsfuerzo) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", health)
 
@@ -59,6 +59,11 @@ func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBa
 
 	me := metricasHandler{servicio: metricas}
 	mux.HandleFunc("GET /api/proyectos/{id}/metricas", me.consultar)
+
+	es := esfuerzoHandler{servicio: esfuerzo}
+	mux.HandleFunc("POST /api/proyectos/{id}/backlog/{historiaID}/esfuerzo", es.registrar)
+	mux.HandleFunc("GET /api/proyectos/{id}/backlog/{historiaID}/esfuerzo", es.consultar)
+	mux.HandleFunc("DELETE /api/proyectos/{id}/backlog/{historiaID}/esfuerzo/{registroID}", es.eliminar)
 	return mux
 }
 

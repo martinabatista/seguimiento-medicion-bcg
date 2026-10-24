@@ -1,11 +1,11 @@
 ---
 titulo: Registrar esfuerzo
-estado: in-review    # draft | in-review | approved | implemented
+estado: implemented  # draft | in-review | approved | implemented
 unidad: backend
 issue: "#13"
 sprint: 02
 autor: Luana Guajardo
-aprobada_por: ""
+aprobada_por: "Martina Batista"
 fecha: 2026-10-23
 specs_relacionadas: ["01-proyectos", "02-integrantes", "03-estado-proyecto", "04-product-backlog"]
 ---
@@ -289,17 +289,17 @@ Los pasos que no indican proyecto se refieren al de los Antecedentes, "Tienda On
 
 ## Tareas
 
-- [ ] `[P1]` Registro de esfuerzo en `backend/dominio/` con las validaciones RN-3 a RN-5, la suma (RN-6) y el orden (RN-7) (TDD).
-- [ ] `[P1]` Casos de uso registrar, consultar y eliminar, con la verificación de proyecto, historia e integrante (RN-1, RN-2, RN-8, RN-9), y repositorio en memoria.
-- [ ] `[P1]` Regla del backlog: no eliminar una historia con esfuerzo (RN-10).
-- [ ] `[P1]` Tabla `08_esfuerzo.sql`, repositorio PostgreSQL y rutas REST (`/api/proyectos/{id}/backlog/{historiaID}/esfuerzo`), con escenarios de `backend/features/registro-esfuerzo.feature`.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints, specs relacionadas, trampas).
+- [x] `[P1]` Registro de esfuerzo en `backend/dominio/` con las validaciones RN-3 a RN-5, la suma (RN-6) y el orden (RN-7) (TDD).
+- [x] `[P1]` Casos de uso registrar, consultar y eliminar, con la verificación de proyecto, historia e integrante (RN-1, RN-2, RN-8, RN-9), y repositorio en memoria.
+- [x] `[P1]` Regla del backlog: no eliminar una historia con esfuerzo (RN-10).
+- [x] `[P1]` Tabla `08_esfuerzo.sql`, repositorio PostgreSQL y rutas REST (`/api/proyectos/{id}/backlog/{historiaID}/esfuerzo`), con escenarios de `backend/features/registro-esfuerzo.feature`.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints, specs relacionadas, trampas).
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
-- [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented`.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
+- [x] CI en verde (gofmt / vet / tests / lint / build).
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] Spec en estado `implemented`.

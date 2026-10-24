@@ -59,8 +59,12 @@ Endpoints disponibles:
 | `POST …/votaciones/{votacionID}/rondas` | Empezar una nueva ronda | 200 votación · 404 · 409 |
 | `POST …/votaciones/{votacionID}/acordar` | Registrar la acordada `{"story_points"}`: estima la historia y cierra | 200 votación · 400 · 404 · 409 |
 | `GET /api/proyectos/{id}/metricas` | Métricas de avance por Sprint y del proyecto (spec 10) | 200 · 404 |
+| `POST /api/proyectos/{id}/backlog/{historiaID}/esfuerzo` | Registrar esfuerzo `{"integrante_id", "fecha", "actividad", "horas"}` (spec 09) | 201 registro · 400 · 404 |
+| `GET /api/proyectos/{id}/backlog/{historiaID}/esfuerzo` | Esfuerzo de la historia por fecha, con el total | 200 · 404 |
+| `DELETE …/esfuerzo/{registroID}` | Eliminar un registro de esfuerzo | 204 · 404 |
 
-`DELETE /api/proyectos/{id}/backlog/{historiaID}` responde 409 si la historia está en un Sprint abierto (spec 05 CA-6).
+`DELETE /api/proyectos/{id}/backlog/{historiaID}` responde 409 si la historia está en un Sprint abierto (spec 05 CA-6)
+o si tiene esfuerzo registrado (spec 09 CA-7).
 `PUT /api/proyectos/{id}/backlog/{historiaID}` responde 409 si pone o saca `Completada` a una historia de un
 Sprint abierto: se completa desde el Sprint (spec 06 CA-5).
 
@@ -96,6 +100,11 @@ Métricas en JSON: `{"sprints": [{"sprint_id", "numero", "estado", "parcial", "h
 "historias_completadas", "porcentaje_completadas", "story_points_planificados", "story_points_completados"}}`.
 `sprints` va por fecha de inicio; `parcial` es `true` en el Sprint abierto. `velocidad` es un número con un
 decimal (6.5) o `null` sin Sprints cerrados; `totales` suma solo los Sprints cerrados.
+
+Esfuerzo en JSON: registro `{"id", "proyecto_id", "historia_id", "integrante_id", "integrante_nombre", "fecha",
+"actividad", "horas"}`; consulta `{"registros": [...], "total_horas"}`. `horas` y `total_horas` son números
+con hasta 2 decimales (`2.5`, `0.3`), exactos: se arman desde centésimas enteras. Los registros van por
+fecha y, a igual fecha, por orden de carga.
 
 ## Decisiones técnicas
 
@@ -207,6 +216,12 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   `Sprint.StoryPointsAlCerrar` (los congela `ServicioSprints.Cerrar`), `postgres/esquema/07_sprint_historias_story_points.sql`,
   `api/metricas.go`, `features/metricas-avance.feature` (pasos en `features/metricas_test.go`). El Dashboard
   (spec 13) y el reporte (spec 14) usan estas métricas.
+- `docs/specs/sprint-02/09-registro-esfuerzo.md` — esfuerzo: `dominio/esfuerzo.go` (`NuevoRegistroEsfuerzo`,
+  `ParsearHoras`, `HorasATexto`, `ResumirEsfuerzo`), `dominio/servicio_esfuerzo.go`, la regla al eliminar en
+  `ServicioBacklog.Eliminar` (RN-10), `memoria/esfuerzo.go`, `postgres/esfuerzo.go`,
+  `postgres/esquema/08_esfuerzo.sql`, `api/esfuerzo.go`, `features/registro-esfuerzo.feature` (pasos en
+  `features/esfuerzo_test.go`). La spec 12 (horas reales y desviación) y la 14 (reporte) usan este esfuerzo:
+  sumar `Centesimas`, nunca horas con decimales.
 
 ## Cómo testear
 
@@ -250,6 +265,13 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
   la del paso `que hoy es "AAAA-MM-DD"` (sin ese paso, la del sistema). Hacer lo mismo en cualquier
   cálculo que dependa del día (por ejemplo, el Sprint en curso).
 - `go test -race` necesita cgo: en Windows sin gcc no corre localmente; la CI (Linux) sí lo corre.
+- Horas del esfuerzo (spec 09): se guardan y se suman en **centésimas enteras** (`Centesimas`, columna
+  `centesimas`); nunca con `float64`, porque 0,1 + 0,2 daría 0,30000000000000004. Solo la API las pasa a
+  decimal con `HorasATexto`. La spec 12 tiene que seguir igual al sumar horas reales.
+- `registros_esfuerzo.historia_id` **no** tiene `ON DELETE CASCADE` (a diferencia de Sprints y votaciones):
+  la base también impide borrar una historia con esfuerzo (spec 09 RN-10). Si un test necesita borrar
+  historias con esfuerzo, primero tiene que borrar sus registros.
+- La tabla `08_esfuerzo.sql` obliga a recrear la base local (`docker compose down -v && docker compose up -d`).
 - Los tests de integración (`postgres/*_test.go`) usan la misma base que `go run ./cmd/api` y la dejan
   con sus datos de prueba (por ejemplo, un Sprint cerrado). Antes de probar la API a mano, vaciarla:
   `docker compose exec -T db psql -U sme -d sme -c "TRUNCATE proyectos RESTART IDENTITY CASCADE"`.
@@ -271,4 +293,4 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 03 implementada).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 09).
