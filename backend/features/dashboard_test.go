@@ -1,7 +1,8 @@
 package features
 
 // Pasos de godog para los escenarios del Dashboard (spec 13, dashboard.feature). Reutiliza los
-// pasos de proyectos, backlog, Story Points, Sprints y fecha de hoy para armar el estado.
+// pasos de proyectos, backlog, Story Points, Sprints y fecha de hoy para armar el estado, y
+// "todavía no hay velocidad del equipo" de las métricas (spec 10): lee el mismo campo "velocidad".
 
 import (
 	"encoding/json"
@@ -26,7 +27,6 @@ func (m *mundo) registrarPasosDashboard(sc *godog.ScenarioContext) {
 	sc.Step(`^el backlog tiene (\d+) de (\d+) historias completadas, el (\d+) %$`, m.elBacklogTieneHistoriasCompletadas)
 	sc.Step(`^el backlog tiene (\d+) de (\d+) Story Points completados y (\d+) historias? sin estimar$`, m.elBacklogTieneStoryPointsCompletados)
 	sc.Step(`^la velocidad del equipo es ([\d.]+)$`, m.laVelocidadDelEquipoEs)
-	sc.Step(`^todavía no hay velocidad del equipo$`, m.todaviaNoHayVelocidad)
 	sc.Step(`^el gráfico de Story Points muestra el "([^"]*)" con (\d+) planificados y (\d+) completados(, parcial)?$`, m.elGraficoDeStoryPointsMuestra)
 	sc.Step(`^el gráfico de velocidad muestra solo el "([^"]*)" con (\d+) Story Points completados$`, m.elGraficoDeVelocidadMuestraSolo)
 	sc.Step(`^el promedio del gráfico de velocidad es ([\d.]+)$`, m.elPromedioDelGraficoDeVelocidadEs)
@@ -201,17 +201,6 @@ func (m *mundo) laVelocidadDelEquipoEs(velocidad float64) error {
 	}
 	if d.Velocidad == nil || *d.Velocidad != velocidad {
 		return fmt.Errorf("velocidad = %s, se esperaba %v", textoDeVelocidad(d.Velocidad), velocidad)
-	}
-	return nil
-}
-
-func (m *mundo) todaviaNoHayVelocidad() error {
-	d, err := m.dashboardRespondido()
-	if err != nil {
-		return err
-	}
-	if d.Velocidad != nil || d.Graficos.Velocidad.Promedio != nil {
-		return fmt.Errorf("velocidad = %s, se esperaba que no haya", textoDeVelocidad(d.Velocidad))
 	}
 	return nil
 }

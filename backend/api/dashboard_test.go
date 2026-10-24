@@ -77,8 +77,9 @@ func TestDashboardConSprints(t *testing.T) {
 		g.Velocidad.Promedio == nil || *g.Velocidad.Promedio != 5 {
 		t.Errorf("gráfico de velocidad = %+v, se esperaba solo el Sprint 1 con 5 y promedio 5 (CA-6)", g.Velocidad)
 	}
-	if len(g.BacklogPorEstado) != 3 || g.BacklogPorEstado[0] != (porcionBacklogJSON{"Pendiente", 1}) ||
-		g.BacklogPorEstado[1] != (porcionBacklogJSON{"En progreso", 1}) || g.BacklogPorEstado[2] != (porcionBacklogJSON{"Completada", 1}) {
+	// Asignar una historia a un Sprint no le cambia el estado (spec 05): "Ver catálogo" sigue Pendiente.
+	if len(g.BacklogPorEstado) != 3 || g.BacklogPorEstado[0] != (porcionBacklogJSON{"Pendiente", 2}) ||
+		g.BacklogPorEstado[1] != (porcionBacklogJSON{"En progreso", 0}) || g.BacklogPorEstado[2] != (porcionBacklogJSON{"Completada", 1}) {
 		t.Errorf("backlog por estado = %+v (CA-7)", g.BacklogPorEstado)
 	}
 }
