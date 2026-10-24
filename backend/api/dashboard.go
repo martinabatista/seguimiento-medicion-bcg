@@ -88,12 +88,7 @@ func (h dashboardHandler) consultar(w http.ResponseWriter, r *http.Request) {
 }
 
 func dashboardAJSON(d dominio.Dashboard) dashboardJSON {
-	var velocidad *float64
-	if d.HayVelocidad {
-		// El dominio calcula en décimas, con enteros; recién acá se pasa a decimal para el JSON.
-		v := float64(d.VelocidadDecimas) / 10
-		velocidad = &v
-	}
+	velocidad := velocidadAJSON(d.HayVelocidad, d.VelocidadDecimas)
 	out := dashboardJSON{
 		Proyecto:         aJSON(d.Proyecto),
 		Estado:           string(d.Estado),

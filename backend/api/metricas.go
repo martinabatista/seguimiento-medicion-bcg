@@ -72,10 +72,17 @@ func (h metricasHandler) consultar(w http.ResponseWriter, r *http.Request) {
 			StoryPointsCompletados:  s.StoryPointsCompletados,
 		})
 	}
-	if m.HayVelocidad {
-		// El dominio calcula en décimas, con enteros; recién acá se pasa a decimal para el JSON.
-		v := float64(m.VelocidadDecimas) / 10
-		respuesta.Velocidad = &v
-	}
+	respuesta.Velocidad = velocidadAJSON(m.HayVelocidad, m.VelocidadDecimas)
 	writeJSON(w, http.StatusOK, respuesta)
+}
+
+// velocidadAJSON pasa la velocidad a decimal para el JSON (6.5), o nil si no hay (spec 10 RN-6). El
+// dominio la calcula en décimas, con enteros; recién acá se convierte. La usan las métricas y el
+// Dashboard (spec 13), así la velocidad sale igual en las dos rutas.
+func velocidadAJSON(hay bool, decimas int) *float64 {
+	if !hay {
+		return nil
+	}
+	v := float64(decimas) / 10
+	return &v
 }
