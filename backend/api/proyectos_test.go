@@ -20,7 +20,8 @@ func routerDePrueba() http.Handler {
 	historias := memoria.NuevoRepositorioHistorias()
 	sprints := memoria.NuevoRepositorioSprints()
 	integrantes := memoria.NuevoRepositorioIntegrantes()
-	backlog := dominio.NuevoServicioBacklog(proyectos, historias, sprints)
+	esfuerzo := memoria.NuevoRepositorioEsfuerzo()
+	backlog := dominio.NuevoServicioBacklog(proyectos, historias, sprints, esfuerzo)
 	return NewRouter(
 		dominio.NuevoServicioProyectos(proyectos),
 		backlog,
@@ -29,6 +30,7 @@ func routerDePrueba() http.Handler {
 		dominio.NuevoServicioSprints(proyectos, historias, sprints),
 		dominio.NuevoServicioPlanningPoker(proyectos, historias, integrantes, memoria.NuevoRepositorioVotaciones(), backlog),
 		dominio.NuevoServicioMetricas(proyectos, historias, sprints),
+		dominio.NuevoServicioEsfuerzo(proyectos, historias, integrantes, esfuerzo, func() time.Time { return hoyDePrueba }),
 	)
 }
 

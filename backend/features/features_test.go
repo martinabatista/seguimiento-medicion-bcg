@@ -43,6 +43,7 @@ type mundo struct {
 	integrantes estadoIntegrantes // pasos de integrantes (spec 02), en integrantes_test.go
 	sprints     estadoSprints     // pasos de Sprints (spec 05), en sprints_test.go
 	poker       estadoPoker       // pasos de Planning Poker (spec 08), en planning_poker_test.go
+	esfuerzo    estadoEsfuerzo    // pasos del registro de esfuerzo (spec 09), en esfuerzo_test.go
 	hoy         time.Time         // fecha de hoy fijada por un escenario (spec 03); vacía = la del sistema
 }
 
@@ -62,7 +63,8 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 		historias := memoria.NuevoRepositorioHistorias()
 		sprints := memoria.NuevoRepositorioSprints()
 		integrantes := memoria.NuevoRepositorioIntegrantes()
-		backlog := dominio.NuevoServicioBacklog(proyectos, historias, sprints)
+		esfuerzo := memoria.NuevoRepositorioEsfuerzo()
+		backlog := dominio.NuevoServicioBacklog(proyectos, historias, sprints, esfuerzo)
 		*m = mundo{api: api.NewRouter(
 			dominio.NuevoServicioProyectos(proyectos),
 			backlog,
@@ -71,6 +73,7 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 			dominio.NuevoServicioSprints(proyectos, historias, sprints),
 			dominio.NuevoServicioPlanningPoker(proyectos, historias, integrantes, memoria.NuevoRepositorioVotaciones(), backlog),
 			dominio.NuevoServicioMetricas(proyectos, historias, sprints),
+			dominio.NuevoServicioEsfuerzo(proyectos, historias, integrantes, esfuerzo, m.fechaDeHoy),
 		)}
 		return ctx, nil
 	})
@@ -125,6 +128,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Planning Poker (spec 08)
 	m.registrarPasosPlanningPoker(sc)
+
+	// Registro de esfuerzo (spec 09)
+	m.registrarPasosEsfuerzo(sc)
 }
 
 // ---------- helpers ----------
@@ -353,11 +359,15 @@ func (m *mundo) hayProyectosRegistrados(cantidad int) error {
 	return nil
 }
 
-// elResultadoEs acepta "registrado" (proyecto, o integrante si el escenario pidió agregar uno,
-// spec 02), "registrada" o "modificada" (historia, spec 04) o el mensaje de error esperado.
+// elResultadoEs acepta "registrado" (el registro de esfuerzo, spec 09, el Sprint, spec 05, o el
+// integrante, spec 02, si el escenario pidió uno; si no, el proyecto), "registrada" o "modificada"
+// (historia, spec 04) o el mensaje de error esperado.
 func (m *mundo) elResultadoEs(resultado string) error {
 	switch resultado {
 	case "registrado":
+		if m.esfuerzo.registroPedido {
+			return m.elRegistroQuedaGuardado()
+		}
 		if m.sprints.altaPedida {
 			return m.elSprintQuedaRegistrado()
 		}

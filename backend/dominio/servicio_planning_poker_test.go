@@ -27,7 +27,7 @@ func nuevoPoker(t *testing.T) pokerDePrueba {
 	proyectos := memoria.NuevoRepositorioProyectos()
 	historias := memoria.NuevoRepositorioHistorias()
 	integrantes := memoria.NuevoRepositorioIntegrantes()
-	backlog := dominio.NuevoServicioBacklog(proyectos, historias, memoria.NuevoRepositorioSprints())
+	backlog := dominio.NuevoServicioBacklog(proyectos, historias, memoria.NuevoRepositorioSprints(), memoria.NuevoRepositorioEsfuerzo())
 
 	tienda, _ := proyectos.Guardar(ctx, dominio.Proyecto{Nombre: "Tienda Online", Descripcion: "d", FechaInicio: f("2026-11-01"), FechaFin: f("2026-12-15")})
 	turnos, _ := proyectos.Guardar(ctx, dominio.Proyecto{Nombre: "App Turnos", Descripcion: "d", FechaInicio: f("2026-11-05"), FechaFin: f("2027-01-20")})

@@ -13,6 +13,7 @@ import (
 type backlogDePrueba struct {
 	servicio  *dominio.ServicioBacklog
 	historias *memoria.RepositorioHistorias
+	esfuerzo  *memoria.RepositorioEsfuerzo
 	tienda    int64 // proyecto "Tienda Online"
 	turnos    int64 // proyecto "App Turnos"
 }
@@ -27,9 +28,11 @@ func nuevoBacklog(t *testing.T) backlogDePrueba {
 		t.Fatalf("crear proyecto de partida: %v", err)
 	}
 	turnos, _ := proyectos.Guardar(ctx, dominio.Proyecto{Nombre: "App Turnos", Descripcion: "Turnos médicos", FechaInicio: f("2026-11-05"), FechaFin: f("2027-01-20")})
+	esfuerzo := memoria.NuevoRepositorioEsfuerzo()
 	return backlogDePrueba{
-		servicio:  dominio.NuevoServicioBacklog(proyectos, historias, memoria.NuevoRepositorioSprints()),
+		servicio:  dominio.NuevoServicioBacklog(proyectos, historias, memoria.NuevoRepositorioSprints(), esfuerzo),
 		historias: historias,
+		esfuerzo:  esfuerzo,
 		tienda:    tienda.ID,
 		turnos:    turnos.ID,
 	}
@@ -214,5 +217,26 @@ func TestBacklogProyectoInexistente(t *testing.T) {
 	}
 	if _, err := b.servicio.Modificar(ctx, b.tienda, 999, datos("x", 1), "Pendiente"); !errors.Is(err, dominio.ErrHistoriaNoExiste) {
 		t.Errorf("Modificar historia inexistente: error = %v", err)
+	}
+}
+
+// spec 09 RN-10 (CA-7): no se elimina del backlog una historia con esfuerzo registrado; sin
+// registros, sí.
+func TestBacklogNoEliminaHistoriaConEsfuerzo(t *testing.T) {
+	b := nuevoBacklog(t)
+	ctx := context.Background()
+	h, _ := b.servicio.Crear(ctx, b.tienda, datos("Registrar usuario", 1))
+	r, _ := b.esfuerzo.Guardar(ctx, dominio.RegistroEsfuerzo{ProyectoID: b.tienda, HistoriaID: h.ID, IntegranteID: 1, Fecha: f("2026-11-18"), Actividad: "Backend", Centesimas: 200})
+
+	if err := b.servicio.Eliminar(ctx, b.tienda, h.ID); !errors.Is(err, dominio.ErrHistoriaConEsfuerzo) {
+		t.Fatalf("Eliminar con esfuerzo: error = %v, se esperaba %v", err, dominio.ErrHistoriaConEsfuerzo)
+	}
+	if _, err := b.servicio.Obtener(ctx, b.tienda, h.ID); err != nil {
+		t.Fatalf("la historia ya no existe: %v", err)
+	}
+
+	b.esfuerzo.Eliminar(ctx, b.tienda, h.ID, r.ID)
+	if err := b.servicio.Eliminar(ctx, b.tienda, h.ID); err != nil {
+		t.Errorf("Eliminar sin esfuerzo: %v", err)
 	}
 }
