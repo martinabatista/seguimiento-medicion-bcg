@@ -15,6 +15,7 @@ func (m *mundo) registrarPasosEstado(sc *godog.ScenarioContext) {
 	// Contexto y acciones
 	sc.Step(`^que hoy es "([^"]*)"$`, m.queHoyEs)
 	sc.Step(`^que el backlog tiene la historia "([^"]*)" en estado "([^"]*)" sin estimar$`, m.queElBacklogTieneLaHistoriaEnEstado)
+	sc.Step(`^que el backlog tiene la historia "([^"]*)" en estado "([^"]*)" con (\d+) Story Points$`, m.queElBacklogTieneLaHistoriaEstimada)
 	sc.Step(`^que el backlog del proyecto "([^"]*)" tiene la historia "([^"]*)" en estado "([^"]*)" sin estimar$`, m.queElBacklogDelProyectoTieneLaHistoriaEnEstado)
 	sc.Step(`^que el backlog tiene (\d+) historias de las cuales (\d+) están completadas$`, m.queElBacklogTieneHistoriasCompletadas)
 	sc.Step(`^la historia "([^"]*)" pasa a estado "([^"]*)"$`, m.laHistoriaPasaAEstado)
@@ -96,6 +97,25 @@ func (m *mundo) queHoyEs(texto string) error {
 
 func (m *mundo) queElBacklogTieneLaHistoriaEnEstado(titulo, estado string) error {
 	return m.historiaEnEstado(m.backlog.principal, titulo, estado)
+}
+
+// queElBacklogTieneLaHistoriaEstimada la crea, la estima y después la pasa al estado pedido: una
+// historia completada ya no se puede estimar (spec 07).
+func (m *mundo) queElBacklogTieneLaHistoriaEstimada(titulo, estado string, storyPoints int) error {
+	if err := m.historiaEnEstado(m.backlog.principal, titulo, "Pendiente"); err != nil {
+		return err
+	}
+	if err := m.queEstimeLaHistoria(titulo, storyPoints); err != nil {
+		return err
+	}
+	if estado == "Pendiente" {
+		return nil
+	}
+	id, err := m.historiaLlamada(titulo)
+	if err != nil {
+		return err
+	}
+	return m.cambiarEstadoDeHistoria(m.backlog.principal, id, titulo, estado)
 }
 
 func (m *mundo) queElBacklogDelProyectoTieneLaHistoriaEnEstado(proyecto, titulo, estado string) error {
