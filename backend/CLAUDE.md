@@ -62,6 +62,7 @@ Endpoints disponibles:
 | `POST /api/proyectos/{id}/backlog/{historiaID}/esfuerzo` | Registrar esfuerzo `{"integrante_id", "fecha", "actividad", "horas"}` (spec 09) | 201 registro · 400 · 404 |
 | `GET /api/proyectos/{id}/backlog/{historiaID}/esfuerzo` | Esfuerzo de la historia por fecha, con el total | 200 · 404 |
 | `DELETE …/esfuerzo/{registroID}` | Eliminar un registro de esfuerzo | 204 · 404 |
+| `GET /api/proyectos/{id}/dashboard` | Indicadores y datos de los 3 gráficos del Dashboard (spec 13) | 200 · 404 |
 
 `DELETE /api/proyectos/{id}/backlog/{historiaID}` responde 409 si la historia está en un Sprint abierto (spec 05 CA-6)
 o si tiene esfuerzo registrado (spec 09 CA-7).
@@ -100,6 +101,15 @@ Métricas en JSON: `{"sprints": [{"sprint_id", "numero", "estado", "parcial", "h
 "historias_completadas", "porcentaje_completadas", "story_points_planificados", "story_points_completados"}}`.
 `sprints` va por fecha de inicio; `parcial` es `true` en el Sprint abierto. `velocidad` es un número con un
 decimal (6.5) o `null` sin Sprints cerrados; `totales` suma solo los Sprints cerrados.
+
+Dashboard en JSON: `{"proyecto": {…proyecto…}, "estado", "dias_para_empezar", "dias_para_terminar",
+"sprint_en_curso", "backlog", "velocidad", "graficos"}`. Los días son `null` cuando no corresponden (solo uno
+tiene número, según el estado; ninguno si `Finalizado`). `sprint_en_curso` es `{"id", "numero", "sprint_goal",
+"fecha_fin", "dias_restantes", "story_points_planificados", "story_points_completados"}` o `null`. `backlog` es
+`{"total", "completadas", "porcentaje_completadas", "story_points_totales", "story_points_completados",
+"sin_estimar"}`. `graficos` es `{"story_points_por_sprint": [{"sprint", "numero", "planificados", "completados",
+"parcial"}], "velocidad": {"sprints": [{"sprint", "numero", "completados"}], "promedio"}, "backlog_por_estado":
+[{"estado", "cantidad"}]}` (siempre los 3 estados, en orden). Todo sale de las specs 03 y 10 sin recalcular.
 
 Esfuerzo en JSON: registro `{"id", "proyecto_id", "historia_id", "integrante_id", "integrante_nombre", "fecha",
 "actividad", "horas"}`; consulta `{"registros": [...], "total_horas"}`. `horas` y `total_horas` son números
@@ -222,6 +232,11 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   `postgres/esquema/08_esfuerzo.sql`, `api/esfuerzo.go`, `features/registro-esfuerzo.feature` (pasos en
   `features/esfuerzo_test.go`). La spec 12 (horas reales y desviación) y la 14 (reporte) usan este esfuerzo:
   sumar `Centesimas`, nunca horas con decimales.
+- `docs/specs/sprint-03/13-dashboard.md` — Dashboard, etapa 1 (backend): `dominio/dashboard.go` (`ArmarDashboard`,
+  `ServicioDashboard`), `api/dashboard.go`, `features/dashboard.feature` (pasos en `features/dashboard_test.go`).
+  `ServicioDashboard` llama a `ServicioEstado` y `ServicioMetricas` (no repite sus cálculos); la velocidad sale con
+  `velocidadAJSON`, la misma de las métricas. Si cambia una regla del estado (spec 03) o de las métricas
+  (spec 10), el Dashboard cambia solo. La etapa 2 (la pantalla con los gráficos) va con la interfaz web (#15).
 
 ## Cómo testear
 
@@ -293,4 +308,4 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-23 (spec 09).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-24 (spec 13, etapa 1).

@@ -1,11 +1,11 @@
 ---
 titulo: Dashboard del proyecto
-estado: in-review    # draft | in-review | approved | implemented
+estado: approved     # draft | in-review | approved | implemented
 unidad: global
 issue: "#19"
 sprint: 03
 autor: Florencia Cabeza
-aprobada_por: ""
+aprobada_por: "Martina Batista"
 fecha: 2026-10-24
 specs_relacionadas: ["03-estado-proyecto", "05-crear-sprints", "10-metricas-avance"]
 ---
@@ -238,7 +238,23 @@ Característica: Dashboard del proyecto
     Entonces se informa el error "El proyecto no existe"
 ```
 
-Los pasos que no indican proyecto se refieren al proyecto de los Antecedentes, "Tienda Online". Los pasos de proyectos, backlog, Story Points, Sprints y fecha de hoy (`que existe el proyecto…`, `que el backlog tiene la historia…`, `que estimé la historia…`, `que existe un Sprint…`, `que completé en el Sprint…`, `que cerré el Sprint`, `que hoy es…`) ya existen en las specs 01, 03, 04, 05, 06 y 07 y se reutilizan.
+Los pasos que no indican proyecto se refieren al proyecto de los Antecedentes, "Tienda Online". Los pasos de proyectos, backlog, Story Points, Sprints y fecha de hoy (`que existe el proyecto…`, `que el backlog tiene la historia…`, `que estimé la historia…`, `que existe un Sprint…`, `que completé en el Sprint…`, `que cerré el Sprint`, `que hoy es…`) ya existen en las specs 01, 03, 04, 05, 06 y 07 y se reutilizan. "Todavía no hay velocidad del equipo" se reutiliza de la spec 10: lee el mismo dato de velocidad.
+
+## Trazabilidad
+
+Historia [#19](https://github.com/martinabatista/seguimiento-medicion-bcg/issues/19) → esta spec → criterios → escenarios de `backend/features/dashboard.feature` → tests → código Go.
+
+| Criterio | Escenarios BDD | Tests Go | Código Go |
+|---|---|---|---|
+| CA-1 Estado y días | Proyecto en curso · Termina hoy · Todavía no empezó · Finalizado | `TestDiasQueFaltanDelProyecto`, `TestDashboardReutilizaEstadoYMetricas`, `TestDashboardProyectoVacio` | `dominio/dashboard.go` (`ArmarDashboard`, `diasEntre`) |
+| CA-2 Sprint en curso | Sprint en curso con los días que le quedan · No hay Sprint en curso | `TestSprintEnCursoDelDashboard`, `TestDashboardConSprints` | `dominio/dashboard.go` (`sprintEnCurso`) |
+| CA-3 Avance del backlog | Avance del backlog | `TestGraficosDelDashboard`, `TestDashboardReutilizaEstadoYMetricas`, `TestDashboardConSprints` | `dominio/dashboard.go` (resumen de la spec 03, `ResumirBacklog`) |
+| CA-4 Velocidad | Velocidad con dos Sprints cerrados · Todavía no hay velocidad | `TestGraficosDelDashboard`, `TestDashboardReutilizaEstadoYMetricas` | `dominio/dashboard.go` (velocidad de la spec 10), `api/metricas.go` (`velocidadAJSON`) |
+| CA-5 Gráfico de Story Points | Gráfico de Story Points por Sprint, con el abierto parcial | `TestGraficosDelDashboard`, `TestDashboardConSprints` | `dominio/dashboard.go` (`BarraSprint`) |
+| CA-6 Gráfico de velocidad | El gráfico de velocidad solo muestra los Sprints cerrados | `TestGraficosDelDashboard`, `TestDashboardConSprints` | `dominio/dashboard.go` (`BarraVelocidad`) |
+| CA-7 Backlog por estado | Gráfico del backlog por estado | `TestGraficosDelDashboard`, `TestDashboardConSprints` | `dominio/dashboard.go` (`PorcionBacklog`) |
+| CA-8 Vacío e inexistente | Proyecto sin historias ni Sprints · Proyecto que no existe | `TestDashboardVacio`, `TestDashboardProyectoVacio`, `TestDashboardProyectoInexistente` (dominio y API) | `dominio/dashboard.go` (`ServicioDashboard`), `api/dashboard.go` |
+| CA-9 Pantalla | (etapa 2) | (etapa 2) | (etapa 2, con la interfaz web base #15) |
 
 ## Dependencias
 
@@ -251,11 +267,11 @@ Los pasos que no indican proyecto se refieren al proyecto de los Antecedentes, "
 ## Tareas
 
 **Etapa 1 — backend:**
-- [ ] `[P1]` Días que faltan y armado de los datos de los tres gráficos (RN-3 a RN-8) en `backend/dominio/` (TDD), reutilizando el estado (spec 03) y las métricas (spec 10).
-- [ ] `[P1]` Caso de uso consultar el Dashboard del proyecto.
-- [ ] `[P1]` Ruta de la API del Dashboard en `backend/api/`.
-- [ ] `[P1]` Escenarios de `backend/features/dashboard.feature` con sus pasos.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` (endpoint, JSON, specs relacionadas).
+- [x] `[P1]` Días que faltan y armado de los datos de los tres gráficos (RN-3 a RN-8) en `backend/dominio/` (TDD), reutilizando el estado (spec 03) y las métricas (spec 10).
+- [x] `[P1]` Caso de uso consultar el Dashboard del proyecto.
+- [x] `[P1]` Ruta de la API del Dashboard en `backend/api/`.
+- [x] `[P1]` Escenarios de `backend/features/dashboard.feature` con sus pasos en `features/dashboard_test.go`.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoint, JSON, specs relacionadas).
 
 **Etapa 2 — pantalla (con la interfaz web base, #15):**
 - [ ] `[P1]` Pantalla del Dashboard con los indicadores y los tres gráficos (barras, barras con línea y dona), cada uno con sus números.
@@ -263,9 +279,9 @@ Los pasos que no indican proyecto se refieren al proyecto de los Antecedentes, "
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
 - [ ] Criterios de aceptación verificados (CA-1 a CA-8 en la etapa 1; CA-9 en la etapa 2).
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
 - [ ] Spec en estado `implemented` (al terminar la etapa 2).
