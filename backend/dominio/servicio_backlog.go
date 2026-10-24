@@ -19,16 +19,18 @@ type RepositorioHistorias interface {
 }
 
 // ServicioBacklog son los casos de uso de la spec 04. Usa el repositorio de proyectos solo para
-// verificar que el proyecto exista (RN-1) y el de Sprints para no eliminar una historia de un
-// Sprint abierto (spec 05 RN-11).
+// verificar que el proyecto exista (RN-1), el de Sprints para no eliminar una historia de un
+// Sprint abierto (spec 05 RN-11) y el de esfuerzo para no eliminar una historia con horas
+// registradas (spec 09 RN-10).
 type ServicioBacklog struct {
 	proyectos RepositorioProyectos
 	historias RepositorioHistorias
 	sprints   RepositorioSprints
+	esfuerzo  RepositorioEsfuerzo
 }
 
-func NuevoServicioBacklog(proyectos RepositorioProyectos, historias RepositorioHistorias, sprints RepositorioSprints) *ServicioBacklog {
-	return &ServicioBacklog{proyectos: proyectos, historias: historias, sprints: sprints}
+func NuevoServicioBacklog(proyectos RepositorioProyectos, historias RepositorioHistorias, sprints RepositorioSprints, esfuerzo RepositorioEsfuerzo) *ServicioBacklog {
+	return &ServicioBacklog{proyectos: proyectos, historias: historias, sprints: sprints, esfuerzo: esfuerzo}
 }
 
 // Crear valida los datos y registra la historia en el backlog del proyecto (CA-1).
@@ -81,7 +83,8 @@ func (s *ServicioBacklog) Modificar(ctx context.Context, proyectoID, id int64, d
 }
 
 // Eliminar saca la historia del backlog (CA-3). No se puede si está asignada a un Sprint abierto:
-// primero hay que quitarla del Sprint (spec 05 RN-11, CA-6).
+// primero hay que quitarla del Sprint (spec 05 RN-11, CA-6). Tampoco si tiene esfuerzo registrado:
+// primero hay que eliminar sus registros (spec 09 RN-10, CA-7).
 func (s *ServicioBacklog) Eliminar(ctx context.Context, proyectoID, id int64) error {
 	if err := verificarProyecto(ctx, s.proyectos, proyectoID); err != nil {
 		return err
@@ -92,6 +95,14 @@ func (s *ServicioBacklog) Eliminar(ctx context.Context, proyectoID, id int64) er
 	}
 	if enSprint {
 		return ErrHistoriaEnSprintAbierto
+	}
+	// spec 09 RN-10: con esfuerzo registrado no se elimina, para no perder las horas reales.
+	registros, err := s.esfuerzo.Listar(ctx, proyectoID, id)
+	if err != nil {
+		return err
+	}
+	if len(registros) > 0 {
+		return ErrHistoriaConEsfuerzo
 	}
 	return s.historias.Eliminar(ctx, proyectoID, id)
 }
