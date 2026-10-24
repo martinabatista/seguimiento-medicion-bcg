@@ -92,21 +92,24 @@ func ArmarDashboard(e EstadoDeProyecto, m MetricasProyecto, hoy time.Time) Dashb
 		if s.Estado == SprintCerrado {
 			d.VelocidadPorSprint = append(d.VelocidadPorSprint, BarraVelocidad{Nombre: nombre, Numero: s.Numero, Completados: s.StoryPointsCompletados})
 		}
-		if e.SprintEnCurso != nil && s.SprintID == e.SprintEnCurso.ID {
-			d.SprintEnCurso = &SprintEnCursoDashboard{
-				StoryPointsPlanificados: s.StoryPointsPlanificados,
-				StoryPointsCompletados:  s.StoryPointsCompletados,
-			}
-		}
 	}
 	if e.SprintEnCurso != nil {
-		if d.SprintEnCurso == nil { // sin métricas del Sprint: sus Story Points quedan en 0
-			d.SprintEnCurso = &SprintEnCursoDashboard{}
-		}
-		d.SprintEnCurso.Sprint = *e.SprintEnCurso
-		d.SprintEnCurso.DiasRestantes = diasEntre(hoy, e.SprintEnCurso.FechaFin)
+		d.SprintEnCurso = sprintEnCurso(*e.SprintEnCurso, m.Sprints, hoy)
 	}
 	return d
+}
+
+// sprintEnCurso arma el indicador del Sprint en curso: los días que le quedan (RN-4) y sus Story
+// Points parciales, tomados de sus métricas (spec 10). Sin métricas del Sprint, quedan en 0.
+func sprintEnCurso(s Sprint, metricas []MetricasSprint, hoy time.Time) *SprintEnCursoDashboard {
+	enCurso := &SprintEnCursoDashboard{Sprint: s, DiasRestantes: diasEntre(hoy, s.FechaFin)}
+	for _, m := range metricas {
+		if m.SprintID == s.ID {
+			enCurso.StoryPointsPlanificados = m.StoryPointsPlanificados
+			enCurso.StoryPointsCompletados = m.StoryPointsCompletados
+		}
+	}
+	return enCurso
 }
 
 // diasEntre cuenta los días corridos de desde a hasta, solo por la fecha (sin la hora): 0 si son el
