@@ -107,3 +107,21 @@ var (
 	// ErrVotacionNoExiste no es un conflicto: la API lo responde como 404.
 	ErrVotacionNoExiste = errors.New("La votación no existe")
 )
+
+// Errores de la spec 09 (registro de esfuerzo). La fecha con formato inválido usa ErrFechaInvalida
+// de la spec 01 y el integrante inexistente, ErrIntegranteNoExiste de la spec 02.
+var (
+	ErrIntegranteObligatorio = ErrDatoInvalido{"El integrante es obligatorio"}
+	ErrFechaObligatoria      = ErrDatoInvalido{"La fecha es obligatoria"}
+	ErrFechaFueraDelProyecto = ErrDatoInvalido{"La fecha debe estar dentro de las fechas del proyecto"}
+	ErrFechaFutura           = ErrDatoInvalido{"La fecha no puede ser posterior a hoy"}
+	ErrActividadObligatoria  = ErrDatoInvalido{"La actividad es obligatoria"}
+	ErrActividadMuyLarga     = ErrDatoInvalido{"La actividad no puede superar los 300 caracteres"}
+	ErrHorasObligatorias     = ErrDatoInvalido{"Las horas son obligatorias"}
+	ErrHorasInvalidas        = ErrDatoInvalido{"Las horas deben ser un número mayor a 0 y hasta 24, con hasta 2 decimales"}
+
+	ErrHistoriaConEsfuerzo = ErrConflicto{"La historia tiene esfuerzo registrado"}
+
+	// ErrRegistroEsfuerzoNoExiste no es un conflicto: la API lo responde como 404.
+	ErrRegistroEsfuerzoNoExiste = errors.New("El registro de esfuerzo no existe")
+)
