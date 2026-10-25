@@ -346,7 +346,7 @@ Historia [#12](https://github.com/martinabatista/seguimiento-medicion-bcg/issues
 
 | Criterio | Escenarios BDD | Tests Go | Código Go |
 |---|---|---|---|
-| CA-1 Abrir | Abrir una votación · No se pueden abrir dos · Historia completada · Proyecto sin Developers | `TestNuevaVotacion`, `TestPlanningPokerAbrirErrores`, `TestAbrirVotacion` | `dominio/planning_poker.go` (`NuevaVotacion`), `dominio/servicio_planning_poker.go` (`Abrir`), `api/planning_poker.go` (`abrir`), `postgres/esquema/06_votaciones.sql` |
+| CA-1 Abrir | Abrir una votación · No se pueden abrir dos · Historia completada · Proyecto sin Developers | `TestNuevaVotacion`, `TestPlanningPokerAbrirErrores`, `TestAbrirVotacion` | `dominio/planning_poker.go` (`NuevaVotacion`), `dominio/servicio_planning_poker.go` (`Abrir`), `api/planning_poker.go` (`abrir`), `postgres/tablas/06_votaciones.sql` |
 | CA-2 Votar | Un Developer vota · Cambia su voto · No es Developer · Solo valores de la escala | `TestVotar`, `TestPlanningPokerVotarErrores`, `TestPlanningPokerErrores` | `dominio/planning_poker.go` (`Votar`), `api/planning_poker.go` (`votar`) |
 | CA-3 Votos ocultos | Los votos están ocultos hasta revelar | `TestVistaDeVotacion`, `TestVotosOcultosEnLaAPI` | `dominio/planning_poker.go` (`Vista`), `api/planning_poker.go` (`votacionAJSON`) |
 | CA-4 Revelar | Revelar cuando votaron todos · Falta un voto · Ronda revelada no admite votos | `TestRevelar`, `TestRevelarVotacion` | `dominio/planning_poker.go` (`Revelar`) |
@@ -367,7 +367,7 @@ Historia [#12](https://github.com/martinabatista/seguimiento-medicion-bcg/issues
 
 - [x] `[P1]` Votación, rondas, votos y cálculo de diferencias (RN-1 a RN-10) en `backend/dominio/` (TDD).
 - [x] `[P1]` Casos de uso abrir, votar, ver, revelar, nueva ronda y registrar la acordada, usando la operación estimar de la spec 07.
-- [x] `[P1]` Tablas de votaciones, rondas y votos en `backend/postgres/esquema/06_votaciones.sql` y su repositorio en `backend/postgres/votaciones.go`.
+- [x] `[P1]` Tablas de votaciones, rondas y votos en `backend/postgres/tablas/06_votaciones.sql` y su repositorio en `backend/postgres/votaciones.go`.
 - [x] `[P1]` Rutas de la API de Planning Poker en `backend/api/`.
 - [x] `[P1]` Escenarios de `backend/features/planning-poker.feature` con sus pasos en `features/planning_poker_test.go`.
 - [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas, trampas).

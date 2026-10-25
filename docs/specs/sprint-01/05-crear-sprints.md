@@ -282,7 +282,7 @@ Los pasos que no indican proyecto se refieren al de los Antecedentes, "Tienda On
 ## Tareas
 
 - [x] `[P1]` Entidad Sprint en `backend/dominio/` con las reglas RN-2 a RN-13 (TDD).
-- [x] `[P1]` Tablas de Sprints y de historias asignadas en `backend/postgres/esquema/` (`04_sprints.sql`: `sprints` y `sprint_historias`).
+- [x] `[P1]` Tablas de Sprints y de historias asignadas en `backend/postgres/tablas/` (`04_sprints.sql`: `sprints` y `sprint_historias`).
 - [x] `[P1]` Repositorio de Sprints en `backend/postgres/` y en `backend/memoria/`.
 - [x] `[P1]` Rutas de la API bajo `/api/proyectos/{id}/sprints` en `backend/api/`.
 - [x] `[P1]` Sprint en curso en el estado del proyecto (spec 03) y regla de eliminación en el backlog (spec 04).

@@ -214,7 +214,7 @@ Ninguna (base del resto del sistema). Las specs 02, 03, 04 y 05 dependen de esta
 ## Tareas
 
 - [x] `[P1]` Entidad Proyecto en `backend/dominio/` con las validaciones RN-1 a RN-5 (TDD, un ciclo por regla).
-- [x] `[P1]` Tabla de proyectos en `backend/postgres/esquema/01_proyectos.sql`.
+- [x] `[P1]` Tabla de proyectos en `backend/postgres/tablas/01_proyectos.sql`.
 - [x] `[P1]` Agregar el driver `pgx` y el acceso a datos de proyectos en `backend/postgres/`.
 - [x] `[P1]` Rutas de la API para crear, modificar, listar y ver proyectos en `backend/api/`.
 - [x] `[P1]` Escenarios de `backend/features/proyectos.feature` con sus pasos en `features_test.go`.

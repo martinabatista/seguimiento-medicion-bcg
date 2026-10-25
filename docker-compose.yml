@@ -1,6 +1,6 @@
 # Base de datos de desarrollo. Levantar con: docker compose up -d
 # Usa el puerto 5434 para no chocar con otros PostgreSQL de la compu (5432, 5433).
-# Al crear la base por primera vez ejecuta, en orden, los .sql de backend/postgres/esquema/.
+# Al crear la base por primera vez ejecuta, en orden, los .sql de backend/postgres/tablas/.
 # Si esos archivos cambian, recrear la base: docker compose down -v && docker compose up -d
 services:
   db:
@@ -13,7 +13,7 @@ services:
       - "${POSTGRES_PORT:-5434}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./backend/postgres/esquema:/docker-entrypoint-initdb.d:ro
+      - ./backend/postgres/tablas:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sme} -d ${POSTGRES_DB:-sme}"]
       interval: 5s
