@@ -65,15 +65,18 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 		integrantes := memoria.NuevoRepositorioIntegrantes()
 		esfuerzo := memoria.NuevoRepositorioEsfuerzo()
 		backlog := dominio.NuevoServicioBacklog(proyectos, historias, sprints, esfuerzo)
+		estado := dominio.NuevoServicioEstado(proyectos, historias, sprints, m.fechaDeHoy)
+		metricas := dominio.NuevoServicioMetricas(proyectos, historias, sprints)
 		*m = mundo{api: api.NewRouter(
 			dominio.NuevoServicioProyectos(proyectos),
 			backlog,
 			dominio.NuevoServicioIntegrantes(proyectos, integrantes),
-			dominio.NuevoServicioEstado(proyectos, historias, sprints, m.fechaDeHoy),
+			estado,
 			dominio.NuevoServicioSprints(proyectos, historias, sprints),
 			dominio.NuevoServicioPlanningPoker(proyectos, historias, integrantes, memoria.NuevoRepositorioVotaciones(), backlog),
-			dominio.NuevoServicioMetricas(proyectos, historias, sprints),
+			metricas,
 			dominio.NuevoServicioEsfuerzo(proyectos, historias, integrantes, esfuerzo, m.fechaDeHoy),
+			dominio.NuevoServicioDashboard(estado, metricas, m.fechaDeHoy),
 		)}
 		return ctx, nil
 	})
@@ -131,6 +134,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Registro de esfuerzo (spec 09)
 	m.registrarPasosEsfuerzo(sc)
+
+	// Dashboard (spec 13)
+	m.registrarPasosDashboard(sc)
 }
 
 // ---------- helpers ----------
