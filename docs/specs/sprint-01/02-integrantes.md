@@ -287,7 +287,7 @@ Al implementar, el email con un espacio adelante del CA-3 (`" ana@mail.com"`) pa
 
 - [x] `[P1]` Entidad Integrante en `backend/dominio/` con las validaciones RN-2 a RN-5 y la normalización del email (TDD, un ciclo por regla).
 - [x] `[P1]` Casos de uso agregar, listar y ver, con la verificación del proyecto (RN-1) y del email repetido (RN-6), y repositorio en memoria en `backend/memoria/`.
-- [x] `[P1]` Tabla de integrantes en `backend/postgres/esquema/03_integrantes.sql`, con el email único por proyecto (RN-6).
+- [x] `[P1]` Tabla de integrantes en `backend/postgres/tablas/03_integrantes.sql`, con el email único por proyecto (RN-6).
 - [x] `[P1]` Acceso a datos de integrantes en `backend/postgres/` con sus tests de integración.
 - [x] `[P1]` Rutas de la API para agregar, listar y ver integrantes en `backend/api/` (`/api/proyectos/{id}/integrantes`), con 409 para el email repetido.
 - [x] `[P1]` Escenarios de `backend/features/integrantes.feature` con sus pasos.

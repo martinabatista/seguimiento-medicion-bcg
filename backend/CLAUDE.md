@@ -17,7 +17,7 @@ backend/
 ├── dominio/                 # entidades, reglas, casos de uso e interfaces de repositorio — Go puro
 ├── memoria/                 # repositorios en memoria para los tests (sin base real)
 ├── postgres/                # repositorios sobre PostgreSQL (database/sql + pgx) + tests de integración
-│   └── esquema/             # tablas: NN_tabla.sql, las ejecuta Docker al crear la base
+│   └── tablas/              # un NN_tabla.sql por tabla; los ejecuta Docker al crear la base
 └── features/                # escenarios BDD *.feature (godog) + features_test.go con los pasos
 ```
 
@@ -118,7 +118,7 @@ fecha y, a igual fecha, por orden de carga.
 
 ## Decisiones técnicas
 
-Acordadas por el equipo el 2026-10-19 (acceso a datos y esquema revisados el 2026-10-20).
+Acordadas por el equipo el 2026-10-19 (acceso a datos y tablas revisados el 2026-10-20).
 Cambiarlas requiere acuerdo de las tres y actualizar este archivo.
 
 **Acceso a datos: `database/sql` (librería estándar de Go) con el driver `pgx` v5, SQL escrito a
@@ -148,7 +148,7 @@ mano, sin ORM.**
   corresponda (400 dato inválido, 404 no existe, 409 conflicto).
 - Campos JSON en español y `snake_case` (`fecha_inicio`, `fecha_fin`).
 
-**Tablas: archivos SQL simples en `postgres/esquema/`, sin herramienta de migraciones.**
+**Tablas: archivos SQL simples en `postgres/tablas/`, sin herramienta de migraciones.**
 - Un archivo por tabla, numerado en el orden en que se crean: `01_proyectos.sql`,
   `02_historias.sql`, `03_integrantes.sql`… Cada uno con su `CREATE TABLE`.
 - Docker los ejecuta en orden **solo cuando crea la base por primera vez** (los monta en
@@ -187,7 +187,7 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   proyecto o sus errores, revisar las specs 02 a 05, que cuelgan de `/api/proyectos/{id}`.
 - `docs/specs/sprint-01/02-integrantes.md` — integrantes: `dominio/integrante.go`,
   `dominio/servicio_integrantes.go`, `memoria/integrantes.go`, `postgres/integrantes.go`,
-  `postgres/esquema/03_integrantes.sql`, `api/integrantes.go`, `features/integrantes.feature` (pasos en
+  `postgres/tablas/03_integrantes.sql`, `api/integrantes.go`, `features/integrantes.feature` (pasos en
   `features/integrantes_test.go`). Las specs 08 (Planning Poker) y 09 (esfuerzo) usan el id del
   integrante: si cambia su JSON o su identidad (el email), actualizar la spec 02.
 - `docs/specs/sprint-01/03-estado-proyecto.md` — estado del proyecto: `dominio/estado_proyecto.go`
@@ -198,17 +198,17 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   los Story Points de la historia (spec 04), revisar `ResumirBacklog`. La spec 13 (Dashboard) va a usar
   este estado.
 - `docs/specs/sprint-01/04-product-backlog.md` — backlog: `dominio/historia.go`, `dominio/servicio_backlog.go`,
-  `memoria/historias.go`, `postgres/historias.go`, `postgres/esquema/02_historias.sql`, `api/backlog.go`,
+  `memoria/historias.go`, `postgres/historias.go`, `postgres/tablas/02_historias.sql`, `api/backlog.go`,
   `features/product-backlog.feature` (pasos en `features/backlog_test.go`). Las specs 05 a 08 usan la
   historia: si cambian su estado o sus Story Points, actualizar la spec 04.
 - `docs/specs/sprint-01/05-crear-sprints.md` — Sprints: `dominio/sprint.go` (`NuevoSprint`, `SprintEnCurso`),
-  `dominio/servicio_sprints.go`, `memoria/sprints.go`, `postgres/sprints.go`, `postgres/esquema/04_sprints.sql`,
+  `dominio/servicio_sprints.go`, `memoria/sprints.go`, `postgres/sprints.go`, `postgres/tablas/04_sprints.sql`,
   `api/sprints.go`, `features/sprints.feature` (pasos en `features/sprints_test.go`). También toca el
   estado (`ServicioEstado`, CA-5) y el backlog (`ServicioBacklog.Eliminar`, CA-6). La spec 06 cierra los
   Sprints (estado `Cerrado`) y la 10 calcula sus métricas.
 - `docs/specs/sprint-01/06-cerrar-sprint.md` — cierre de Sprints: `ServicioSprints` (`CompletarHistoria`,
   `DeshacerHistoria`, `Cerrar`, `Anteriores`), `Sprint.Completadas`, regla del backlog en
-  `ServicioBacklog.Modificar` (`cambiaCompletada`), `postgres/esquema/05_sprint_historias_completada.sql`,
+  `ServicioBacklog.Modificar` (`cambiaCompletada`), `postgres/tablas/05_sprint_historias_completada.sql`,
   `features/cerrar-sprint.feature` (pasos en `features/cerrar_sprint_test.go`). La spec 10 (velocidad) usa
   `Sprint.Completadas` de los Sprints cerrados, no el estado actual de las historias (RN-8).
 - `docs/specs/sprint-01/07-story-points.md` — Story Points: `dominio/story_points.go` (`EscalaStoryPoints`,
@@ -219,17 +219,17 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
 - `docs/specs/sprint-02/08-planning-poker.md` — Planning Poker: `dominio/planning_poker.go` (`Votacion`,
   `NuevaVotacion`, `Votar`, `Revelar`, `NuevaRonda`, `Acordar`, `Vista` con los votos ocultos y las
   diferencias), `dominio/servicio_planning_poker.go`, `memoria/votaciones.go`, `postgres/votaciones.go`,
-  `postgres/esquema/06_votaciones.sql`, `api/planning_poker.go`, `features/planning-poker.feature` (pasos en
+  `postgres/tablas/06_votaciones.sql`, `api/planning_poker.go`, `features/planning-poker.feature` (pasos en
   `features/planning_poker_test.go`). Usa los roles de la spec 02 (solo `Developer` vota) y `Estimar` de la 07.
 - `docs/specs/sprint-02/10-metricas-avance.md` — métricas de avance: `dominio/metricas.go`
   (`CalcularMetricasSprint`, `CalcularVelocidad`, `CalcularMetricasProyecto`), `dominio/servicio_metricas.go`,
-  `Sprint.StoryPointsAlCerrar` (los congela `ServicioSprints.Cerrar`), `postgres/esquema/07_sprint_historias_story_points.sql`,
+  `Sprint.StoryPointsAlCerrar` (los congela `ServicioSprints.Cerrar`), `postgres/tablas/07_sprint_historias_story_points.sql`,
   `api/metricas.go`, `features/metricas-avance.feature` (pasos en `features/metricas_test.go`). El Dashboard
   (spec 13) y el reporte (spec 14) usan estas métricas.
 - `docs/specs/sprint-02/09-registro-esfuerzo.md` — esfuerzo: `dominio/esfuerzo.go` (`NuevoRegistroEsfuerzo`,
   `ParsearHoras`, `HorasATexto`, `ResumirEsfuerzo`), `dominio/servicio_esfuerzo.go`, la regla al eliminar en
   `ServicioBacklog.Eliminar` (RN-10), `memoria/esfuerzo.go`, `postgres/esfuerzo.go`,
-  `postgres/esquema/08_esfuerzo.sql`, `api/esfuerzo.go`, `features/registro-esfuerzo.feature` (pasos en
+  `postgres/tablas/08_esfuerzo.sql`, `api/esfuerzo.go`, `features/registro-esfuerzo.feature` (pasos en
   `features/esfuerzo_test.go`). La spec 12 (horas reales y desviación) y la 14 (reporte) usan este esfuerzo:
   sumar `Centesimas`, nunca horas con decimales.
 - `docs/specs/sprint-03/13-dashboard.md` — Dashboard, etapa 1 (backend): `dominio/dashboard.go` (`ArmarDashboard`,
@@ -263,9 +263,9 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
   por la API, porque tiene los valores de la ronda sin revelar (spec 08 RN-5).
 - `historias` e `integrantes` referencian a `proyectos`: los tests de integración vacían con
   `TRUNCATE proyectos RESTART IDENTITY CASCADE` (sin `CASCADE`, PostgreSQL no deja truncar `proyectos`).
-- Cada tabla nueva en `postgres/esquema/` obliga a recrear la base local
+- Cada tabla nueva en `postgres/tablas/` obliga a recrear la base local
   (`docker compose down -v && docker compose up -d`), o a correr solo ese archivo:
-  `docker compose exec -T db psql -U sme -d sme < backend/postgres/esquema/NN_tabla.sql`.
+  `docker compose exec -T db psql -U sme -d sme < backend/postgres/tablas/NN_tabla.sql`.
 - El orden del backlog (spec 04 RN-8) lo aplica el dominio (`OrdenarBacklog`), no el `ORDER BY` del SQL:
   el repositorio puede devolver las historias en cualquier orden.
 - Email repetido de un integrante (spec 02 RN-6): lo controla el servicio y **también** la restricción
@@ -299,7 +299,7 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
   de la historia en el backlog: un Sprint cerrado conserva lo que se completó en él aunque después la
   historia cambie. Para métricas por Sprint (spec 10), leer eso y no el estado actual.
 - `docker compose up -d --wait` puede decir "Healthy" mientras PostgreSQL todavía se reinicia después de
-  ejecutar los `.sql` del esquema: si un `psql` justo después falla con "shutting down", esperar unos segundos.
+  ejecutar los `.sql` de las tablas: si un `psql` justo después falla con "shutting down", esperar unos segundos.
 - Métricas de un Sprint **cerrado** (spec 10): usan `Sprint.StoryPointsAlCerrar` (columna
   `sprint_historias.story_points_al_cerrar`), no los Story Points actuales de la historia. Solo un Sprint
   cerrado tiene ese mapa; uno abierto lo tiene en `nil` y se calcula con los actuales.

@@ -281,7 +281,7 @@ Historia [#7](https://github.com/martinabatista/seguimiento-medicion-bcg/issues/
 ## Tareas
 
 - [x] `[P1]` Entidad Historia en `backend/dominio/` con las validaciones RN-2 a RN-9 (TDD, un ciclo por regla).
-- [x] `[P1]` Tabla de historias en `backend/postgres/esquema/02_historias.sql`, con referencia al proyecto.
+- [x] `[P1]` Tabla de historias en `backend/postgres/tablas/02_historias.sql`, con referencia al proyecto.
 - [x] `[P1]` Acceso a datos del backlog en `backend/postgres/` (crear, modificar, eliminar, listar, ver una).
 - [x] `[P1]` Rutas de la API bajo `/api/proyectos/{id}/backlog` en `backend/api/`.
 - [x] `[P1]` Escenarios de `backend/features/product-backlog.feature` con sus pasos en `features/backlog_test.go`.

@@ -26,7 +26,7 @@ cp .env.example .env
 Base de datos (con Docker Desktop abierto):
 
 ```bash
-docker compose up -d        # PostgreSQL 17 en localhost:5434; crea las tablas de backend/postgres/esquema/
+docker compose up -d        # PostgreSQL 17 en localhost:5434; crea las tablas de backend/postgres/tablas/
 docker compose down         # para apagarla
 docker compose down -v && docker compose up -d   # recrear la base cuando cambian las tablas
 ```

@@ -1,5 +1,5 @@
 // Package postgres implementa los repositorios del dominio sobre PostgreSQL,
-// con database/sql y el driver pgx. Las tablas están en esquema/*.sql.
+// con database/sql y el driver pgx. Las tablas están en tablas/*.sql.
 package postgres
 
 import (
