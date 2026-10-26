@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import type { Proyecto } from './api'
+import Backlog from './paginas/Backlog'
 import EnConstruccion from './paginas/EnConstruccion'
 import Proyectos from './paginas/Proyectos'
 
@@ -7,7 +8,7 @@ import Proyectos from './paginas/Proyectos'
 // cambiar su línea acá (pantalla recibe el proyecto elegido).
 const secciones: { titulo: string; pantalla: (proyecto: Proyecto) => ReactNode }[] = [
   { titulo: 'Estado', pantalla: () => <EnConstruccion titulo="Estado" /> },
-  { titulo: 'Backlog', pantalla: () => <EnConstruccion titulo="Backlog" /> },
+  { titulo: 'Backlog', pantalla: (proyecto) => <Backlog proyecto={proyecto} /> },
   { titulo: 'Integrantes', pantalla: () => <EnConstruccion titulo="Integrantes" /> },
   { titulo: 'Sprints', pantalla: () => <EnConstruccion titulo="Sprints" /> },
   { titulo: 'Planning Poker', pantalla: () => <EnConstruccion titulo="Planning Poker" /> },
