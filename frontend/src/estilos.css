@@ -1,0 +1,28 @@
+/* Estilos de toda la app, en un solo archivo y sin librerías. */
+
+:root {
+  --texto: #1f2937;
+  --suave: #6b7280;
+  --borde: #d1d5db;
+  --fondo: #f9fafb;
+  --primario: #2563eb;
+  --error: #b91c1c;
+  font-family: system-ui, sans-serif;
+  color: var(--texto);
+  background: var(--fondo);
+}
+
+body {
+  margin: 0;
+}
+
+header {
+  padding: 1rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid var(--borde);
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
