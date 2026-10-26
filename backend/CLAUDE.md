@@ -53,6 +53,7 @@ Endpoints disponibles:
 | `POST /api/proyectos/{id}/sprints/{sprintID}/cerrar` | Cerrar el Sprint (spec 06) | 200 Sprint · 404 · 409 ya cerrado |
 | `GET /api/proyectos/{id}/sprints/anteriores` | Sprints cerrados con sus historias, del más reciente al más antiguo | 200 lista · 404 |
 | `POST /api/proyectos/{id}/votaciones` | Abrir una votación de Planning Poker `{"historia_id"}` (spec 08) | 201 votación · 400 · 404 · 409 |
+| `GET /api/proyectos/{id}/votaciones` | Votaciones abiertas del proyecto, para retomarlas (spec 08 CA-9) | 200 lista (`[]` si no hay) · 404 |
 | `GET /api/proyectos/{id}/votaciones/{votacionID}` | Ver la votación (sin valores de la ronda sin revelar) | 200 · 404 |
 | `POST …/votaciones/{votacionID}/votos` | Votar `{"integrante_id", "story_points"}` (solo Developers) | 200 votación · 400 · 404 · 409 |
 | `POST …/votaciones/{votacionID}/revelar` | Revelar la ronda (votaron todos los Developers) | 200 votación · 404 · 409 |
