@@ -34,6 +34,17 @@ export async function pedir<T>(metodo: string, ruta: string, cuerpo?: unknown): 
   return datos as T
 }
 
+// Tipos de los datos que devuelve el backend (los JSON están en backend/CLAUDE.md).
+// Cada integrante suma acá los de sus pantallas.
+
+export interface Proyecto {
+  id: number
+  nombre: string
+  descripcion: string
+  fecha_inicio: string // AAAA-MM-DD
+  fecha_fin: string
+}
+
 // mensajeDe devuelve el texto para mostrar de cualquier error.
 export function mensajeDe(error: unknown): string {
   return error instanceof Error ? error.message : 'Ocurrió un error inesperado'

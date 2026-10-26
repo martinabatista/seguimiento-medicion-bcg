@@ -1,7 +1,60 @@
+import { useState, type ReactNode } from 'react'
+import type { Proyecto } from './api'
+import EnConstruccion from './paginas/EnConstruccion'
+import Proyectos from './paginas/Proyectos'
+
+// Las secciones del menú de un proyecto. Para sumar una pantalla: crear el archivo en paginas/ y
+// cambiar su línea acá (pantalla recibe el proyecto elegido).
+const secciones: { titulo: string; pantalla: (proyecto: Proyecto) => ReactNode }[] = [
+  { titulo: 'Estado', pantalla: () => <EnConstruccion titulo="Estado" /> },
+  { titulo: 'Backlog', pantalla: () => <EnConstruccion titulo="Backlog" /> },
+  { titulo: 'Integrantes', pantalla: () => <EnConstruccion titulo="Integrantes" /> },
+  { titulo: 'Sprints', pantalla: () => <EnConstruccion titulo="Sprints" /> },
+  { titulo: 'Planning Poker', pantalla: () => <EnConstruccion titulo="Planning Poker" /> },
+  { titulo: 'Esfuerzo', pantalla: () => <EnConstruccion titulo="Esfuerzo" /> },
+  { titulo: 'Métricas', pantalla: () => <EnConstruccion titulo="Métricas" /> },
+  { titulo: 'Dashboard', pantalla: () => <EnConstruccion titulo="Dashboard" /> },
+]
+
+// App es el layout: el encabezado y, según haya un proyecto elegido o no, la lista de proyectos o
+// el menú con la sección elegida. La navegación es un estado: no usa librerías de rutas.
 export default function App() {
+  const [proyecto, setProyecto] = useState<Proyecto | null>(null)
+  const [seccion, setSeccion] = useState(0)
+
+  function elegir(p: Proyecto) {
+    setProyecto(p)
+    setSeccion(0)
+  }
+
   return (
-    <header>
-      <h1>Software Metrics &amp; Estimation</h1>
-    </header>
+    <>
+      <header>
+        <h1>Software Metrics &amp; Estimation</h1>
+        {proyecto && (
+          <p>
+            Proyecto: <strong>{proyecto.nombre}</strong>{' '}
+            <button className="enlace" onClick={() => setProyecto(null)}>
+              Cambiar de proyecto
+            </button>
+          </p>
+        )}
+      </header>
+
+      {proyecto === null ? (
+        <Proyectos alElegir={elegir} />
+      ) : (
+        <>
+          <nav>
+            {secciones.map((s, i) => (
+              <button key={s.titulo} aria-current={i === seccion ? 'page' : undefined} onClick={() => setSeccion(i)}>
+                {s.titulo}
+              </button>
+            ))}
+          </nav>
+          <main>{secciones[seccion].pantalla(proyecto)}</main>
+        </>
+      )}
+    </>
   )
 }
