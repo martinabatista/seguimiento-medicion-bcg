@@ -1,0 +1,143 @@
+/* Estilos de toda la app, en un solo archivo y sin librerías. */
+
+:root {
+  --texto: #1f2937;
+  --suave: #6b7280;
+  --borde: #d1d5db;
+  --fondo: #f9fafb;
+  --primario: #2563eb;
+  --error: #b91c1c;
+  font-family: system-ui, sans-serif;
+  color: var(--texto);
+  background: var(--fondo);
+}
+
+body {
+  margin: 0;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid var(--borde);
+}
+
+header p {
+  margin: 0;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+h2 {
+  font-size: 1.15rem;
+}
+
+main {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 0 1.5rem 2rem;
+}
+
+/* Menú de secciones */
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.5rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid var(--borde);
+}
+
+nav button {
+  background: none;
+  color: var(--texto);
+  border-color: transparent;
+}
+
+nav button[aria-current='page'] {
+  color: var(--primario);
+  border-color: var(--primario);
+}
+
+/* Formularios y botones */
+form {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 28rem;
+}
+
+label {
+  display: grid;
+  gap: 0.25rem;
+  font-weight: 600;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  font-weight: normal;
+}
+
+button {
+  font: inherit;
+  padding: 0.4rem 0.9rem;
+  color: white;
+  background: var(--primario);
+  border: 1px solid var(--primario);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.enlace {
+  padding: 0;
+  color: var(--primario);
+  background: none;
+  border: none;
+  text-decoration: underline;
+}
+
+/* Listas y mensajes */
+.lista {
+  padding: 0;
+  list-style: none;
+}
+
+.lista li {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  background: white;
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+}
+
+.lista p {
+  margin: 0.25rem 0 0;
+}
+
+.suave {
+  color: var(--suave);
+}
+
+.error {
+  padding: 0.5rem 0.75rem;
+  color: var(--error);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+}

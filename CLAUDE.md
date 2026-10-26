@@ -90,12 +90,12 @@ TypeScript (frontend) · godog (BDD con Gherkin) · `go test` (TDD) · GitHub Ac
 ├── CLAUDE.md
 ├── backend/          # Go: dominio, reglas de negocio, métricas, API REST
 │   └── CLAUDE.md
+├── frontend/         # React + Vite + TypeScript: pantallas que consumen la API REST
+│   └── CLAUDE.md
 ├── docs/specs/       # specs SDD, una carpeta por Sprint (sprint-NN/)
 ├── .github/          # CI + PR template
 └── .claude/          # hooks de Claude Code y el comando /comando (ponerse al día)
 ```
-
-El frontend (React + Vite + TS) todavía no está creado: se arma cuando el equipo lo defina.
 
 Regla de capas: el **dominio Go** (entidades, reglas, cálculos) no depende de HTTP ni de la base de
 datos; la API (`backend/api`) y el acceso a datos (`backend/postgres`) lo envuelven. El frontend consume solo la API REST.
@@ -105,3 +105,4 @@ datos; la API (`backend/api`) y el acceso a datos (`backend/postgres`) lo envuel
 <!-- Uno por unidad con CLAUDE.md propio. Crece al mergear specs. -->
 
 - [`backend/`](backend/CLAUDE.md) — núcleo Go + API REST.
+- [`frontend/`](frontend/CLAUDE.md) — interfaz web: layout, cliente de la API y pantallas.
