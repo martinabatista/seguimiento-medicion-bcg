@@ -229,6 +229,10 @@ Característica: Registrar historias completadas, cerrar Sprint y consultar Spri
 
 Los pasos que no indican proyecto se refieren al de los Antecedentes, "Tienda Online". "El Sprint" es el último Sprint creado en el escenario. Los pasos "que existe un Sprint del … al …", "asigno al Sprint…", "quito del Sprint…", "cambio su objetivo a…" y "que hoy es…" son los de las specs 03 y 05; "la historia … pasa a estado …" es el de la spec 03.
 
+## Pantalla
+
+`frontend/src/paginas/Sprints.tsx` (sección "Sprints" del menú, la misma de la spec 05). En un Sprint abierto, cada historia tiene "Completar" o "Deshacer", y abajo está "Cerrar Sprint", que pide confirmación. Un Sprint cerrado se ve sin botones: lo planificado y cuáles se completaron en él (CA-4, Sprints anteriores). Todas las reglas y los mensajes de error son los del backend.
+
 ## Dependencias
 
 - Spec 04 (backlog) y spec 05 (Sprints): esta historia es de la misma dueña que la 05 y se programa después de que la 05 esté mergeada (regla de independencia del `CLAUDE.md`). Agrega a la spec 04 la regla CA-5 y a la spec 05 el estado `Cerrado`.

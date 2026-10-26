@@ -274,6 +274,10 @@ Característica: Crear Sprints, definir Sprint Goal y asignar historias
 
 Los pasos que no indican proyecto se refieren al de los Antecedentes, "Tienda Online". "Que existe un Sprint del … al …" crea el Sprint con un objetivo cualquiera. En las tablas, `(vacío)` representa un texto vacío, igual que en las specs 01 y 04. El paso "que hoy es …" es el de la spec 03.
 
+## Pantalla
+
+`frontend/src/paginas/Sprints.tsx` (sección "Sprints" del menú): la lista de Sprints del proyecto con su número, fechas, Sprint Goal y estado, y un formulario para crear uno. Al tocar "Ver" se abre el Sprint: si está abierto se puede cambiar el Sprint Goal y asignar historias del backlog con un desplegable o quitarlas. No valida nada: muestra los mensajes de error del backend (por ejemplo, el de un Sprint superpuesto). Completar historias y cerrar el Sprint se hacen en la misma pantalla (spec 06).
+
 ## Dependencias
 
 - Spec 01 (proyectos), spec 04 (backlog) y spec 03 (estado del proyecto): implementadas. Esta historia agrega el Sprint en curso al estado (CA-5) y la regla de eliminación del backlog (CA-6).
