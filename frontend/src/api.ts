@@ -57,6 +57,42 @@ export interface Historia {
   story_points: number | null // null = sin estimar
 }
 
+// Integrante del proyecto (spec 02).
+export interface Integrante {
+  id: number
+  proyecto_id: number
+  nombre: string
+  email: string
+  rol: 'Product Owner' | 'Scrum Master' | 'Developer'
+}
+
+// Votación de Planning Poker (spec 08). Los valores de los votos solo aparecen en "rondas", que trae
+// las rondas ya reveladas: de la ronda sin revelar solo se sabe quién votó y quién falta.
+export interface Votacion {
+  id: number
+  proyecto_id: number
+  historia_id: number
+  estado: 'Abierta' | 'Cerrada'
+  ronda: number // la ronda actual
+  estimacion_acordada: number | null
+  votaron: Persona[]
+  faltan: Persona[]
+  rondas: RondaRevelada[]
+}
+
+export interface Persona {
+  id: number
+  nombre: string
+}
+
+export interface RondaRevelada {
+  numero: number
+  votos: { integrante_id: number; nombre: string; story_points: number }[]
+  hay_diferencias: boolean
+  mas_bajo: { story_points: number; integrantes: Persona[] }
+  mas_alto: { story_points: number; integrantes: Persona[] }
+}
+
 // mensajeDe devuelve el texto para mostrar de cualquier error.
 export function mensajeDe(error: unknown): string {
   return error instanceof Error ? error.message : 'Ocurrió un error inesperado'
