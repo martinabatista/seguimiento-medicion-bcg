@@ -1,6 +1,6 @@
 ---
 titulo: Planning Poker
-estado: implemented  # draft | in-review | approved | implemented
+estado: in-review    # draft | in-review | approved | implemented
 unidad: backend
 issue: "#12"
 sprint: 02
@@ -33,12 +33,13 @@ Origen: Consigna — Requerimiento 4 (mecanismo de Planning Poker: registrar est
 - Revelar la ronda cuando votaron todos los Developers: se muestran todos los votos y si hay diferencias.
 - Empezar una nueva ronda, conservando las anteriores con sus votos.
 - Registrar la estimación acordada: queda como Story Points de la historia y la votación se cierra.
+- Consultar las votaciones abiertas del proyecto, para retomarlas desde la interfaz sin saber su identificador (RN-12, CA-9; agregado al armar la pantalla, Issue #15).
 
 **NO entra:**
 - La escala y las reglas para estimar una historia: spec 07 (esta historia las reutiliza).
 - Votos de integrantes que no son Developers (el Product Owner explica la historia y el Scrum Master facilita: no estiman).
 - Un tiempo límite para votar, o votaciones de varias historias a la vez en una misma sesión.
-- Listar todas las votaciones de una historia: se puede sumar cuando se arme la interfaz.
+- Consultar las votaciones cerradas (el historial): su resultado ya queda como Story Points de cada historia.
 - Pantallas del frontend (Sprint 2, tarea #15).
 
 ## Entradas
@@ -48,6 +49,7 @@ Origen: Consigna — Requerimiento 4 (mecanismo de Planning Poker: registrar est
 | Abrir una votación | Proyecto e historia del backlog | El proyecto y la historia tienen que existir; la historia no puede estar `Completada`; no puede tener otra votación abierta; el proyecto tiene que tener al menos un Developer. |
 | Votar | Votación, integrante y valor | El integrante tiene que ser del proyecto y tener rol `Developer`; el valor tiene que ser de la escala de la spec 07 (1, 2, 3, 5, 8, 13, 21); la votación tiene que estar abierta y la ronda actual sin revelar. |
 | Ver la votación | Votación | Tiene que existir y ser del proyecto. |
+| Consultar las votaciones abiertas | Proyecto | El proyecto tiene que existir. |
 | Revelar la ronda | Votación | La ronda actual no puede estar revelada y tienen que haber votado todos los Developers del proyecto. |
 | Nueva ronda | Votación | La ronda actual tiene que estar revelada y la votación, abierta. |
 | Registrar la estimación acordada | Votación y valor | La ronda actual tiene que estar revelada; el valor tiene que ser de la escala (no hace falta que alguien lo haya votado). |
@@ -60,6 +62,7 @@ Origen: Consigna — Requerimiento 4 (mecanismo de Planning Poker: registrar est
 - **Revelar:** todos los votos de la ronda (integrante y valor, en el orden en que se agregaron los integrantes al proyecto), si hay diferencias, el voto más bajo y el más alto, y quiénes los dieron.
 - **Nueva ronda:** la votación pasa a la ronda siguiente, sin votos; las rondas anteriores se siguen viendo con sus votos.
 - **Registrar la acordada:** la historia queda con esos Story Points (spec 07) y la votación queda cerrada con la estimación acordada.
+- **Votaciones abiertas:** las votaciones abiertas del proyecto en el orden en que se abrieron, cada una con su historia y como al verla (sin los valores de la ronda sin revelar). Si no hay, la lista está vacía.
 - **Error:** no cambia nada y se informa un mensaje que explica qué está mal.
 
 ## Reglas de negocio
@@ -75,11 +78,12 @@ Origen: Consigna — Requerimiento 4 (mecanismo de Planning Poker: registrar est
 - RN-9: Después de revelar se puede **registrar la estimación acordada**: cualquier valor de la escala, aunque nadie lo haya votado. Se guarda como Story Points de la historia con la operación de la spec 07 (y con sus reglas: si la historia se completó mientras tanto, se rechaza) y la votación se **cierra**.
 - RN-10: Una votación cerrada no admite votos, revelaciones, rondas nuevas ni otra estimación acordada. Para volver a estimar la historia se abre una votación nueva.
 - RN-11: La votación, la historia y el integrante tienen que pertenecer al proyecto indicado; si no, se tratan como inexistentes.
+- RN-12: Se pueden consultar las votaciones **abiertas** del proyecto, en el orden en que se abrieron, cada una como al verla (RN-5: sin los valores de la ronda sin revelar). Sirve para retomar una votación sin saber su identificador. Las cerradas no aparecen.
 
 ## Restricciones
 
 - Las reglas de negocio y los cálculos se implementan en Go (backend); el frontend solo presenta y captura datos.
-- Las reglas RN-1 a RN-10 (incluido el cálculo de diferencias de RN-7) viven en el dominio y se desarrollan con TDD.
+- Las reglas RN-1 a RN-10 y RN-12 (incluido el cálculo de diferencias de RN-7) viven en el dominio y se desarrollan con TDD.
 - La escala y el registro de la estimación se reutilizan de la spec 07: no se repiten.
 - El valor de un voto no se devuelve en ninguna respuesta mientras su ronda no está revelada (RN-5): la regla vale para la API, no solo para la pantalla.
 
@@ -95,6 +99,7 @@ Origen: Consigna — Requerimiento 4 (mecanismo de Planning Poker: registrar est
 - Después de cerrar una votación, abrir otra para la misma historia: se acepta (por ejemplo, para re-estimar).
 - La historia se completa en un Sprint mientras la votación está abierta: al registrar la acordada se rechaza ("La historia ya está completada").
 - Un integrante de otro proyecto intenta votar: se informa que el integrante no existe.
+- Proyecto sin votaciones abiertas: la lista está vacía (no es un error). Una votación cerrada no aparece entre las abiertas.
 
 ## Condiciones de error
 
@@ -127,8 +132,9 @@ Si hay más de un problema, primero se informa un pedido mal armado o un valor f
 - CA-6: Después de revelar se puede empezar una nueva ronda sin votos; las rondas anteriores se conservan con sus votos.
 - CA-7: Después de revelar se registra la estimación acordada (cualquier valor de la escala): queda como Story Points de la historia y la votación se cierra y no admite más cambios.
 - CA-8: Operar con un proyecto, una historia, un integrante o una votación que no existe (o es de otro proyecto) informa cuál no existe, sin cambiar nada.
+- CA-9: Se pueden consultar las votaciones abiertas del proyecto para retomarlas, sin los valores de las rondas sin revelar; las cerradas no aparecen y, sin votaciones abiertas, la lista está vacía.
 
-Relación con los criterios iniciales del Issue #12: "registrar las estimaciones individuales" → CA-2; "ocultas hasta finalizar la votación" → CA-3; "al finalizar se muestran todas" → CA-4; "detectar diferencias" → CA-5; "nuevas rondas" → CA-6; "registrar la estimación acordada" → CA-7. CA-1 y CA-8 agregan cómo se abre una votación y los errores.
+Relación con los criterios iniciales del Issue #12: "registrar las estimaciones individuales" → CA-2; "ocultas hasta finalizar la votación" → CA-3; "al finalizar se muestran todas" → CA-4; "detectar diferencias" → CA-5; "nuevas rondas" → CA-6; "registrar la estimación acordada" → CA-7. CA-1 y CA-8 agregan cómo se abre una votación y los errores. CA-9 se agregó al armar la pantalla (Issue #15): sin él, una votación abierta no se podía retomar después de recargar la página, y su historia quedaba trabada ("La historia ya tiene una votación abierta").
 
 ## Escenarios BDD
 
@@ -336,6 +342,28 @@ Característica: Planning Poker
     Y que abrí una votación para la historia "Registrar usuario"
     Cuando "Eli" vota 5
     Entonces se informa el error "El integrante no existe"
+
+  Escenario: Consultar las votaciones abiertas para retomarlas (CA-9)
+    Dado que el backlog tiene la historia "Ver catálogo" con prioridad 2
+    Y que abrí una votación para la historia "Registrar usuario"
+    Y que "Ana" votó 5
+    Y que abrí una votación para la historia "Ver catálogo"
+    Cuando consulto las votaciones abiertas
+    Entonces veo las votaciones abiertas de "Registrar usuario" y "Ver catálogo" en ese orden
+    Y ninguna votación muestra los valores de los votos
+
+  Escenario: Una votación cerrada no aparece entre las abiertas (CA-9)
+    Dado que abrí una votación para la historia "Registrar usuario"
+    Y que "Ana" votó 5
+    Y que "Beto" votó 5
+    Y que revelé la ronda
+    Y que registré la estimación acordada de 5
+    Cuando consulto las votaciones abiertas
+    Entonces no hay votaciones abiertas
+
+  Escenario: Proyecto sin votaciones abiertas (CA-9)
+    Cuando consulto las votaciones abiertas
+    Entonces no hay votaciones abiertas
 ```
 
 Los pasos que no indican proyecto se refieren al proyecto de los Antecedentes, "Tienda Online". En las tablas, `(vacío)` representa un valor que falta (Gherkin no puede escribirlo), igual que en las specs 01, 04 y 07. Los pasos de proyectos, integrantes, backlog y Story Points (`que existe el proyecto…`, `que el proyecto tiene al integrante…`, `que el backlog tiene la historia…`, `la historia "…" tiene N Story Points`, `la historia "…" está sin estimar`) ya existen en las specs 01, 02, 04 y 07 y se reutilizan.
@@ -354,6 +382,7 @@ Historia [#12](https://github.com/martinabatista/seguimiento-medicion-bcg/issues
 | CA-6 Nueva ronda | Empezar una nueva ronda · Sin revelar la actual | `TestNuevaRonda`, `TestNuevaRondaYAcordar`, `TestRepositorioVotaciones` | `dominio/planning_poker.go` (`NuevaRonda`), `postgres/votaciones.go` |
 | CA-7 Acordar | Registrar la acordada · Un valor que nadie votó · Sin revelar · Fuera de la escala · Votación cerrada · Abrir otra después de cerrar | `TestAcordar`, `TestPlanningPokerRecorridoCompleto`, `TestPlanningPokerAcordarHistoriaCompletada`, `TestNuevaRondaYAcordar` | `dominio/planning_poker.go` (`Acordar`), `dominio/servicio_planning_poker.go` (`Acordar` → `ServicioBacklog.Estimar`, spec 07) |
 | CA-8 Inexistentes | Historia que no existe · Votación que no existe · Integrante de otro proyecto | `TestPlanningPokerAbrirErrores`, `TestPlanningPokerVotarErrores`, `TestPlanningPokerErrores`, `TestRepositorioVotaciones` | `dominio/servicio_planning_poker.go` (`votacionConEquipo`), `api/planning_poker.go` (`leerIDsVotacion`) |
+| CA-9 Votaciones abiertas | Consultar las votaciones abiertas · Una cerrada no aparece · Sin votaciones abiertas | (al implementar) | (al implementar) |
 
 ## Dependencias
 
@@ -371,6 +400,7 @@ Historia [#12](https://github.com/martinabatista/seguimiento-medicion-bcg/issues
 - [x] `[P1]` Rutas de la API de Planning Poker en `backend/api/`.
 - [x] `[P1]` Escenarios de `backend/features/planning-poker.feature` con sus pasos en `features/planning_poker_test.go`.
 - [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas, trampas).
+- [ ] `[P1]` Consultar las votaciones abiertas del proyecto (RN-12, CA-9): caso de uso, ruta y escenarios.
 
 ## Definition of Done
 
@@ -379,4 +409,4 @@ Historia [#12](https://github.com/martinabatista/seguimiento-medicion-bcg/issues
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
 - [x] Criterios de aceptación verificados.
 - [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [x] Spec en estado `implemented`.
+- [ ] Spec en estado `implemented` (otra vez, cuando se implemente CA-9).
