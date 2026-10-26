@@ -26,6 +26,7 @@ frontend/
     ├── estilos.css      # todos los estilos
     └── paginas/         # una pantalla por archivo
         ├── Proyectos.tsx       # listar, crear y elegir proyecto (spec 01)
+        ├── Backlog.tsx         # backlog con Story Points (specs 04 y 07)
         └── EnConstruccion.tsx  # lugar de las secciones que todavía no tienen pantalla
 ```
 
@@ -56,6 +57,12 @@ Acordadas al crear la unidad (Issue #15, 2026-10-26):
 
 - No valida datos ni calcula métricas: eso es del backend.
 - Se usa con `npm run dev` (para la demo alcanza). Publicarla en un servidor no está en el alcance.
+
+## Trampas conocidas
+
+- Si se cambia de rama con `npm run dev` andando y la rama no tiene `frontend/` (por ejemplo, una vieja), Vite
+  se reinicia sin su configuración y **pierde el proxy**: los pedidos a `/api` devuelven la página. Solución:
+  frenar `npm run dev` (Ctrl+C) y volver a lanzarlo.
 
 ## Contratos públicos
 

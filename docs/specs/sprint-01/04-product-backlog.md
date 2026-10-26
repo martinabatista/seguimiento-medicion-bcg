@@ -273,6 +273,10 @@ Historia [#7](https://github.com/martinabatista/seguimiento-medicion-bcg/issues/
 | CA-6 Prioridad y estado | Validar la prioridad · Validar el estado al modificar | `TestParsearPrioridad`, `TestParsearEstado`, `TestNuevaHistoria`, `TestCrearHistoriaInvalida` | `dominio/historia.go` (`ParsearPrioridad`, `ParsearEstado`) |
 | CA-7 Inexistentes | Crear en un proyecto que no existe · Ver una historia que no existe · Historia de otro proyecto | `TestBacklogProyectoInexistente`, `TestBacklogObtener`, `TestBacklogInexistente`, `TestRepositorioHistorias` | `dominio/servicio_backlog.go` (`verificarProyecto`), `memoria/historias.go`, `postgres/historias.go`, `api/proyectos.go` (`responderError`) |
 
+## Pantalla
+
+`frontend/src/paginas/Backlog.tsx` (sección "Backlog" del menú): lista ordenada por prioridad, un solo formulario para crear y modificar, y eliminar con confirmación. No valida nada: muestra los mensajes de error del backend. Los Story Points se estiman en la misma pantalla (spec 07).
+
 ## Dependencias
 
 - Spec 01 (proyectos): el backlog pertenece a un proyecto existente.
