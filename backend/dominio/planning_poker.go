@@ -1,6 +1,9 @@
 package dominio
 
-import "slices"
+import (
+	"cmp"
+	"slices"
+)
 
 // EstadoVotacion indica si una votación de Planning Poker admite cambios (spec 08 RN-10).
 type EstadoVotacion string
@@ -258,4 +261,17 @@ func quienesVotaron(votos []VotoRevelado, valor int) []Integrante {
 		}
 	}
 	return is
+}
+
+// VotacionesAbiertas devuelve las votaciones abiertas en el orden en que se abrieron (ID creciente),
+// para retomarlas sin saber su identificador (spec 08 RN-12). Las cerradas no aparecen.
+func VotacionesAbiertas(votaciones []Votacion) []Votacion {
+	abiertas := []Votacion{}
+	for _, v := range votaciones {
+		if v.Estado == VotacionAbierta {
+			abiertas = append(abiertas, v)
+		}
+	}
+	slices.SortFunc(abiertas, func(a, b Votacion) int { return cmp.Compare(a.ID, b.ID) })
+	return abiertas
 }
