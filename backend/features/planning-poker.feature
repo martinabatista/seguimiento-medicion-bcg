@@ -204,3 +204,25 @@ Característica: Planning Poker
     Y que abrí una votación para la historia "Registrar usuario"
     Cuando "Eli" vota 5
     Entonces se informa el error "El integrante no existe"
+
+  Escenario: Consultar las votaciones abiertas para retomarlas (CA-9)
+    Dado que el backlog tiene la historia "Ver catálogo" con prioridad 2
+    Y que abrí una votación para la historia "Registrar usuario"
+    Y que "Ana" votó 5
+    Y que abrí una votación para la historia "Ver catálogo"
+    Cuando consulto las votaciones abiertas
+    Entonces veo las votaciones abiertas de "Registrar usuario" y "Ver catálogo" en ese orden
+    Y ninguna votación muestra los valores de los votos
+
+  Escenario: Una votación cerrada no aparece entre las abiertas (CA-9)
+    Dado que abrí una votación para la historia "Registrar usuario"
+    Y que "Ana" votó 5
+    Y que "Beto" votó 5
+    Y que revelé la ronda
+    Y que registré la estimación acordada de 5
+    Cuando consulto las votaciones abiertas
+    Entonces no hay votaciones abiertas
+
+  Escenario: Proyecto sin votaciones abiertas (CA-9)
+    Cuando consulto las votaciones abiertas
+    Entonces no hay votaciones abiertas

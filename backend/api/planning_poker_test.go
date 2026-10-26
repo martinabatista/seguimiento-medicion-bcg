@@ -175,3 +175,29 @@ func TestPlanningPokerErrores(t *testing.T) {
 		})
 	}
 }
+
+// spec 08 CA-9: las votaciones abiertas del proyecto → 200 lista, sin valores de la ronda sin revelar.
+func TestVotacionesAbiertasEnLaAPI(t *testing.T) {
+	if rec := pedir(t, conEquipo(t), http.MethodGet, "/api/proyectos/1/votaciones", ""); rec.Code != http.StatusOK || strings.TrimSpace(rec.Body.String()) != "[]" {
+		t.Errorf("sin votaciones: código = %d, cuerpo = %q; se esperaba 200 y []", rec.Code, rec.Body.String())
+	}
+
+	h := conVotacion(t)
+	votarEn(t, h, 1, 13)
+	rec := pedir(t, h, http.MethodGet, "/api/proyectos/1/votaciones", "")
+	var lista []votacionJSON
+	leerJSON(t, rec, &lista)
+	if rec.Code != http.StatusOK || len(lista) != 1 || lista[0].ID != 1 || lista[0].HistoriaID != 1 || fmt.Sprint(nombresJSON(lista[0].Votaron)) != "[Ana]" {
+		t.Errorf("código = %d, lista = %+v; se esperaba la votación 1 con Ana votando", rec.Code, lista)
+	}
+	if cuerpo := rec.Body.String(); strings.Contains(cuerpo, `"story_points"`) || strings.Contains(cuerpo, "13") {
+		t.Errorf("cuerpo = %s, no debe mostrar el valor de un voto sin revelar (RN-5)", cuerpo)
+	}
+
+	rec = pedir(t, h, http.MethodGet, "/api/proyectos/999/votaciones", "")
+	var e errorJSON
+	leerJSON(t, rec, &e)
+	if rec.Code != http.StatusNotFound || e.Error != "El proyecto no existe" {
+		t.Errorf("proyecto inexistente: código = %d, error = %q", rec.Code, e.Error)
+	}
+}

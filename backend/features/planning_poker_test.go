@@ -49,6 +49,12 @@ func (m *mundo) registrarPasosPlanningPoker(sc *godog.ScenarioContext) {
 	sc.Step(`^hay diferencias entre los votos$`, m.hayDiferencias)
 	sc.Step(`^no hay diferencias entre los votos$`, m.noHayDiferencias)
 	sc.Step(`^el voto más (bajo|alto) es (\d+) de ((?:"[^"]*"(?: y )?)+)$`, m.elVotoExtremoEs)
+
+	// Votaciones abiertas (RN-12, CA-9)
+	sc.Step(`^consulto las votaciones abiertas$`, m.consultoLasVotacionesAbiertas)
+	sc.Step(`^veo las votaciones abiertas de "([^"]*)" y "([^"]*)" en ese orden$`, m.veoLasVotacionesAbiertasDe)
+	sc.Step(`^ninguna votación muestra los valores de los votos$`, m.ningunaVotacionMuestraValores)
+	sc.Step(`^no hay votaciones abiertas$`, m.noHayVotacionesAbiertas)
 }
 
 // ---------- helpers ----------
@@ -394,6 +400,73 @@ func (m *mundo) elVotoExtremoEs(cual string, valor int, lista string) error {
 	}
 	if quienes := nombresVotacion(e.Integrantes); e.StoryPoints != valor || !slices.Equal(quienes, listaDeNombres(lista)) {
 		return fmt.Errorf("voto más %s = %d de %v, se esperaba %d de %v", cual, e.StoryPoints, quienes, valor, listaDeNombres(lista))
+	}
+	return nil
+}
+
+// ---------- votaciones abiertas (RN-12, CA-9) ----------
+
+type votacionAbierta struct {
+	ID         int64           `json:"id"`
+	HistoriaID int64           `json:"historia_id"`
+	Rondas     []rondaRevelada `json:"rondas"`
+}
+
+func (m *mundo) consultoLasVotacionesAbiertas() error {
+	return m.pedir(http.MethodGet, rutaVotaciones(m.backlog.principal), nil)
+}
+
+// votacionesAbiertas lee la lista de la última respuesta (la de "consulto las votaciones abiertas").
+func (m *mundo) votacionesAbiertas() ([]votacionAbierta, error) {
+	if err := m.exigirOK("consultar las votaciones abiertas"); err != nil {
+		return nil, err
+	}
+	var lista []votacionAbierta
+	return lista, json.Unmarshal(m.respuesta.Body.Bytes(), &lista)
+}
+
+func (m *mundo) veoLasVotacionesAbiertasDe(primera, segunda string) error {
+	lista, err := m.votacionesAbiertas()
+	if err != nil {
+		return err
+	}
+	var esperadas []int64
+	for _, titulo := range []string{primera, segunda} {
+		id, err := m.historiaLlamada(titulo)
+		if err != nil {
+			return err
+		}
+		esperadas = append(esperadas, id)
+	}
+	if len(lista) != 2 || lista[0].HistoriaID != esperadas[0] || lista[1].HistoriaID != esperadas[1] {
+		return fmt.Errorf("votaciones abiertas = %+v, se esperaban las de %q y %q en ese orden", lista, primera, segunda)
+	}
+	return nil
+}
+
+func (m *mundo) ningunaVotacionMuestraValores() error {
+	lista, err := m.votacionesAbiertas()
+	if err != nil {
+		return err
+	}
+	for _, v := range lista {
+		if len(v.Rondas) != 0 {
+			return fmt.Errorf("la votación %d muestra rondas reveladas: %+v", v.ID, v.Rondas)
+		}
+	}
+	if cuerpo := m.respuesta.Body.String(); strings.Contains(cuerpo, `"story_points"`) {
+		return fmt.Errorf("las votaciones abiertas muestran valores de votos sin revelar: %s", cuerpo)
+	}
+	return nil
+}
+
+func (m *mundo) noHayVotacionesAbiertas() error {
+	lista, err := m.votacionesAbiertas()
+	if err != nil {
+		return err
+	}
+	if len(lista) != 0 {
+		return fmt.Errorf("votaciones abiertas = %+v, se esperaba ninguna", lista)
 	}
 	return nil
 }
