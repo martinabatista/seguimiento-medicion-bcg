@@ -1,6 +1,6 @@
 ---
 titulo: Planning Poker
-estado: in-review    # draft | in-review | approved | implemented
+estado: implemented  # draft | in-review | approved | implemented
 unidad: backend
 issue: "#12"
 sprint: 02
@@ -382,7 +382,11 @@ Historia [#12](https://github.com/martinabatista/seguimiento-medicion-bcg/issues
 | CA-6 Nueva ronda | Empezar una nueva ronda · Sin revelar la actual | `TestNuevaRonda`, `TestNuevaRondaYAcordar`, `TestRepositorioVotaciones` | `dominio/planning_poker.go` (`NuevaRonda`), `postgres/votaciones.go` |
 | CA-7 Acordar | Registrar la acordada · Un valor que nadie votó · Sin revelar · Fuera de la escala · Votación cerrada · Abrir otra después de cerrar | `TestAcordar`, `TestPlanningPokerRecorridoCompleto`, `TestPlanningPokerAcordarHistoriaCompletada`, `TestNuevaRondaYAcordar` | `dominio/planning_poker.go` (`Acordar`), `dominio/servicio_planning_poker.go` (`Acordar` → `ServicioBacklog.Estimar`, spec 07) |
 | CA-8 Inexistentes | Historia que no existe · Votación que no existe · Integrante de otro proyecto | `TestPlanningPokerAbrirErrores`, `TestPlanningPokerVotarErrores`, `TestPlanningPokerErrores`, `TestRepositorioVotaciones` | `dominio/servicio_planning_poker.go` (`votacionConEquipo`), `api/planning_poker.go` (`leerIDsVotacion`) |
-| CA-9 Votaciones abiertas | Consultar las votaciones abiertas · Una cerrada no aparece · Sin votaciones abiertas | (al implementar) | (al implementar) |
+| CA-9 Votaciones abiertas | Consultar las votaciones abiertas · Una cerrada no aparece · Sin votaciones abiertas | `TestVotacionesAbiertas`, `TestPlanningPokerAbiertas`, `TestVotacionesAbiertasEnLaAPI` | `dominio/planning_poker.go` (`VotacionesAbiertas`), `dominio/servicio_planning_poker.go` (`Abiertas`), `api/planning_poker.go` (`abiertas`) |
+
+## Pantalla
+
+`frontend/src/paginas/PlanningPoker.tsx` (sección "Planning Poker" del menú): un desplegable con las historias no completadas para abrir una votación, la lista de votaciones abiertas para retomarlas (CA-9), una fila por Developer con su carta y "Votar" (después de votar dice "Ya votó" y la carta deja de verse), "Revelar votos", y al revelar los votos con el aviso de diferencias, "Nueva ronda" y "Acordar". Las rondas anteriores se muestran abajo. Todas las reglas y los mensajes de error son los del backend.
 
 ## Dependencias
 
@@ -400,7 +404,7 @@ Historia [#12](https://github.com/martinabatista/seguimiento-medicion-bcg/issues
 - [x] `[P1]` Rutas de la API de Planning Poker en `backend/api/`.
 - [x] `[P1]` Escenarios de `backend/features/planning-poker.feature` con sus pasos en `features/planning_poker_test.go`.
 - [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoints disponibles, specs relacionadas, trampas).
-- [ ] `[P1]` Consultar las votaciones abiertas del proyecto (RN-12, CA-9): caso de uso, ruta y escenarios.
+- [x] `[P1]` Consultar las votaciones abiertas del proyecto (RN-12, CA-9): caso de uso, ruta y escenarios.
 
 ## Definition of Done
 
@@ -409,4 +413,4 @@ Historia [#12](https://github.com/martinabatista/seguimiento-medicion-bcg/issues
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
 - [x] Criterios de aceptación verificados.
 - [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented` (otra vez, cuando se implemente CA-9).
+- [x] Spec en estado `implemented` (también con CA-9).

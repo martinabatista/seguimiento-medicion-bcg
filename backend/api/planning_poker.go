@@ -81,6 +81,26 @@ func (h pokerHandler) abrir(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, votacionAJSON(v))
 }
 
+// abiertas: GET /api/proyectos/{id}/votaciones (spec 08 CA-9). Las votaciones abiertas del
+// proyecto, para retomarlas; sin los valores de las rondas sin revelar ([] si no hay).
+func (h pokerHandler) abiertas(w http.ResponseWriter, r *http.Request) {
+	proyectoID, err := leerID(r)
+	if err != nil {
+		responderError(w, err)
+		return
+	}
+	vistas, err := h.servicio.Abiertas(r.Context(), proyectoID)
+	if err != nil {
+		responderError(w, err)
+		return
+	}
+	lista := make([]votacionJSON, 0, len(vistas))
+	for _, v := range vistas {
+		lista = append(lista, votacionAJSON(v))
+	}
+	writeJSON(w, http.StatusOK, lista)
+}
+
 // ver: GET /api/proyectos/{id}/votaciones/{votacionID} (spec 08 CA-3).
 func (h pokerHandler) ver(w http.ResponseWriter, r *http.Request) {
 	h.operar(w, r, h.servicio.Ver)

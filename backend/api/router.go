@@ -51,6 +51,7 @@ func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBa
 
 	pp := pokerHandler{servicio: poker}
 	mux.HandleFunc("POST /api/proyectos/{id}/votaciones", pp.abrir)
+	mux.HandleFunc("GET /api/proyectos/{id}/votaciones", pp.abiertas)
 	mux.HandleFunc("GET /api/proyectos/{id}/votaciones/{votacionID}", pp.ver)
 	mux.HandleFunc("POST /api/proyectos/{id}/votaciones/{votacionID}/votos", pp.votar)
 	mux.HandleFunc("POST /api/proyectos/{id}/votaciones/{votacionID}/revelar", pp.revelar)

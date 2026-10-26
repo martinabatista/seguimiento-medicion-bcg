@@ -124,6 +124,27 @@ func (s *ServicioPlanningPoker) Acordar(ctx context.Context, proyectoID, votacio
 	return s.guardar(ctx, v, integrantes)
 }
 
+// Abiertas devuelve las votaciones abiertas del proyecto, cada una como al verla: sin los valores
+// de la ronda sin revelar (CA-9, RN-12, RN-5).
+func (s *ServicioPlanningPoker) Abiertas(ctx context.Context, proyectoID int64) ([]VistaVotacion, error) {
+	if err := verificarProyecto(ctx, s.proyectos, proyectoID); err != nil {
+		return nil, err
+	}
+	votaciones, err := s.votaciones.Listar(ctx, proyectoID)
+	if err != nil {
+		return nil, err
+	}
+	integrantes, err := s.integrantes.Listar(ctx, proyectoID)
+	if err != nil {
+		return nil, err
+	}
+	vistas := []VistaVotacion{}
+	for _, v := range VotacionesAbiertas(votaciones) {
+		vistas = append(vistas, v.Vista(integrantes))
+	}
+	return vistas, nil
+}
+
 // votacionConEquipo devuelve la votación del proyecto y sus integrantes (para saber quién es
 // Developer y nombrar a quienes votaron).
 func (s *ServicioPlanningPoker) votacionConEquipo(ctx context.Context, proyectoID, votacionID int64) (Votacion, []Integrante, error) {

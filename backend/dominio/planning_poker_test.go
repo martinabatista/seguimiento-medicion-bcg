@@ -361,3 +361,19 @@ func TestErroresDePlanningPoker(t *testing.T) {
 		t.Error("ErrVotacionNoExiste no es un conflicto")
 	}
 }
+
+// spec 08 RN-12 (CA-9): solo las abiertas, en el orden en que se abrieron (ID creciente).
+func TestVotacionesAbiertas(t *testing.T) {
+	cerrada := Votacion{ID: 2, HistoriaID: 11, Estado: VotacionCerrada}
+	segunda := Votacion{ID: 5, HistoriaID: 12, Estado: VotacionAbierta}
+	primera := Votacion{ID: 3, HistoriaID: 10, Estado: VotacionAbierta}
+
+	abiertas := VotacionesAbiertas([]Votacion{segunda, cerrada, primera})
+
+	if len(abiertas) != 2 || abiertas[0].ID != 3 || abiertas[1].ID != 5 {
+		t.Errorf("abiertas = %+v, se esperaban las 3 y 5 en ese orden", abiertas)
+	}
+	if vacias := VotacionesAbiertas([]Votacion{cerrada}); vacias == nil || len(vacias) != 0 {
+		t.Errorf("sin abiertas = %#v, se esperaba una lista vacía (no nil)", vacias)
+	}
+}
