@@ -185,6 +185,10 @@ Característica: Métricas de avance del Sprint y del proyecto
 
 Los pasos que no indican proyecto se refieren al de los Antecedentes, "Tienda Online". "Que estimé la historia … con N Story Points" es el paso de la spec 07; los de Sprints, los de las specs 05 y 06. La velocidad se escribe con punto decimal (6.5), como sale en la respuesta.
 
+## Pantalla
+
+`frontend/src/paginas/Metricas.tsx` (sección "Métricas" del menú). Pide las métricas una sola vez y muestra lo que llega, sin calcular nada: arriba la velocidad del equipo (o "todavía no hay Sprints cerrados"), los Story Points y las historias completadas de los Sprints cerrados; abajo una tabla con una fila por Sprint, donde el abierto dice "abierto (parcial)".
+
 ## Dependencias
 
 - Spec 05 (Sprints), spec 06 (completar y cerrar) y spec 07 (Story Points): implementadas. Esta historia agrega a la spec 06 que, al cerrar, se congelen los Story Points (RN-4).
