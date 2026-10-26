@@ -164,6 +164,21 @@ button.enlace {
   border-radius: 4px;
 }
 
+/* Tablas (Métricas) */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 1px solid var(--borde);
+}
+
+th,
+td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--borde);
+}
+
 /* ---------- Dashboard (spec 13) ---------- */
 
 .tarjetas {
