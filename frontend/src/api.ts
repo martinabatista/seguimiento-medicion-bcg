@@ -93,6 +93,38 @@ export interface RondaRevelada {
   mas_alto: { story_points: number; integrantes: Persona[] }
 }
 
+// Dashboard del proyecto (spec 13): indicadores y datos de los gráficos, ya calculados por el backend.
+// Donde no hay dato llega null.
+export interface Dashboard {
+  proyecto: Proyecto
+  estado: 'No iniciado' | 'En curso' | 'Finalizado'
+  dias_para_empezar: number | null
+  dias_para_terminar: number | null
+  sprint_en_curso: {
+    id: number
+    numero: number
+    sprint_goal: string
+    fecha_fin: string
+    dias_restantes: number
+    story_points_planificados: number
+    story_points_completados: number
+  } | null
+  backlog: {
+    total: number
+    completadas: number
+    porcentaje_completadas: number
+    story_points_totales: number
+    story_points_completados: number
+    sin_estimar: number
+  }
+  velocidad: number | null
+  graficos: {
+    story_points_por_sprint: { sprint: string; numero: number; planificados: number; completados: number; parcial: boolean }[]
+    velocidad: { sprints: { sprint: string; numero: number; completados: number }[]; promedio: number | null }
+    backlog_por_estado: { estado: Historia['estado']; cantidad: number }[]
+  }
+}
+
 // mensajeDe devuelve el texto para mostrar de cualquier error.
 export function mensajeDe(error: unknown): string {
   return error instanceof Error ? error.message : 'Ocurrió un error inesperado'

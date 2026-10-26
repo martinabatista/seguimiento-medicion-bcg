@@ -7,6 +7,10 @@
   --fondo: #f9fafb;
   --primario: #2563eb;
   --error: #b91c1c;
+  /* Colores de los gráficos (validados para daltonismo sobre blanco; el aqua lleva siempre su número) */
+  --serie-1: #2a78d6;
+  --serie-2: #eb6834;
+  --serie-3: #1baf7a;
   font-family: system-ui, sans-serif;
   color: var(--texto);
   background: var(--fondo);
@@ -153,4 +157,157 @@ button.enlace {
   background: #fef2f2;
   border: 1px solid #fecaca;
   border-radius: 4px;
+}
+
+/* ---------- Dashboard (spec 13) ---------- */
+
+.tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.75rem;
+}
+
+.tarjeta {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  background: white;
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+}
+
+.tarjeta strong {
+  font-size: 1.5rem;
+}
+
+.serie-1 {
+  background: var(--serie-1);
+}
+
+.serie-2 {
+  background: var(--serie-2);
+}
+
+.serie-3 {
+  background: var(--serie-3);
+}
+
+.leyenda {
+  display: flex;
+  gap: 1rem;
+}
+
+.muestra {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+/* Barras: el área tiene alto fijo y cada barra ocupa el % de su valor sobre el mayor. */
+.grafico {
+  padding: 1rem;
+  background: white;
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+}
+
+.area {
+  position: relative;
+  display: flex;
+  gap: 1.5rem;
+  align-items: end;
+  height: 12rem;
+  padding-top: 1.5rem;
+  border-bottom: 1px solid var(--suave);
+}
+
+.grupo {
+  display: flex;
+  flex: 1;
+  gap: 2px;
+  height: 100%;
+}
+
+.columna {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: end;
+  max-width: 3rem;
+  height: 100%;
+}
+
+.valor {
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.barra {
+  border-radius: 4px 4px 0 0;
+}
+
+.ejes {
+  display: flex;
+  gap: 1.5rem;
+  padding-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--suave);
+}
+
+.ejes span {
+  flex: 1;
+}
+
+.promedio {
+  position: absolute;
+  right: 0;
+  left: 0;
+  border-top: 2px dashed var(--texto);
+  pointer-events: none;
+}
+
+.promedio span {
+  position: absolute;
+  right: 0;
+  bottom: 0.15rem;
+  padding: 0 0.25rem;
+  font-size: 0.8rem;
+  background: white;
+}
+
+/* Dona: un degradado circular con un agujero blanco en el medio. */
+.dona-y-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: center;
+}
+
+.dona {
+  display: grid;
+  place-items: center;
+  width: 10rem;
+  height: 10rem;
+  border-radius: 50%;
+}
+
+.dona span {
+  display: grid;
+  place-items: center;
+  width: 6rem;
+  height: 6rem;
+  text-align: center;
+  background: white;
+  border-radius: 50%;
+}
+
+.leyenda-dona {
+  padding: 0;
+  list-style: none;
+}
+
+.leyenda-dona li {
+  margin-bottom: 0.4rem;
 }
