@@ -1,6 +1,6 @@
 ---
 titulo: Dashboard del proyecto
-estado: approved     # draft | in-review | approved | implemented
+estado: implemented  # draft | in-review | approved | implemented
 unidad: global
 issue: "#19"
 sprint: 03
@@ -42,7 +42,7 @@ Se implementa en **dos etapas**, con dos PRs de código:
 - Métricas de esfuerzo y de calidad (horas, desviación, defectos; specs 11 y 12): se pueden sumar en el Sprint 4 si queda tiempo.
 - Filtros (por ejemplo, ver solo un Sprint), exportar o imprimir el Dashboard (el reporte en PDF es la spec 14).
 - Pronósticos (por ejemplo, cuándo se terminaría el backlog).
-- Elegir la librería de gráficos: se decide con el equipo en la etapa 2.
+- Una librería de gráficos: se decidió dibujarlos con HTML y CSS (ver "Pantalla").
 
 ## Entradas
 
@@ -254,7 +254,21 @@ Historia [#19](https://github.com/martinabatista/seguimiento-medicion-bcg/issues
 | CA-6 Gráfico de velocidad | El gráfico de velocidad solo muestra los Sprints cerrados | `TestGraficosDelDashboard`, `TestDashboardConSprints` | `dominio/dashboard.go` (`BarraVelocidad`) |
 | CA-7 Backlog por estado | Gráfico del backlog por estado | `TestGraficosDelDashboard`, `TestDashboardConSprints` | `dominio/dashboard.go` (`PorcionBacklog`) |
 | CA-8 Vacío e inexistente | Proyecto sin historias ni Sprints · Proyecto que no existe | `TestDashboardVacio`, `TestDashboardProyectoVacio`, `TestDashboardProyectoInexistente` (dominio y API) | `dominio/dashboard.go` (`ServicioDashboard`), `api/dashboard.go` |
-| CA-9 Pantalla | (etapa 2) | (etapa 2) | (etapa 2, con la interfaz web base #15) |
+| CA-9 Pantalla | (se verifica a mano en la pantalla) | (sin tests de pantalla; el cliente de la API los tiene) | `frontend/src/paginas/Dashboard.tsx` (`Tarjeta`, `Barras`, `Dona`) |
+
+## Pantalla
+
+`frontend/src/paginas/Dashboard.tsx` (sección "Dashboard" del menú). Pide la consulta del Dashboard una sola vez y dibuja lo que llega, sin calcular nada:
+
+- **6 tarjetas** con un número grande: estado del proyecto y días que faltan, Sprint en curso, historias completadas, Story Points completados, velocidad e historias sin estimar.
+- **Story Points por Sprint:** dos barras por Sprint (planificados y completados) con leyenda; el Sprint abierto dice "(parcial)".
+- **Velocidad:** una barra por Sprint cerrado y una línea punteada a la altura del promedio.
+- **Backlog por estado:** una dona con la leyenda al lado (nombre y cantidad de cada estado).
+
+Decisiones:
+- **Sin librería de gráficos:** las barras son cajas de CSS cuyo alto es su valor sobre el mayor del gráfico, y la dona es un degradado circular de CSS. Cero dependencias y se entiende leyendo el código; para tres gráficos simples no hace falta más.
+- **Cada barra y cada porción lleva su número** (y la dona, su leyenda con cantidades): se lee sin depender del color, también impreso o con daltonismo. Al pasar el mouse, el navegador muestra el detalle.
+- **Colores** azul, naranja y aqua, validados para daltonismo sobre el fondo blanco (separación CVD ΔE ≥ 9,2). El aqua tiene menos de 3:1 de contraste: por eso va siempre acompañado de su número.
 
 ## Dependencias
 
@@ -274,14 +288,14 @@ Historia [#19](https://github.com/martinabatista/seguimiento-medicion-bcg/issues
 - [x] `[P2]` Actualizar `backend/CLAUDE.md` (endpoint, JSON, specs relacionadas).
 
 **Etapa 2 — pantalla (con la interfaz web base, #15):**
-- [ ] `[P1]` Pantalla del Dashboard con los indicadores y los tres gráficos (barras, barras con línea y dona), cada uno con sus números.
-- [ ] `[P2]` Elegir con el equipo la librería de gráficos y justificarla en esta spec.
+- [x] `[P1]` Pantalla del Dashboard con los indicadores y los tres gráficos (barras, barras con línea y dona), cada uno con sus números.
+- [x] `[P2]` Elegir la librería de gráficos y justificarla en esta spec: ninguna (ver "Pantalla").
 
 ## Definition of Done
 
 - [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
 - [x] Escenarios BDD automatizados y en verde.
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados (CA-1 a CA-8 en la etapa 1; CA-9 en la etapa 2).
+- [x] Criterios de aceptación verificados (CA-1 a CA-8 en la etapa 1; CA-9 en la etapa 2).
 - [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented` (al terminar la etapa 2).
+- [x] Spec en estado `implemented` (al terminar la etapa 2).

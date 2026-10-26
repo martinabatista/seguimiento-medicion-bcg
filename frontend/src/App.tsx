@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import type { Proyecto } from './api'
 import Backlog from './paginas/Backlog'
+import Dashboard from './paginas/Dashboard'
 import EnConstruccion from './paginas/EnConstruccion'
 import PlanningPoker from './paginas/PlanningPoker'
 import Proyectos from './paginas/Proyectos'
@@ -15,7 +16,7 @@ const secciones: { titulo: string; pantalla: (proyecto: Proyecto) => ReactNode }
   { titulo: 'Planning Poker', pantalla: (proyecto) => <PlanningPoker proyecto={proyecto} /> },
   { titulo: 'Esfuerzo', pantalla: () => <EnConstruccion titulo="Esfuerzo" /> },
   { titulo: 'Métricas', pantalla: () => <EnConstruccion titulo="Métricas" /> },
-  { titulo: 'Dashboard', pantalla: () => <EnConstruccion titulo="Dashboard" /> },
+  { titulo: 'Dashboard', pantalla: (proyecto) => <Dashboard proyecto={proyecto} /> },
 ]
 
 // App es el layout: el encabezado y, según haya un proyecto elegido o no, la lista de proyectos o

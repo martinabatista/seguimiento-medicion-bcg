@@ -28,6 +28,7 @@ frontend/
         ├── Proyectos.tsx       # listar, crear y elegir proyecto (spec 01)
         ├── Backlog.tsx         # backlog con Story Points (specs 04 y 07)
         ├── PlanningPoker.tsx   # votar en secreto, revelar, nueva ronda y acordar (spec 08)
+        ├── Dashboard.tsx       # indicadores y 3 gráficos en HTML y CSS (spec 13)
         └── EnConstruccion.tsx  # lugar de las secciones que todavía no tienen pantalla
 ```
 
@@ -49,8 +50,8 @@ Acordadas al crear la unidad (Issue #15, 2026-10-26):
   lanza `ErrorAPI` con el mensaje del backend (`{"error": "…"}`) o uno claro si el servidor no responde.
 - **Proxy de Vite** en desarrollo (`/api` → `http://localhost:8080`): el frontend y la API se ven como
   un solo sitio, así no hace falta configurar CORS en el backend.
-- **Estilos en un solo archivo CSS**, sin librerías. La librería de gráficos se elige con el Dashboard
-  (spec 13, etapa 2).
+- **Estilos en un solo archivo CSS**, sin librerías. Los gráficos del Dashboard también son HTML y CSS
+  (barras con su alto en % y la dona con `conic-gradient`), sin librería de gráficos (spec 13).
 - **Dependencias:** de la app, `react` y `react-dom`; de desarrollo, Vite, TypeScript, ESLint (mínimo) y
   Vitest. Cada dependencia nueva se justifica en el PR que la agrega.
 
