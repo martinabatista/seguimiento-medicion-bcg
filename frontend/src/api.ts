@@ -83,6 +83,32 @@ export interface DetalleSprint extends Sprint {
   historias: (Historia & { completada_en_sprint: boolean })[]
 }
 
+// Métricas de avance (spec 10), ya calculadas por el backend. Los Sprints van por fecha de inicio;
+// "parcial" marca el abierto. La velocidad y los totales cuentan solo los Sprints cerrados.
+export interface Metricas {
+  sprints: {
+    sprint_id: number
+    numero: number
+    estado: Sprint['estado']
+    parcial: boolean
+    historias_planificadas: number
+    historias_completadas: number
+    porcentaje_completadas: number
+    sin_estimar: number
+    story_points_planificados: number
+    story_points_completados: number
+  }[]
+  sprints_cerrados: number
+  velocidad: number | null // null = todavía no hay Sprints cerrados
+  totales: {
+    historias_planificadas: number
+    historias_completadas: number
+    porcentaje_completadas: number
+    story_points_planificados: number
+    story_points_completados: number
+  }
+}
+
 // Votación de Planning Poker (spec 08). Los valores de los votos solo aparecen en "rondas", que trae
 // las rondas ya reveladas: de la ronda sin revelar solo se sabe quién votó y quién falta.
 export interface Votacion {
