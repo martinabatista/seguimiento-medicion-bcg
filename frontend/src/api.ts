@@ -45,6 +45,18 @@ export interface Proyecto {
   fecha_fin: string
 }
 
+// Historia del Product Backlog (specs 04 y 07).
+export interface Historia {
+  id: number
+  proyecto_id: number
+  titulo: string
+  descripcion: string
+  prioridad: number // 1 es la más importante
+  criterios_aceptacion: string
+  estado: 'Pendiente' | 'En progreso' | 'Completada'
+  story_points: number | null // null = sin estimar
+}
+
 // mensajeDe devuelve el texto para mostrar de cualquier error.
 export function mensajeDe(error: unknown): string {
   return error instanceof Error ? error.message : 'Ocurrió un error inesperado'

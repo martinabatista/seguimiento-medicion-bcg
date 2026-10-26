@@ -229,6 +229,10 @@ Historia [#10](https://github.com/martinabatista/seguimiento-medicion-bcg/issues
 | CA-5 Consultar la escala | Consultar la escala de Story Points | `TestEscalaStoryPoints`, `TestConsultarEscalaStoryPoints` | `dominio/story_points.go` (`EscalaStoryPoints`), `api/story_points.go` (`escalaStoryPoints`) |
 | CA-6 Inexistentes | Estimar en un proyecto que no existe · Historia que no existe · Historia de otro proyecto | `TestEstimarInexistente`, `TestEstimarHistoriaInexistente` | `dominio/servicio_story_points.go` (`cambiarEstimacion`), `api/backlog.go` (`leerIDs`) |
 
+## Pantalla
+
+`frontend/src/paginas/Backlog.tsx`: cada historia del backlog tiene un desplegable con "Sin estimar" y los valores de la escala, que se piden al backend (CA-5). Elegir un valor estima; elegir "Sin estimar" quita la estimación. Los errores (por ejemplo, "La historia ya está completada") son los del backend.
+
 ## Dependencias
 
 - Spec 04 (backlog): implementada. La historia ya tiene el dato de Story Points, que arranca sin estimar.
