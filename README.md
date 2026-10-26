@@ -14,6 +14,7 @@ Integrantes: Batista Martina, Cabeza Florencia, Guajardo Luana
 - [Git](https://git-scm.com/)
 - [Go](https://go.dev/dl/) 1.27 (la versión de `backend/go.mod`)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/), para la base de datos PostgreSQL
+- [Node.js](https://nodejs.org/) 24, para el frontend
 
 ## Levantar el proyecto
 
@@ -43,6 +44,14 @@ cd backend
 go run ./cmd/api            # API en http://localhost:8080 — probar: /api/health, /api/proyectos
 ```
 
+Frontend (con el backend andando, en otra terminal):
+
+```bash
+cd frontend
+npm install                 # solo la primera vez, o cuando cambian las dependencias
+npm run dev                 # la app en http://localhost:5173 (los pedidos a /api van al backend)
+```
+
 ## Tests
 
 ```bash
@@ -51,9 +60,15 @@ go test ./... -cover        # tests unitarios y escenarios BDD (backend/features
                             # con DATABASE_URL definida, también los de integración con PostgreSQL
 go vet ./...
 gofmt -l .                  # no debe listar nada
+
+cd frontend
+npm test                    # tests del frontend (Vitest)
+npm run lint                # ESLint
+npm run typecheck           # TypeScript
+npm run build               # compila la app
 ```
 
-La CI corre estos mismos controles en cada Pull Request.
+La CI corre estos mismos controles en cada Pull Request (en el frontend: lint, typecheck y build).
 
 ## Cómo trabajamos
 
