@@ -1,4 +1,4 @@
-# seguimiento_medicionBCG — Software Metrics & Estimation
+# seguimiento-medicion-bcg — Software Metrics & Estimation
 
 Aplicación web para administrar proyectos de software y medir su estimación, planificación,
 seguimiento y calidad. Trabajo Práctico Integrador de Ingeniería y Calidad de Software 2026 — UTN FRSR.
