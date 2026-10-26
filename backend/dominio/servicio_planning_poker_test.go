@@ -209,3 +209,39 @@ func TestPlanningPokerAcordarHistoriaCompletada(t *testing.T) {
 		t.Errorf("votación = %+v, tenía que seguir abierta y sin acordada", visto)
 	}
 }
+
+// spec 08 RN-12 (CA-9): las votaciones abiertas del proyecto, para retomarlas, sin los valores de
+// la ronda sin revelar; las cerradas no aparecen.
+func TestPlanningPokerAbiertas(t *testing.T) {
+	p := nuevoPoker(t)
+	ctx := context.Background()
+	catalogo, _ := p.historias.Guardar(ctx, dominio.Historia{ProyectoID: p.tienda, Titulo: "Ver catálogo", Descripcion: "d", Prioridad: 2, Estado: dominio.EstadoPendiente})
+	pagar, _ := p.historias.Guardar(ctx, dominio.Historia{ProyectoID: p.tienda, Titulo: "Pagar pedido", Descripcion: "d", Prioridad: 3, Estado: dominio.EstadoPendiente})
+
+	if vacias, err := p.servicio.Abiertas(ctx, p.tienda); err != nil || vacias == nil || len(vacias) != 0 {
+		t.Fatalf("sin votaciones = %#v, %v; se esperaba una lista vacía", vacias, err)
+	}
+
+	registrar, _ := p.servicio.Abrir(ctx, p.tienda, p.registrar)
+	p.servicio.Votar(ctx, p.tienda, registrar.ID, p.ana, 13)
+	cerrada, _ := p.servicio.Abrir(ctx, p.tienda, pagar.ID)
+	p.servicio.Votar(ctx, p.tienda, cerrada.ID, p.ana, 5)
+	p.servicio.Votar(ctx, p.tienda, cerrada.ID, p.beto, 5)
+	p.servicio.Revelar(ctx, p.tienda, cerrada.ID)
+	p.servicio.Acordar(ctx, p.tienda, cerrada.ID, 5)
+	p.servicio.Abrir(ctx, p.tienda, catalogo.ID)
+
+	abiertas, err := p.servicio.Abiertas(ctx, p.tienda)
+	if err != nil {
+		t.Fatalf("Abiertas: %v", err)
+	}
+	if len(abiertas) != 2 || abiertas[0].HistoriaID != p.registrar || abiertas[1].HistoriaID != catalogo.ID {
+		t.Fatalf("abiertas = %+v, se esperaban las de Registrar usuario y Ver catálogo, en ese orden", abiertas)
+	}
+	if len(abiertas[0].Reveladas) != 0 || len(nombresDe(abiertas[0].Votaron)) != 1 {
+		t.Errorf("votación de Registrar usuario = %+v, se esperaba que votó Ana sin ver su voto (RN-5)", abiertas[0])
+	}
+	if _, err := p.servicio.Abiertas(ctx, 999); !errors.Is(err, dominio.ErrProyectoNoExiste) {
+		t.Errorf("proyecto inexistente: error = %v, se esperaba %v", err, dominio.ErrProyectoNoExiste)
+	}
+}
