@@ -5,6 +5,7 @@ import Dashboard from './paginas/Dashboard'
 import EnConstruccion from './paginas/EnConstruccion'
 import PlanningPoker from './paginas/PlanningPoker'
 import Proyectos from './paginas/Proyectos'
+import Sprints from './paginas/Sprints'
 
 // Las secciones del menú de un proyecto. Para sumar una pantalla: crear el archivo en paginas/ y
 // cambiar su línea acá (pantalla recibe el proyecto elegido).
@@ -12,7 +13,7 @@ const secciones: { titulo: string; pantalla: (proyecto: Proyecto) => ReactNode }
   { titulo: 'Estado', pantalla: () => <EnConstruccion titulo="Estado" /> },
   { titulo: 'Backlog', pantalla: (proyecto) => <Backlog proyecto={proyecto} /> },
   { titulo: 'Integrantes', pantalla: () => <EnConstruccion titulo="Integrantes" /> },
-  { titulo: 'Sprints', pantalla: () => <EnConstruccion titulo="Sprints" /> },
+  { titulo: 'Sprints', pantalla: (proyecto) => <Sprints proyecto={proyecto} /> },
   { titulo: 'Planning Poker', pantalla: (proyecto) => <PlanningPoker proyecto={proyecto} /> },
   { titulo: 'Esfuerzo', pantalla: () => <EnConstruccion titulo="Esfuerzo" /> },
   { titulo: 'Métricas', pantalla: () => <EnConstruccion titulo="Métricas" /> },

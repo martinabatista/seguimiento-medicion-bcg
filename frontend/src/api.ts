@@ -66,6 +66,23 @@ export interface Integrante {
   rol: 'Product Owner' | 'Scrum Master' | 'Developer'
 }
 
+// Sprint del proyecto (spec 05). Al listarlos llega sin historias.
+export interface Sprint {
+  id: number
+  proyecto_id: number
+  numero: number
+  fecha_inicio: string // AAAA-MM-DD
+  fecha_fin: string
+  sprint_goal: string
+  estado: 'Abierto' | 'Cerrado'
+}
+
+// Un Sprint con sus historias (specs 05 y 06): llega al verlo y como respuesta de cada cambio.
+// completada_en_sprint dice si se completó en ese Sprint; en uno cerrado ya no cambia.
+export interface DetalleSprint extends Sprint {
+  historias: (Historia & { completada_en_sprint: boolean })[]
+}
+
 // Votación de Planning Poker (spec 08). Los valores de los votos solo aparecen en "rondas", que trae
 // las rondas ya reveladas: de la ronda sin revelar solo se sabe quién votó y quién falta.
 export interface Votacion {
