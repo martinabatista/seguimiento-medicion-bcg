@@ -119,16 +119,7 @@ func (h metricasEsfuerzoHandler) consultar(w http.ResponseWriter, r *http.Reques
 		})
 	}
 	for _, s := range m.Sprints {
-		respuesta.Sprints = append(respuesta.Sprints, esfuerzoSprintJSON{
-			SprintID:                     s.SprintID,
-			Numero:                       s.Numero,
-			Estado:                       string(s.Estado),
-			Parcial:                      s.Parcial,
-			HorasEstimadas:               horasConSigno(s.Estimadas),
-			HorasReales:                  horasConSigno(s.Reales),
-			Desviacion:                   desviacionAJSON(s.Desviacion),
-			CompletadasSinHorasEstimadas: s.CompletadasSinEstimar,
-		})
+		respuesta.Sprints = append(respuesta.Sprints, esfuerzoSprintAJSON(s))
 	}
 	writeJSON(w, http.StatusOK, respuesta)
 }
@@ -156,4 +147,19 @@ func desviacionAJSON(d *dominio.Desviacion) *desviacionJSON {
 		return nil
 	}
 	return &desviacionJSON{Horas: horasConSigno(d.Centesimas), Porcentaje: d.Porcentaje}
+}
+
+// esfuerzoSprintAJSON pasa las métricas de esfuerzo de un Sprint al JSON. La usan las métricas de
+// esfuerzo y el reporte (spec 14).
+func esfuerzoSprintAJSON(s dominio.EsfuerzoSprint) esfuerzoSprintJSON {
+	return esfuerzoSprintJSON{
+		SprintID:                     s.SprintID,
+		Numero:                       s.Numero,
+		Estado:                       string(s.Estado),
+		Parcial:                      s.Parcial,
+		HorasEstimadas:               horasConSigno(s.Estimadas),
+		HorasReales:                  horasConSigno(s.Reales),
+		Desviacion:                   desviacionAJSON(s.Desviacion),
+		CompletadasSinHorasEstimadas: s.CompletadasSinEstimar,
+	}
 }
