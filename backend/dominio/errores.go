@@ -125,3 +125,10 @@ var (
 	// ErrRegistroEsfuerzoNoExiste no es un conflicto: la API lo responde como 404.
 	ErrRegistroEsfuerzoNoExiste = errors.New("El registro de esfuerzo no existe")
 )
+
+// Errores de la spec 12 (horas estimadas). La historia completada usa ErrHistoriaCompletada, el
+// mismo mensaje de las specs 05 y 07.
+var (
+	ErrHorasEstimadasObligatorias = ErrDatoInvalido{"Las horas estimadas son obligatorias"}
+	ErrHorasEstimadasInvalidas    = ErrDatoInvalido{"Las horas estimadas deben ser un número mayor a 0, con hasta 2 decimales"}
+)

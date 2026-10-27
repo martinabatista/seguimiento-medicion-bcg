@@ -21,10 +21,10 @@ func NuevoRepositorioHistorias(db *sql.DB) *RepositorioHistorias {
 // Guardar inserta la historia; el ID lo genera PostgreSQL (spec 04 RN-10).
 func (r *RepositorioHistorias) Guardar(ctx context.Context, h dominio.Historia) (dominio.Historia, error) {
 	err := r.db.QueryRowContext(ctx,
-		`INSERT INTO historias (proyecto_id, titulo, descripcion, prioridad, criterios, estado, story_points)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7)
+		`INSERT INTO historias (proyecto_id, titulo, descripcion, prioridad, criterios, estado, story_points, horas_estimadas_centesimas)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		 RETURNING id`,
-		h.ProyectoID, h.Titulo, h.Descripcion, h.Prioridad, h.Criterios, string(h.Estado), h.StoryPoints,
+		h.ProyectoID, h.Titulo, h.Descripcion, h.Prioridad, h.Criterios, string(h.Estado), h.StoryPoints, h.HorasEstimadas,
 	).Scan(&h.ID)
 	if err != nil {
 		return dominio.Historia{}, fmt.Errorf("guardar historia: %w", err)
@@ -36,9 +36,9 @@ func (r *RepositorioHistorias) Guardar(ctx context.Context, h dominio.Historia) 
 func (r *RepositorioHistorias) Actualizar(ctx context.Context, h dominio.Historia) error {
 	res, err := r.db.ExecContext(ctx,
 		`UPDATE historias
-		 SET titulo = $1, descripcion = $2, prioridad = $3, criterios = $4, estado = $5, story_points = $6
-		 WHERE id = $7 AND proyecto_id = $8`,
-		h.Titulo, h.Descripcion, h.Prioridad, h.Criterios, string(h.Estado), h.StoryPoints, h.ID, h.ProyectoID,
+		 SET titulo = $1, descripcion = $2, prioridad = $3, criterios = $4, estado = $5, story_points = $6, horas_estimadas_centesimas = $7
+		 WHERE id = $8 AND proyecto_id = $9`,
+		h.Titulo, h.Descripcion, h.Prioridad, h.Criterios, string(h.Estado), h.StoryPoints, h.HorasEstimadas, h.ID, h.ProyectoID,
 	)
 	if err != nil {
 		return fmt.Errorf("actualizar historia %d: %w", h.ID, err)
@@ -60,7 +60,7 @@ func (r *RepositorioHistorias) Eliminar(ctx context.Context, proyectoID, id int6
 // (prioridad y desempate) lo aplica el dominio (spec 04 RN-8).
 func (r *RepositorioHistorias) Listar(ctx context.Context, proyectoID int64) ([]dominio.Historia, error) {
 	rows, err := r.db.QueryContext(ctx,
-		`SELECT id, proyecto_id, titulo, descripcion, prioridad, criterios, estado, story_points
+		`SELECT id, proyecto_id, titulo, descripcion, prioridad, criterios, estado, story_points, horas_estimadas_centesimas
 		 FROM historias
 		 WHERE proyecto_id = $1
 		 ORDER BY id`, proyectoID)
@@ -86,7 +86,7 @@ func (r *RepositorioHistorias) Listar(ctx context.Context, proyectoID int64) ([]
 // Obtener devuelve la historia de ese proyecto, o ErrHistoriaNoExiste (spec 04 RN-10).
 func (r *RepositorioHistorias) Obtener(ctx context.Context, proyectoID, id int64) (dominio.Historia, error) {
 	row := r.db.QueryRowContext(ctx,
-		`SELECT id, proyecto_id, titulo, descripcion, prioridad, criterios, estado, story_points
+		`SELECT id, proyecto_id, titulo, descripcion, prioridad, criterios, estado, story_points, horas_estimadas_centesimas
 		 FROM historias
 		 WHERE id = $1 AND proyecto_id = $2`, id, proyectoID)
 	h, err := leerHistoria(row)
@@ -101,12 +101,13 @@ type fila interface {
 	Scan(dest ...any) error
 }
 
-// leerHistoria arma una historia desde una fila; story_points NULL queda como sin estimar (nil).
+// leerHistoria arma una historia desde una fila; story_points NULL queda como sin estimar (nil) y
+// horas_estimadas_centesimas NULL, como sin horas estimadas (nil).
 func leerHistoria(f fila) (dominio.Historia, error) {
 	var h dominio.Historia
 	var estado string
-	var sp sql.NullInt64
-	err := f.Scan(&h.ID, &h.ProyectoID, &h.Titulo, &h.Descripcion, &h.Prioridad, &h.Criterios, &estado, &sp)
+	var sp, horas sql.NullInt64
+	err := f.Scan(&h.ID, &h.ProyectoID, &h.Titulo, &h.Descripcion, &h.Prioridad, &h.Criterios, &estado, &sp, &horas)
 	if errors.Is(err, sql.ErrNoRows) {
 		return dominio.Historia{}, err
 	}
@@ -117,6 +118,10 @@ func leerHistoria(f fila) (dominio.Historia, error) {
 	if sp.Valid {
 		v := int(sp.Int64)
 		h.StoryPoints = &v
+	}
+	if horas.Valid {
+		v := int(horas.Int64)
+		h.HorasEstimadas = &v
 	}
 	return h, nil
 }

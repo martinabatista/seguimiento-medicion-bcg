@@ -23,12 +23,17 @@ func historiasDePrueba(t *testing.T) (r *RepositorioHistorias, tienda, turnos in
 	return NuevoRepositorioHistorias(proyectos.db), a.ID, b.ID
 }
 
-// mismaHistoria compara dos historias, incluido el valor de los Story Points (que es un puntero).
+// mismaHistoria compara dos historias, incluido el valor de los Story Points y de las horas
+// estimadas (que son punteros).
 func mismaHistoria(a, b dominio.Historia) bool {
-	spIguales := (a.StoryPoints == nil && b.StoryPoints == nil) ||
-		(a.StoryPoints != nil && b.StoryPoints != nil && *a.StoryPoints == *b.StoryPoints)
+	iguales := mismoValor(a.StoryPoints, b.StoryPoints) && mismoValor(a.HorasEstimadas, b.HorasEstimadas)
 	a.StoryPoints, b.StoryPoints = nil, nil
-	return a == b && spIguales
+	a.HorasEstimadas, b.HorasEstimadas = nil, nil
+	return a == b && iguales
+}
+
+func mismoValor(a, b *int) bool {
+	return (a == nil && b == nil) || (a != nil && b != nil && *a == *b)
 }
 
 // spec 04 CA-1 a CA-4, CA-7 contra PostgreSQL.
@@ -132,5 +137,36 @@ func TestStoryPointsDeHistoria(t *testing.T) {
 	}
 	if visto, _ := r.Obtener(ctx, tienda, h.ID); visto.StoryPoints != nil {
 		t.Errorf("Story Points = %d, se esperaba sin estimar", *visto.StoryPoints)
+	}
+}
+
+// spec 12 CA-1: las horas estimadas se guardan en centésimas, se cambian y se quitan (NULL = sin
+// horas estimadas), también al crear y sin tocar los Story Points.
+func TestHorasEstimadasDeHistoria(t *testing.T) {
+	r, tienda, _ := historiasDePrueba(t)
+	ctx := context.Background()
+	ocho, sp := 800, 5
+	h, err := r.Guardar(ctx, dominio.Historia{ProyectoID: tienda, Titulo: "Registrar usuario", Descripcion: "d", Prioridad: 1, Estado: dominio.EstadoPendiente, StoryPoints: &sp, HorasEstimadas: &ocho})
+	if err != nil {
+		t.Fatalf("Guardar: %v", err)
+	}
+	if visto, _ := r.Obtener(ctx, tienda, h.ID); visto.HorasEstimadas == nil || *visto.HorasEstimadas != 800 || visto.StoryPoints == nil || *visto.StoryPoints != 5 {
+		t.Errorf("al guardar: historia = %+v, se esperaban 800 centésimas y 5 Story Points", visto)
+	}
+	for _, c := range []int{650, 1, 999999999} { // el máximo que acepta el dominio: 9.999.999,99 h
+		h.HorasEstimadas = &c
+		if err := r.Actualizar(ctx, h); err != nil {
+			t.Fatalf("Actualizar con %d: %v", c, err)
+		}
+		if lista, _ := r.Listar(ctx, tienda); len(lista) != 1 || lista[0].HorasEstimadas == nil || *lista[0].HorasEstimadas != c {
+			t.Errorf("Listar = %+v, se esperaban %d centésimas", lista, c)
+		}
+	}
+	h.HorasEstimadas = nil
+	if err := r.Actualizar(ctx, h); err != nil {
+		t.Fatalf("Actualizar sin horas estimadas: %v", err)
+	}
+	if visto, _ := r.Obtener(ctx, tienda, h.ID); visto.HorasEstimadas != nil {
+		t.Errorf("horas estimadas = %d, se esperaba sin horas estimadas", *visto.HorasEstimadas)
 	}
 }

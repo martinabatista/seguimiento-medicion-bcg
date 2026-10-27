@@ -45,10 +45,11 @@ func main() {
 	esfuerzo := dominio.NuevoServicioEsfuerzo(repoProyectos, repoHistorias, repoIntegrantes, repoEsfuerzo, time.Now)
 	// El Dashboard (spec 13) reutiliza el estado y las métricas, con la misma fecha de hoy.
 	dashboard := dominio.NuevoServicioDashboard(estado, metricas, time.Now)
+	metricasEsfuerzo := dominio.NuevoServicioMetricasEsfuerzo(repoProyectos, repoHistorias, repoSprints, repoEsfuerzo)
 
 	addr := ":" + port
 	log.Printf("API escuchando en http://localhost%s", addr)
-	if err := http.ListenAndServe(addr, api.NewRouter(proyectos, backlog, integrantes, estado, sprints, poker, metricas, esfuerzo, dashboard)); err != nil {
+	if err := http.ListenAndServe(addr, api.NewRouter(proyectos, backlog, integrantes, estado, sprints, poker, metricas, esfuerzo, dashboard, metricasEsfuerzo)); err != nil {
 		log.Fatal(err)
 	}
 }

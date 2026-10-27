@@ -9,7 +9,7 @@ import (
 )
 
 // NewRouter arma las rutas de la API.
-func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBacklog, integrantes *dominio.ServicioIntegrantes, estado *dominio.ServicioEstado, sprints *dominio.ServicioSprints, poker *dominio.ServicioPlanningPoker, metricas *dominio.ServicioMetricas, esfuerzo *dominio.ServicioEsfuerzo, dashboard *dominio.ServicioDashboard) http.Handler {
+func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBacklog, integrantes *dominio.ServicioIntegrantes, estado *dominio.ServicioEstado, sprints *dominio.ServicioSprints, poker *dominio.ServicioPlanningPoker, metricas *dominio.ServicioMetricas, esfuerzo *dominio.ServicioEsfuerzo, dashboard *dominio.ServicioDashboard, metricasEsfuerzo *dominio.ServicioMetricasEsfuerzo) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", health)
 
@@ -28,6 +28,8 @@ func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBa
 	mux.HandleFunc("PUT /api/proyectos/{id}/backlog/{historiaID}/story-points", b.estimar)
 	mux.HandleFunc("DELETE /api/proyectos/{id}/backlog/{historiaID}/story-points", b.quitarEstimacion)
 	mux.HandleFunc("GET /api/story-points/escala", escalaStoryPoints)
+	mux.HandleFunc("PUT /api/proyectos/{id}/backlog/{historiaID}/horas-estimadas", b.estimarHoras)
+	mux.HandleFunc("DELETE /api/proyectos/{id}/backlog/{historiaID}/horas-estimadas", b.quitarHorasEstimadas)
 
 	i := integrantesHandler{servicio: integrantes}
 	mux.HandleFunc("POST /api/proyectos/{id}/integrantes", i.agregar)
@@ -60,6 +62,9 @@ func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBa
 
 	me := metricasHandler{servicio: metricas}
 	mux.HandleFunc("GET /api/proyectos/{id}/metricas", me.consultar)
+
+	mesf := metricasEsfuerzoHandler{servicio: metricasEsfuerzo}
+	mux.HandleFunc("GET /api/proyectos/{id}/metricas/esfuerzo", mesf.consultar)
 
 	es := esfuerzoHandler{servicio: esfuerzo}
 	mux.HandleFunc("POST /api/proyectos/{id}/backlog/{historiaID}/esfuerzo", es.registrar)

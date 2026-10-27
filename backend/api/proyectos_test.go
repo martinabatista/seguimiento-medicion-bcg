@@ -35,6 +35,7 @@ func routerDePrueba() http.Handler {
 		metricas,
 		dominio.NuevoServicioEsfuerzo(proyectos, historias, integrantes, esfuerzo, hoy),
 		dominio.NuevoServicioDashboard(estado, metricas, hoy),
+		dominio.NuevoServicioMetricasEsfuerzo(proyectos, historias, sprints, esfuerzo),
 	)
 }
 

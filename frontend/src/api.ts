@@ -55,6 +55,7 @@ export interface Historia {
   criterios_aceptacion: string
   estado: 'Pendiente' | 'En progreso' | 'Completada'
   story_points: number | null // null = sin estimar
+  horas_estimadas: number | null // null = sin horas estimadas (spec 12)
 }
 
 // Integrante del proyecto (spec 02).
@@ -107,6 +108,38 @@ export interface Metricas {
     story_points_planificados: number
     story_points_completados: number
   }
+}
+
+// Métricas de esfuerzo (spec 12), ya calculadas por el backend. Las horas son números con hasta 2
+// decimales; la desviación es positiva si se trabajó más de lo estimado y null cuando no hay datos.
+export interface Desviacion {
+  horas: number
+  porcentaje: number
+}
+
+export interface MetricasEsfuerzo {
+  historias: {
+    historia_id: number
+    titulo: string
+    estado: Historia['estado']
+    horas_estimadas: number | null
+    horas_reales: number
+    desviacion: Desviacion | null // solo las completadas con horas estimadas
+  }[]
+  sprints: {
+    sprint_id: number
+    numero: number
+    estado: Sprint['estado']
+    parcial: boolean
+    horas_estimadas: number
+    horas_reales: number
+    desviacion: Desviacion | null
+    completadas_sin_horas_estimadas: number
+  }[]
+  horas_estimadas: number
+  horas_reales: number
+  desviacion: Desviacion | null
+  completadas_sin_horas_estimadas: number
 }
 
 // Votación de Planning Poker (spec 08). Los valores de los votos solo aparecen en "rondas", que trae
