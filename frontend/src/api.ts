@@ -78,6 +78,42 @@ export interface Sprint {
   estado: 'Abierto' | 'Cerrado'
 }
 
+// Estado de un proyecto (spec 03), ya calculado por el backend con la fecha de hoy. El Sprint en curso
+// es el abierto cuyo período incluye hoy (spec 05 CA-5), o null si no hay.
+export interface EstadoProyecto {
+  proyecto: Proyecto
+  estado: 'No iniciado' | 'En curso' | 'Finalizado'
+  backlog: {
+    total: number
+    pendientes: number
+    en_progreso: number
+    completadas: number
+    porcentaje_completadas: number
+    story_points_totales: number
+    story_points_completados: number
+    sin_estimar: number
+  }
+  sprint_en_curso: Sprint | null
+}
+
+// Registro de esfuerzo sobre una historia (spec 09). Las horas son un número con hasta 2 decimales.
+export interface RegistroEsfuerzo {
+  id: number
+  proyecto_id: number
+  historia_id: number
+  integrante_id: number
+  integrante_nombre: string
+  fecha: string // AAAA-MM-DD
+  actividad: string
+  horas: number
+}
+
+// Esfuerzo de una historia (spec 09): los registros por fecha y el total, sumado por el backend.
+export interface EsfuerzoDeHistoria {
+  registros: RegistroEsfuerzo[]
+  total_horas: number
+}
+
 // Un Sprint con sus historias (specs 05 y 06): llega al verlo y como respuesta de cada cambio.
 // completada_en_sprint dice si se completó en ese Sprint; en uno cerrado ya no cambia.
 export interface DetalleSprint extends Sprint {
