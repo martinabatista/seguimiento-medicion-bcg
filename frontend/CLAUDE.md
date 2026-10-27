@@ -32,6 +32,7 @@ frontend/
         ├── Sprints.tsx         # crear Sprints, asignar y completar historias, cerrar y consultar (specs 05 y 06)
         ├── PlanningPoker.tsx   # votar en secreto, revelar, nueva ronda y acordar (spec 08)
         ├── Esfuerzo.tsx        # registrar, consultar y eliminar horas por historia (spec 09)
+        ├── Defectos.tsx        # métricas de defectos, lista con cambio de estado y registro (spec 11)
         ├── Metricas.tsx        # avance (spec 10) y esfuerzo, con la carga de horas estimadas (spec 12)
         └── Dashboard.tsx       # indicadores y 3 gráficos en HTML y CSS (spec 13)
 ```
@@ -93,4 +94,4 @@ npm run build       # la CI corre lint, typecheck y build
 
 ## Estado
 
-Origen: interfaz web base (Issue #15). Última revisión: 2026-10-27 (pantallas de Integrantes, Estado y Esfuerzo).
+Origen: interfaz web base (Issue #15). Última revisión: 2026-10-27 (pantalla de Defectos, spec 11).
