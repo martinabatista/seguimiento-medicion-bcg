@@ -5,6 +5,7 @@ go 1.27.0
 
 require (
 	github.com/cucumber/godog v0.16.0
+	github.com/go-pdf/fpdf v0.9.0
 	github.com/jackc/pgx/v5 v5.11.0
 )
 

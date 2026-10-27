@@ -26,6 +26,8 @@ func routerDePrueba() http.Handler {
 	hoy := func() time.Time { return hoyDePrueba }
 	estado := dominio.NuevoServicioEstado(proyectos, historias, sprints, hoy)
 	metricas := dominio.NuevoServicioMetricas(proyectos, historias, sprints)
+	metricasEsfuerzo := dominio.NuevoServicioMetricasEsfuerzo(proyectos, historias, sprints, esfuerzo)
+	servicioDefectos := dominio.NuevoServicioDefectos(proyectos, historias, sprints, defectos)
 	return NewRouter(
 		dominio.NuevoServicioProyectos(proyectos),
 		backlog,
@@ -36,8 +38,9 @@ func routerDePrueba() http.Handler {
 		metricas,
 		dominio.NuevoServicioEsfuerzo(proyectos, historias, integrantes, esfuerzo, hoy),
 		dominio.NuevoServicioDashboard(estado, metricas, hoy),
-		dominio.NuevoServicioMetricasEsfuerzo(proyectos, historias, sprints, esfuerzo),
-		dominio.NuevoServicioDefectos(proyectos, historias, sprints, defectos),
+		metricasEsfuerzo,
+		servicioDefectos,
+		dominio.NuevoServicioReporte(estado, metricas, metricasEsfuerzo, servicioDefectos, integrantes, historias, sprints, hoy),
 	)
 }
 

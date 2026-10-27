@@ -45,6 +45,7 @@ type mundo struct {
 	poker       estadoPoker       // pasos de Planning Poker (spec 08), en planning_poker_test.go
 	esfuerzo    estadoEsfuerzo    // pasos del registro de esfuerzo (spec 09), en esfuerzo_test.go
 	defectos    estadoDefectos    // pasos de defectos (spec 11), en defectos_test.go
+	reporte     estadoReporte     // pasos del reporte (spec 14), en reporte_test.go
 	hoy         time.Time         // fecha de hoy fijada por un escenario (spec 03); vacía = la del sistema
 }
 
@@ -69,6 +70,8 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 		backlog := dominio.NuevoServicioBacklog(proyectos, historias, sprints, esfuerzo, defectos)
 		estado := dominio.NuevoServicioEstado(proyectos, historias, sprints, m.fechaDeHoy)
 		metricas := dominio.NuevoServicioMetricas(proyectos, historias, sprints)
+		metricasEsfuerzo := dominio.NuevoServicioMetricasEsfuerzo(proyectos, historias, sprints, esfuerzo)
+		servicioDefectos := dominio.NuevoServicioDefectos(proyectos, historias, sprints, defectos)
 		*m = mundo{api: api.NewRouter(
 			dominio.NuevoServicioProyectos(proyectos),
 			backlog,
@@ -79,8 +82,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 			metricas,
 			dominio.NuevoServicioEsfuerzo(proyectos, historias, integrantes, esfuerzo, m.fechaDeHoy),
 			dominio.NuevoServicioDashboard(estado, metricas, m.fechaDeHoy),
-			dominio.NuevoServicioMetricasEsfuerzo(proyectos, historias, sprints, esfuerzo),
-			dominio.NuevoServicioDefectos(proyectos, historias, sprints, defectos),
+			metricasEsfuerzo,
+			servicioDefectos,
+			dominio.NuevoServicioReporte(estado, metricas, metricasEsfuerzo, servicioDefectos, integrantes, historias, sprints, m.fechaDeHoy),
 		)}
 		return ctx, nil
 	})
@@ -147,6 +151,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Defectos (spec 11)
 	m.registrarPasosDefectos(sc)
+
+	// Reporte (spec 14)
+	m.registrarPasosReporte(sc)
 }
 
 // ---------- helpers ----------
