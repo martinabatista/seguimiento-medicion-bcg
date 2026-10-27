@@ -27,7 +27,7 @@ func nuevasMetricas(t *testing.T) metricasDePrueba {
 	m := metricasDePrueba{
 		sprintsDePrueba: sprintsDePrueba{
 			servicio: dominio.NuevoServicioSprints(proyectos, historias, sprints),
-			backlog:  dominio.NuevoServicioBacklog(proyectos, historias, sprints, memoria.NuevoRepositorioEsfuerzo()),
+			backlog:  dominio.NuevoServicioBacklog(proyectos, historias, sprints, memoria.NuevoRepositorioEsfuerzo(), memoria.NuevoRepositorioDefectos()),
 			sprints:  sprints,
 			tienda:   tienda.ID,
 		},
