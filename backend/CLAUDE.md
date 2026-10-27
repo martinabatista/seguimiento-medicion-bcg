@@ -18,6 +18,7 @@ backend/
 ├── memoria/                 # repositorios en memoria para los tests (sin base real)
 ├── postgres/                # repositorios sobre PostgreSQL (database/sql + pgx) + tests de integración
 │   └── tablas/              # un NN_tabla.sql por tabla; los ejecuta Docker al crear la base
+├── pdf/                     # arma los PDF del reporte (spec 14) con go-pdf/fpdf; solo presenta, no calcula
 └── features/                # escenarios BDD *.feature (godog) + features_test.go con los pasos
 ```
 
@@ -72,6 +73,10 @@ Endpoints disponibles:
 | `GET /api/proyectos/{id}/defectos/{defectoID}` | Ver un defecto | 200 · 404 |
 | `PUT …/defectos/{defectoID}/estado` | Cambiar el estado `{"estado", "sprint_resolucion_id"}` (el Sprint solo cuenta al resolver) | 200 defecto · 400 · 404 |
 | `GET /api/proyectos/{id}/metricas/defectos` | Defectos detectados y resueltos del proyecto y por Sprint (spec 11 CA-4) | 200 · 404 |
+| `GET /api/proyectos/{id}/reporte` | Vista previa del reporte del proyecto (spec 14) | 200 · 404 |
+| `GET /api/proyectos/{id}/reporte/pdf` | Descargar el reporte del proyecto como `Reporte <proyecto>.pdf` | 200 `application/pdf` · 404 |
+| `GET /api/proyectos/{id}/sprints/{sprintID}/reporte` | Vista previa del reporte de un Sprint (spec 14) | 200 · 404 |
+| `GET …/sprints/{sprintID}/reporte/pdf` | Descargar el reporte del Sprint como `Reporte <proyecto> - Sprint N.pdf` | 200 `application/pdf` · 404 |
 
 `DELETE /api/proyectos/{id}/backlog/{historiaID}` responde 409 si la historia está en un Sprint abierto (spec 05 CA-6)
 o si tiene esfuerzo registrado (spec 09 CA-7) o defectos registrados (spec 11 CA-6).
@@ -131,6 +136,15 @@ Defectos en JSON: `{"id", "proyecto_id", "descripcion", "severidad", "estado", "
 "sprint_deteccion": {"id", "numero"}, "sprint_resolucion": {"id", "numero"} | null}`. Métricas de defectos:
 `{"detectados", "resueltos", "sprints": [{"sprint_id", "numero", "detectados", "resueltos"}]}`, con todos los
 Sprints por fecha de inicio (0 si no tienen defectos).
+
+Reporte en JSON (spec 14): del proyecto, `{"proyecto", "estado", "generado_el", "integrantes": [{"nombre", "rol"}],
+"historias", "sprints", "metricas": {"sprints_cerrados", "velocidad", "totales", "horas_estimadas", "horas_reales",
+"desviacion", "completadas_sin_horas_estimadas"}, "defectos": {"detectados", "resueltos", "lista"}}`; de un Sprint,
+`{"proyecto", "generado_el", "sprint", "historias", "defectos"}`. Cada historia: `{"historia_id", "titulo", "estado",
+"story_points", "horas_estimadas", "horas_reales", "desviacion"}` (+ `"completada_en_sprint"` en el de un Sprint). Cada
+Sprint: `{"sprint_id", "numero", "fecha_inicio", "fecha_fin", "sprint_goal", "estado", "parcial", "avance", "esfuerzo"}`,
+con `avance` y `esfuerzo` iguales a la fila de ese Sprint en `/metricas` y `/metricas/esfuerzo`. La lista de defectos usa
+el JSON de los defectos. El nombre del PDF va en `Content-Disposition` (con tildes, codificado `filename*=utf-8''…`).
 
 Métricas de esfuerzo en JSON: `{"historias": [{"historia_id", "titulo", "estado", "horas_estimadas", "horas_reales",
 "desviacion"}], "sprints": [{"sprint_id", "numero", "estado", "parcial", "horas_estimadas", "horas_reales", "desviacion",
@@ -201,6 +215,7 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
 - **Internas:** ninguna.
 - **Externas:** PostgreSQL (`docker compose up -d` en la raíz, puerto 5434); godog v0.16 (BDD).
   Decidida, se agrega con la spec 01: `pgx` v5 (driver de PostgreSQL para `database/sql`).
+  Con la spec 14: `go-pdf/fpdf` v0.9 (arma los PDF; Go puro, licencia MIT, sin programas externos).
   Cada dependencia nueva se justifica en la spec que la agrega.
 
 ## Specs relacionadas
@@ -271,8 +286,13 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
 - `docs/specs/sprint-03/11-defectos.md` — defectos: `dominio/defecto.go` (`NuevoDefecto`, `ParsearEstadoDefecto`,
   `CambiarEstadoDefecto`, `ContarDefectos`), `dominio/servicio_defectos.go`, la regla al eliminar en
   `ServicioBacklog.Eliminar` (RN-14), `memoria/defectos.go`, `postgres/defectos.go`, `postgres/tablas/10_defectos.sql`,
-  `api/defectos.go`, `features/defectos.feature` (pasos en `features/defectos_test.go`). La spec 14 (reporte) va a
-  usar los defectos y sus métricas.
+  `api/defectos.go`, `features/defectos.feature` (pasos en `features/defectos_test.go`). La spec 14 (reporte) usa los
+  defectos y sus métricas.
+- `docs/specs/sprint-04/14-reporte-pdf.md` — reporte: `dominio/reporte.go` (`ArmarReporteProyecto`, `ArmarReporteSprint`),
+  `dominio/servicio_reporte.go`, `pdf/pdf.go`, `api/reporte.go`, `features/reporte.feature` (pasos en
+  `features/reporte_test.go`). `ServicioReporte` llama a los servicios de las specs 03, 10, 11 y 12 (no repite sus
+  cálculos): si cambia una de esas reglas, el reporte cambia solo. `api/metricas.go` y `api/metricas_esfuerzo.go`
+  comparten con el reporte el JSON de cada Sprint (`metricasSprintAJSON`, `esfuerzoSprintAJSON`).
 
 ## Cómo testear
 
@@ -349,9 +369,15 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
   (un `CHECK` lo exige). "Anterior al de detección" se compara por **fecha de inicio**, no por número. Los resueltos
   cuentan el estado **actual**: un defecto reabierto deja de contar. `defectos.historia_id` tampoco tiene
   `ON DELETE CASCADE` (como el esfuerzo). La tabla `10_defectos.sql` obliga a recrear la base local.
+- Reporte (spec 14): el PDF se genera **sin compresión** para que el texto se pueda buscar en los tests (`aWinAnsi`
+  pasa el texto a cp1252, la codificación de las fuentes estándar de fpdf; con UTF-8 no se encuentra). Los textos del
+  PDF usan coma decimal, como las pantallas. En el reporte de un Sprint **cerrado** los Story Points son los
+  congelados (`StoryPointsAlCerrar`); en el del proyecto, los actuales.
+- Los tests de `postgres/` vacían la base (`TRUNCATE … CASCADE`) y dejan sus datos de prueba: después de correrlos
+  con `DATABASE_URL`, los datos de la demo local se pierden.
 - La velocidad se calcula en **décimas con enteros** (`CalcularVelocidad`: 65 = 6,5) para no tener errores
   de coma flotante; recién `api/metricas.go` la pasa a decimal para el JSON.
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-27 (spec 11).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-27 (spec 14).
