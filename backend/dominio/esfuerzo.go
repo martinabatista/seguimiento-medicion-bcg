@@ -108,20 +108,27 @@ func ParsearHoras(texto string) (int, error) {
 	if texto == "" {
 		return 0, ErrHorasObligatorias
 	}
-	partes := formatoHoras.FindStringSubmatch(texto)
-	if partes == nil || len(partes[1]) > maxDigitosEnterosHoras {
+	centesimas, ok := centesimasDeTexto(texto, maxDigitosEnterosHoras)
+	if !ok || centesimas <= 0 || centesimas > MaxCentesimasRegistro {
 		return 0, ErrHorasInvalidas
 	}
-	enteras, _ := strconv.Atoi(partes[1]) // el formato garantiza solo dígitos
+	return centesimas, nil
+}
+
+// centesimasDeTexto convierte un número sin signo con hasta 2 decimales en centésimas ("2.5" → 250).
+// Devuelve false si no tiene ese formato o si la parte entera tiene más de maxDigitos dígitos. Lo
+// usan las horas del esfuerzo (spec 09) y las horas estimadas (spec 12).
+func centesimasDeTexto(texto string, maxDigitos int) (int, bool) {
+	partes := formatoHoras.FindStringSubmatch(texto)
+	if partes == nil || len(partes[1]) > maxDigitos {
+		return 0, false
+	}
+	enteras, _ := strconv.Atoi(partes[1]) // el formato y el largo garantizan un entero válido
 	decimales := 0
 	if partes[2] != "" {
 		decimales, _ = strconv.Atoi((partes[2] + "0")[:2]) // "5" son 50 centésimas
 	}
-	centesimas := enteras*centesimasPorHora + decimales
-	if centesimas <= 0 || centesimas > MaxCentesimasRegistro {
-		return 0, ErrHorasInvalidas
-	}
-	return centesimas, nil
+	return enteras*centesimasPorHora + decimales, true
 }
 
 // HorasATexto muestra las centésimas como horas con hasta 2 decimales y sin ceros de más:

@@ -8,19 +8,20 @@ func (s *ServicioBacklog) Estimar(ctx context.Context, proyectoID, id int64, sto
 	if !EnEscala(storyPoints) {
 		return Historia{}, ErrStoryPointsFueraDeEscala
 	}
-	return s.cambiarEstimacion(ctx, proyectoID, id, &storyPoints)
+	return s.cambiarSiNoEstaCompletada(ctx, proyectoID, id, func(h *Historia) { h.StoryPoints = &storyPoints })
 }
 
 // QuitarEstimacion deja la historia sin estimar (spec 07 CA-2, RN-3). Si ya estaba sin estimar, no
 // es un error.
 func (s *ServicioBacklog) QuitarEstimacion(ctx context.Context, proyectoID, id int64) (Historia, error) {
-	return s.cambiarEstimacion(ctx, proyectoID, id, nil)
+	return s.cambiarSiNoEstaCompletada(ctx, proyectoID, id, func(h *Historia) { h.StoryPoints = nil })
 }
 
-// cambiarEstimacion guarda los Story Points (nil = sin estimar) de una historia del proyecto.
-// Verifica que el proyecto y la historia existan (CA-6, RN-6) y que la historia no esté completada
-// (RN-4). Solo cambian los Story Points: el resto de la historia queda igual (RN-5).
-func (s *ServicioBacklog) cambiarEstimacion(ctx context.Context, proyectoID, id int64, storyPoints *int) (Historia, error) {
+// cambiarSiNoEstaCompletada aplica una estimación (Story Points, spec 07, u horas estimadas, spec 12)
+// a una historia del proyecto. Verifica que el proyecto y la historia existan (spec 07 CA-6, RN-6) y
+// que la historia no esté completada (spec 07 RN-4, spec 12 RN-3). Solo cambia lo que toca cambio:
+// el resto de la historia queda igual (spec 07 RN-5, spec 12 RN-4).
+func (s *ServicioBacklog) cambiarSiNoEstaCompletada(ctx context.Context, proyectoID, id int64, cambio func(*Historia)) (Historia, error) {
 	if err := verificarProyecto(ctx, s.proyectos, proyectoID); err != nil {
 		return Historia{}, err
 	}
@@ -31,7 +32,7 @@ func (s *ServicioBacklog) cambiarEstimacion(ctx context.Context, proyectoID, id 
 	if h.Estado == EstadoCompletada {
 		return Historia{}, ErrHistoriaCompletada
 	}
-	h.StoryPoints = storyPoints
+	cambio(&h)
 	if err := s.historias.Actualizar(ctx, h); err != nil {
 		return Historia{}, err
 	}
