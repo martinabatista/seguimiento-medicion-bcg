@@ -38,6 +38,8 @@ Endpoints disponibles:
 | `PUT /api/proyectos/{id}/backlog/{historiaID}/story-points` | Estimar `{"story_points"}` (spec 07) | 200 historia · 400 · 404 · 409 completada |
 | `DELETE /api/proyectos/{id}/backlog/{historiaID}/story-points` | Quitar la estimación (queda sin estimar) | 200 historia · 404 · 409 completada |
 | `GET /api/story-points/escala` | Escala de Story Points `{"valores": [1, 2, 3, 5, 8, 13, 21]}` | 200 |
+| `PUT /api/proyectos/{id}/backlog/{historiaID}/horas-estimadas` | Cargar o cambiar las horas estimadas `{"horas_estimadas"}` (spec 12) | 200 historia · 400 · 404 · 409 completada |
+| `DELETE /api/proyectos/{id}/backlog/{historiaID}/horas-estimadas` | Quitar las horas estimadas | 200 historia · 404 · 409 completada |
 | `POST /api/proyectos/{id}/integrantes` | Agregar un integrante (spec 02) | 201 integrante · 400 · 404 · 409 email repetido |
 | `GET /api/proyectos/{id}/integrantes` | Listar en orden de alta | 200 lista (`[]` si no hay) · 404 |
 | `GET /api/proyectos/{id}/integrantes/{integranteID}` | Ver un integrante | 200 · 404 |
@@ -60,6 +62,7 @@ Endpoints disponibles:
 | `POST …/votaciones/{votacionID}/rondas` | Empezar una nueva ronda | 200 votación · 404 · 409 |
 | `POST …/votaciones/{votacionID}/acordar` | Registrar la acordada `{"story_points"}`: estima la historia y cierra | 200 votación · 400 · 404 · 409 |
 | `GET /api/proyectos/{id}/metricas` | Métricas de avance por Sprint y del proyecto (spec 10) | 200 · 404 |
+| `GET /api/proyectos/{id}/metricas/esfuerzo` | Métricas de esfuerzo por historia, por Sprint y del proyecto (spec 12) | 200 · 404 |
 | `POST /api/proyectos/{id}/backlog/{historiaID}/esfuerzo` | Registrar esfuerzo `{"integrante_id", "fecha", "actividad", "horas"}` (spec 09) | 201 registro · 400 · 404 |
 | `GET /api/proyectos/{id}/backlog/{historiaID}/esfuerzo` | Esfuerzo de la historia por fecha, con el total | 200 · 404 |
 | `DELETE …/esfuerzo/{registroID}` | Eliminar un registro de esfuerzo | 204 · 404 |
@@ -73,9 +76,11 @@ Sprint abierto: se completa desde el Sprint (spec 06 CA-5).
 Proyecto en JSON: `{"id", "nombre", "descripcion", "fecha_inicio", "fecha_fin"}`, fechas `AAAA-MM-DD`.
 
 Historia en JSON: `{"id", "proyecto_id", "titulo", "descripcion", "prioridad", "criterios_aceptacion",
-"estado", "story_points"}`. `estado` es `Pendiente` | `En progreso` | `Completada` (al crear se ignora:
+"estado", "story_points", "horas_estimadas"}`. `estado` es `Pendiente` | `En progreso` | `Completada` (al crear se ignora:
 siempre arranca `Pendiente`); `story_points` es `null` mientras está sin estimar. Los Story Points solo
 cambian por las rutas `…/story-points` (spec 07): el `PUT` de la historia los conserva.
+`horas_estimadas` es un número con hasta 2 decimales (`6.5`) o `null`; solo cambia por las rutas
+`…/horas-estimadas` (spec 12) y el `PUT` de la historia también las conserva.
 
 Integrante en JSON: `{"id", "proyecto_id", "nombre", "email", "rol"}`. `rol` es `Product Owner` |
 `Scrum Master` | `Developer`; `email` se devuelve normalizado (sin espacios al borde y en minúsculas).
@@ -116,6 +121,14 @@ Esfuerzo en JSON: registro `{"id", "proyecto_id", "historia_id", "integrante_id"
 "actividad", "horas"}`; consulta `{"registros": [...], "total_horas"}`. `horas` y `total_horas` son números
 con hasta 2 decimales (`2.5`, `0.3`), exactos: se arman desde centésimas enteras. Los registros van por
 fecha y, a igual fecha, por orden de carga.
+
+Métricas de esfuerzo en JSON: `{"historias": [{"historia_id", "titulo", "estado", "horas_estimadas", "horas_reales",
+"desviacion"}], "sprints": [{"sprint_id", "numero", "estado", "parcial", "horas_estimadas", "horas_reales", "desviacion",
+"completadas_sin_horas_estimadas"}], "horas_estimadas", "horas_reales", "desviacion", "completadas_sin_horas_estimadas"}`.
+`desviacion` es `{"horas", "porcentaje"}` (horas con signo, `-0.5`; porcentaje entero) o `null`: en una historia,
+si no está completada o no tiene horas estimadas; en un Sprint o el proyecto, si ninguna historia entra ("sin datos").
+Las historias van en el orden del backlog y los Sprints por fecha de inicio; cada Sprint suma las historias
+completadas en él.
 
 ## Decisiones técnicas
 
@@ -238,6 +251,13 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   `ServicioDashboard` llama a `ServicioEstado` y `ServicioMetricas` (no repite sus cálculos); la velocidad sale con
   `velocidadAJSON`, la misma de las métricas. Si cambia una regla del estado (spec 03) o de las métricas
   (spec 10), el Dashboard cambia solo. La etapa 2 (la pantalla con los gráficos) va con la interfaz web (#15).
+- `docs/specs/sprint-03/12-metricas-esfuerzo-calidad.md` — métricas de esfuerzo: `Historia.HorasEstimadas`,
+  `dominio/horas_estimadas.go` (`ParsearHorasEstimadas`, `ServicioBacklog.EstimarHoras` y `QuitarHorasEstimadas`),
+  `dominio/metricas_esfuerzo.go` (`CalcularDesviacion`, `CalcularMetricasEsfuerzo`), `dominio/servicio_metricas_esfuerzo.go`,
+  `postgres/tablas/09_historias_horas_estimadas.sql`, `api/metricas_esfuerzo.go`, `features/metricas-esfuerzo.feature`
+  (pasos en `features/metricas_esfuerzo_test.go`). Usa el esfuerzo de la spec 09 (horas reales) y lo completado en
+  cada Sprint de la spec 06. Las horas estimadas, como los Story Points, no se cambian en una historia completada
+  (`cambiarSiNoEstaCompletada`). La spec 14 (reporte) va a usar estas métricas.
 
 ## Cómo testear
 
@@ -304,9 +324,15 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
 - Métricas de un Sprint **cerrado** (spec 10): usan `Sprint.StoryPointsAlCerrar` (columna
   `sprint_historias.story_points_al_cerrar`), no los Story Points actuales de la historia. Solo un Sprint
   cerrado tiene ese mapa; uno abierto lo tiene en `nil` y se calcula con los actuales.
+- La columna `09_historias_horas_estimadas.sql` (spec 12) obliga a recrear la base local, o a correr solo ese archivo
+  con `psql` (ver arriba).
+- Horas estimadas (spec 12): en centésimas enteras como el esfuerzo (`HorasEstimadas`, columna
+  `horas_estimadas_centesimas`). La desviación se calcula **sobre las sumas** de un Sprint o del proyecto, no promediando
+  la de cada historia, y su porcentaje redondea la mitad **alejándose de cero** (−12,5 % → −13 %). `Modificar` del
+  backlog conserva las horas estimadas, igual que los Story Points: si se agrega otro dato que se carga aparte, conservarlo ahí.
 - La velocidad se calcula en **décimas con enteros** (`CalcularVelocidad`: 65 = 6,5) para no tener errores
   de coma flotante; recién `api/metricas.go` la pasa a decimal para el JSON.
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-24 (spec 13, etapa 1).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-26 (spec 12).

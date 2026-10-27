@@ -29,7 +29,7 @@ frontend/
         ├── Backlog.tsx         # backlog con Story Points (specs 04 y 07)
         ├── Sprints.tsx         # crear Sprints, asignar y completar historias, cerrar y consultar (specs 05 y 06)
         ├── PlanningPoker.tsx   # votar en secreto, revelar, nueva ronda y acordar (spec 08)
-        ├── Metricas.tsx        # velocidad, totales de los Sprints cerrados y una fila por Sprint (spec 10)
+        ├── Metricas.tsx        # avance (spec 10) y esfuerzo, con la carga de horas estimadas (spec 12)
         ├── Dashboard.tsx       # indicadores y 3 gráficos en HTML y CSS (spec 13)
         └── EnConstruccion.tsx  # lugar de las secciones que todavía no tienen pantalla
 ```

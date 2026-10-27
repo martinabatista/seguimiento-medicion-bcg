@@ -1,11 +1,11 @@
 ---
 titulo: Métricas de esfuerzo y calidad
-estado: in-review    # draft | in-review | approved | implemented
+estado: implemented  # draft | in-review | approved | implemented
 unidad: global
 issue: "#18"
 sprint: 03
 autor: Martina Batista
-aprobada_por: ""
+aprobada_por: "Florencia Cabeza"
 fecha: 2026-10-26
 specs_relacionadas: ["04-product-backlog", "06-cerrar-sprint", "07-story-points", "09-registro-esfuerzo", "10-metricas-avance"]
 ---
@@ -255,6 +255,22 @@ Característica: Métricas de esfuerzo
 
 Los pasos que ya existen (crear proyecto, integrantes, historias, Sprints, completar, cerrar, registrar esfuerzo, `que hoy es`) se reutilizan al implementar; los textos exactos pueden ajustarse a los pasos del `.feature`.
 
+## Trazabilidad
+
+| Criterio | Escenarios BDD (`backend/features/metricas-esfuerzo.feature`) | Tests Go | Código |
+|---|---|---|---|
+| CA-1 Cargar, cambiar y quitar | Cargar · Cambiar, con decimales · Quitar · Validar las horas estimadas · Faltan las horas estimadas | `TestParsearHorasEstimadas`, `TestEstimarHoras` (dominio y API), `TestHorasEstimadasDeHistoria` | `dominio/horas_estimadas.go`, `api/metricas_esfuerzo.go` (`estimarHoras`, `quitarHorasEstimadas`), `postgres/historias.go` |
+| CA-2 Historia completada | No se pueden estimar · No se pueden quitar | `TestEstimarHorasErrores` (dominio y API) | `ServicioBacklog.cambiarSiNoEstaCompletada` |
+| CA-3 Horas estimadas y reales | Horas estimadas y reales de cada historia · La desviación de un Sprint se calcula sobre las sumas | `TestCalcularMetricasEsfuerzo`, `TestMetricasEsfuerzoConsultar`, `TestConsultarMetricasEsfuerzo` | `dominio/metricas_esfuerzo.go` (`CalcularMetricasEsfuerzo`), `dominio/servicio_metricas_esfuerzo.go` |
+| CA-4 Desviación | Una historia sin terminar no tiene desviación · Desviación de una historia completada · Historia completada sin esfuerzo registrado | `TestCalcularDesviacion`, `TestMetricasEsfuerzoNegativaYSinDatos` | `CalcularDesviacion` |
+| CA-5 Sprint parcial y completadas sin horas | Las métricas de un Sprint abierto son parciales · Las historias completadas sin horas estimadas se informan aparte | `TestCalcularMetricasEsfuerzo`, `TestCalcularMetricasEsfuerzoVacio` | `CalcularMetricasEsfuerzo` |
+| CA-6 TDD | — (no es un comportamiento visible) | los tests unitarios del dominio, escritos antes del código | — |
+| CA-7 No existe | Consultar las métricas de un proyecto que no existe · Estimar las horas de una historia que no existe | `TestEstimarHorasErrores`, `TestMetricasEsfuerzoProyectoInexistente` | `verificarProyecto`, `responderError` |
+
+## Pantalla
+
+`frontend/src/paginas/Metricas.tsx` (sección "Métricas" del menú), debajo de las métricas de avance: las horas estimadas y reales del proyecto con su desviación, una tabla por historia donde se cargan, cambian o quitan sus horas estimadas (una historia completada solo se ve) y una tabla por Sprint. No valida ni calcula nada: muestra lo que manda el backend y sus mensajes de error.
+
 ## Dependencias
 
 - Spec 04 (backlog) y spec 07 (Story Points): de Sprints anteriores. Las horas estimadas se cargan en la historia, igual que los Story Points, y se suma la columna nueva a la tabla de historias.
@@ -267,19 +283,19 @@ Ninguna dependencia es de otra integrante del mismo Sprint o de uno posterior.
 
 ## Tareas
 
-- [ ] `[P1]` Horas estimadas en la historia: validación (RN-2), regla de la historia completada (RN-3) y caso de uso para cargarlas y quitarlas, con TDD.
-- [ ] `[P1]` Columna de horas estimadas en la tabla de historias y su lectura y escritura en `backend/postgres/`.
-- [ ] `[P1]` Funciones de cálculo en `backend/dominio/` (horas reales, desviación en horas y en %, por historia, por Sprint y del proyecto) con TDD.
-- [ ] `[P1]` Rutas de la API para cargar y quitar las horas estimadas y para consultar las métricas de esfuerzo.
-- [ ] `[P1]` Escenarios de `backend/features/metricas-esfuerzo.feature` con sus pasos.
-- [ ] `[P2]` Pantalla: la parte de esfuerzo en la pantalla de Métricas, con la carga de las horas estimadas de cada historia.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` y `frontend/CLAUDE.md` (endpoints, JSON, specs relacionadas, recrear la base).
+- [x] `[P1]` Horas estimadas en la historia: validación (RN-2), regla de la historia completada (RN-3) y caso de uso para cargarlas y quitarlas, con TDD.
+- [x] `[P1]` Columna de horas estimadas en la tabla de historias y su lectura y escritura en `backend/postgres/`.
+- [x] `[P1]` Funciones de cálculo en `backend/dominio/` (horas reales, desviación en horas y en %, por historia, por Sprint y del proyecto) con TDD.
+- [x] `[P1]` Rutas de la API para cargar y quitar las horas estimadas y para consultar las métricas de esfuerzo.
+- [x] `[P1]` Escenarios de `backend/features/metricas-esfuerzo.feature` con sus pasos.
+- [x] `[P2]` Pantalla: la parte de esfuerzo en la pantalla de Métricas, con la carga de las horas estimadas de cada historia.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` y `frontend/CLAUDE.md` (endpoints, JSON, specs relacionadas, recrear la base).
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
 - [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented`.
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] Spec en estado `implemented`.
