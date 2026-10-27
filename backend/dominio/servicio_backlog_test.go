@@ -14,6 +14,7 @@ type backlogDePrueba struct {
 	servicio  *dominio.ServicioBacklog
 	historias *memoria.RepositorioHistorias
 	esfuerzo  *memoria.RepositorioEsfuerzo
+	defectos  *memoria.RepositorioDefectos
 	tienda    int64 // proyecto "Tienda Online"
 	turnos    int64 // proyecto "App Turnos"
 }
@@ -29,10 +30,12 @@ func nuevoBacklog(t *testing.T) backlogDePrueba {
 	}
 	turnos, _ := proyectos.Guardar(ctx, dominio.Proyecto{Nombre: "App Turnos", Descripcion: "Turnos médicos", FechaInicio: f("2026-11-05"), FechaFin: f("2027-01-20")})
 	esfuerzo := memoria.NuevoRepositorioEsfuerzo()
+	defectos := memoria.NuevoRepositorioDefectos()
 	return backlogDePrueba{
-		servicio:  dominio.NuevoServicioBacklog(proyectos, historias, memoria.NuevoRepositorioSprints(), esfuerzo),
+		servicio:  dominio.NuevoServicioBacklog(proyectos, historias, memoria.NuevoRepositorioSprints(), esfuerzo, defectos),
 		historias: historias,
 		esfuerzo:  esfuerzo,
+		defectos:  defectos,
 		tienda:    tienda.ID,
 		turnos:    turnos.ID,
 	}
@@ -238,5 +241,25 @@ func TestBacklogNoEliminaHistoriaConEsfuerzo(t *testing.T) {
 	b.esfuerzo.Eliminar(ctx, b.tienda, h.ID, r.ID)
 	if err := b.servicio.Eliminar(ctx, b.tienda, h.ID); err != nil {
 		t.Errorf("Eliminar sin esfuerzo: %v", err)
+	}
+}
+
+// spec 11 RN-14 (CA-6): no se elimina del backlog una historia con defectos registrados; una
+// historia sin defectos, sí, aunque otra del proyecto los tenga.
+func TestBacklogNoEliminaHistoriaConDefectos(t *testing.T) {
+	b := nuevoBacklog(t)
+	ctx := context.Background()
+	conDefecto, _ := b.servicio.Crear(ctx, b.tienda, datos("Registrar usuario", 1))
+	sinDefecto, _ := b.servicio.Crear(ctx, b.tienda, datos("Ver catálogo", 2))
+	b.defectos.Guardar(ctx, dominio.Defecto{ProyectoID: b.tienda, HistoriaID: conDefecto.ID, Descripcion: "Falla", Severidad: dominio.SeveridadAlta, Estado: dominio.DefectoAbierto, SprintDeteccionID: 1})
+
+	if err := b.servicio.Eliminar(ctx, b.tienda, conDefecto.ID); !errors.Is(err, dominio.ErrHistoriaConDefectos) {
+		t.Fatalf("Eliminar con defectos: error = %v, se esperaba %v", err, dominio.ErrHistoriaConDefectos)
+	}
+	if _, err := b.servicio.Obtener(ctx, b.tienda, conDefecto.ID); err != nil {
+		t.Fatalf("la historia ya no existe: %v", err)
+	}
+	if err := b.servicio.Eliminar(ctx, b.tienda, sinDefecto.ID); err != nil {
+		t.Errorf("Eliminar sin defectos: %v", err)
 	}
 }

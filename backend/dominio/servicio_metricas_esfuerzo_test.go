@@ -18,7 +18,7 @@ func TestMetricasEsfuerzoConsultar(t *testing.T) {
 	sprints := memoria.NuevoRepositorioSprints()
 	integrantes := memoria.NuevoRepositorioIntegrantes()
 	esfuerzo := memoria.NuevoRepositorioEsfuerzo()
-	backlog := dominio.NuevoServicioBacklog(proyectos, historias, sprints, esfuerzo)
+	backlog := dominio.NuevoServicioBacklog(proyectos, historias, sprints, esfuerzo, memoria.NuevoRepositorioDefectos())
 	servicioSprints := dominio.NuevoServicioSprints(proyectos, historias, sprints)
 	hoy := func() time.Time { return f("2026-11-20") }
 	registro := dominio.NuevoServicioEsfuerzo(proyectos, historias, integrantes, esfuerzo, hoy)

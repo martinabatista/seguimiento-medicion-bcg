@@ -178,6 +178,27 @@ export interface MetricasEsfuerzo {
   completadas_sin_horas_estimadas: number
 }
 
+// Defecto (spec 11). Cada Sprint llega con su identificador y su número; sprint_resolucion es
+// null mientras el defecto no está Resuelto.
+export interface Defecto {
+  id: number
+  proyecto_id: number
+  descripcion: string
+  severidad: 'Baja' | 'Media' | 'Alta' | 'Crítica'
+  estado: 'Abierto' | 'En corrección' | 'Resuelto'
+  historia_id: number
+  historia_titulo: string
+  sprint_deteccion: { id: number; numero: number }
+  sprint_resolucion: { id: number; numero: number } | null
+}
+
+// Métricas de defectos (spec 11 CA-4), ya calculadas por el backend: los Sprints van por fecha de inicio.
+export interface MetricasDefectos {
+  detectados: number
+  resueltos: number
+  sprints: { sprint_id: number; numero: number; detectados: number; resueltos: number }[]
+}
+
 // Votación de Planning Poker (spec 08). Los valores de los votos solo aparecen en "rondas", que trae
 // las rondas ya reveladas: de la ronda sin revelar solo se sabe quién votó y quién falta.
 export interface Votacion {

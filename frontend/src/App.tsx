@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import type { Proyecto } from './api'
 import Backlog from './paginas/Backlog'
 import Dashboard from './paginas/Dashboard'
+import Defectos from './paginas/Defectos'
 import Esfuerzo from './paginas/Esfuerzo'
 import Estado from './paginas/Estado'
 import Integrantes from './paginas/Integrantes'
@@ -19,6 +20,7 @@ const secciones: { titulo: string; pantalla: (proyecto: Proyecto) => ReactNode }
   { titulo: 'Sprints', pantalla: (proyecto) => <Sprints proyecto={proyecto} /> },
   { titulo: 'Planning Poker', pantalla: (proyecto) => <PlanningPoker proyecto={proyecto} /> },
   { titulo: 'Esfuerzo', pantalla: (proyecto) => <Esfuerzo proyecto={proyecto} /> },
+  { titulo: 'Defectos', pantalla: (proyecto) => <Defectos proyecto={proyecto} /> },
   { titulo: 'Métricas', pantalla: (proyecto) => <Metricas proyecto={proyecto} /> },
   { titulo: 'Dashboard', pantalla: (proyecto) => <Dashboard proyecto={proyecto} /> },
 ]

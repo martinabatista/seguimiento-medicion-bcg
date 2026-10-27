@@ -44,6 +44,7 @@ type mundo struct {
 	sprints     estadoSprints     // pasos de Sprints (spec 05), en sprints_test.go
 	poker       estadoPoker       // pasos de Planning Poker (spec 08), en planning_poker_test.go
 	esfuerzo    estadoEsfuerzo    // pasos del registro de esfuerzo (spec 09), en esfuerzo_test.go
+	defectos    estadoDefectos    // pasos de defectos (spec 11), en defectos_test.go
 	hoy         time.Time         // fecha de hoy fijada por un escenario (spec 03); vacía = la del sistema
 }
 
@@ -64,7 +65,8 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 		sprints := memoria.NuevoRepositorioSprints()
 		integrantes := memoria.NuevoRepositorioIntegrantes()
 		esfuerzo := memoria.NuevoRepositorioEsfuerzo()
-		backlog := dominio.NuevoServicioBacklog(proyectos, historias, sprints, esfuerzo)
+		defectos := memoria.NuevoRepositorioDefectos()
+		backlog := dominio.NuevoServicioBacklog(proyectos, historias, sprints, esfuerzo, defectos)
 		estado := dominio.NuevoServicioEstado(proyectos, historias, sprints, m.fechaDeHoy)
 		metricas := dominio.NuevoServicioMetricas(proyectos, historias, sprints)
 		*m = mundo{api: api.NewRouter(
@@ -78,6 +80,7 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 			dominio.NuevoServicioEsfuerzo(proyectos, historias, integrantes, esfuerzo, m.fechaDeHoy),
 			dominio.NuevoServicioDashboard(estado, metricas, m.fechaDeHoy),
 			dominio.NuevoServicioMetricasEsfuerzo(proyectos, historias, sprints, esfuerzo),
+			dominio.NuevoServicioDefectos(proyectos, historias, sprints, defectos),
 		)}
 		return ctx, nil
 	})
@@ -141,6 +144,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Métricas de esfuerzo (spec 12)
 	m.registrarPasosMetricasEsfuerzo(sc)
+
+	// Defectos (spec 11)
+	m.registrarPasosDefectos(sc)
 }
 
 // ---------- helpers ----------
@@ -369,12 +375,15 @@ func (m *mundo) hayProyectosRegistrados(cantidad int) error {
 	return nil
 }
 
-// elResultadoEs acepta "registrado" (el registro de esfuerzo, spec 09, el Sprint, spec 05, o el
+// elResultadoEs acepta "registrado" (el defecto, spec 11, el registro de esfuerzo, spec 09, el Sprint, spec 05, o el
 // integrante, spec 02, si el escenario pidió uno; si no, el proyecto), "registrada" o "modificada"
-// (historia, spec 04) o el mensaje de error esperado.
+// (historia, spec 04), "modificado" (estado del defecto, spec 11) o el mensaje de error esperado.
 func (m *mundo) elResultadoEs(resultado string) error {
 	switch resultado {
 	case "registrado":
+		if m.defectos.registroPedido {
+			return m.elDefectoQuedaRegistrado()
+		}
 		if m.esfuerzo.registroPedido {
 			return m.elRegistroQuedaGuardado()
 		}
@@ -387,7 +396,7 @@ func (m *mundo) elResultadoEs(resultado string) error {
 		return m.elProyectoQuedaRegistrado()
 	case "registrada":
 		return m.laHistoriaQuedaRegistrada()
-	case "modificada", "estimada", "votado":
+	case "modificada", "modificado", "estimada", "votado":
 		if m.respuesta.Code != http.StatusOK {
 			return fmt.Errorf("no se modificó: código %d, %s", m.respuesta.Code, m.respuesta.Body.String())
 		}

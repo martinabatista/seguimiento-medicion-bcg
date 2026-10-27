@@ -132,3 +132,19 @@ var (
 	ErrHorasEstimadasObligatorias = ErrDatoInvalido{"Las horas estimadas son obligatorias"}
 	ErrHorasEstimadasInvalidas    = ErrDatoInvalido{"Las horas estimadas deben ser un número mayor a 0, con hasta 2 decimales"}
 )
+
+// Errores de la spec 11 (defectos). La descripción vacía o larga usa los mensajes de las specs 01 y
+// 04, el estado inválido el de la spec 04 y el Sprint inexistente el de la spec 05.
+var (
+	ErrSeveridadObligatoria         = ErrDatoInvalido{"La severidad es obligatoria"}
+	ErrSeveridadInvalida            = ErrDatoInvalido{"La severidad no es válida"}
+	ErrHistoriaDefectoObligatoria   = ErrDatoInvalido{"La historia relacionada es obligatoria"}
+	ErrSprintDeteccionObligatorio   = ErrDatoInvalido{"El Sprint de detección es obligatorio"}
+	ErrSprintResolucionObligatorio  = ErrDatoInvalido{"Para resolver el defecto hay que indicar el Sprint de resolución"}
+	ErrResolucionAnteriorADeteccion = ErrDatoInvalido{"El Sprint de resolución no puede ser anterior al de detección"}
+
+	ErrHistoriaConDefectos = ErrConflicto{"La historia tiene defectos registrados"}
+
+	// ErrDefectoNoExiste no es un dato inválido: la API lo responde como 404.
+	ErrDefectoNoExiste = errors.New("El defecto no existe")
+)

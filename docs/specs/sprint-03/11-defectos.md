@@ -1,11 +1,11 @@
 ---
 titulo: Gestionar defectos
-estado: in-review        # draft | in-review | approved | implemented
+estado: implemented      # draft | in-review | approved | implemented
 unidad: backend
 issue: "#17"
 sprint: 03
 autor: Luana Guajardo
-aprobada_por: ""
+aprobada_por: "Martina Batista"
 fecha: 2026-10-27
 specs_relacionadas: ["04-product-backlog", "05-crear-sprints", "12-metricas-esfuerzo-calidad"]
 ---
@@ -317,18 +317,18 @@ Los pasos que no indican proyecto se refieren al de los Antecedentes, "Tienda On
 
 ## Tareas
 
-- [ ] `[P1]` Defecto en `backend/dominio/`: validaciones (RN-2 a RN-5), cambio de estado con Sprint de resolución (RN-6 a RN-9) y conteo de detectados y resueltos (RN-10, RN-11) (TDD).
-- [ ] `[P1]` Casos de uso registrar, listar, ver, cambiar estado y métricas, con la verificación de proyecto, historia y Sprints (RN-1, RN-12, RN-13), y repositorio en memoria.
-- [ ] `[P1]` Regla del backlog: no eliminar una historia con defectos (RN-14).
-- [ ] `[P1]` Tabla `10_defectos.sql`, repositorio PostgreSQL y rutas REST (`/api/proyectos/{id}/defectos` y `/api/proyectos/{id}/metricas/defectos`), con escenarios de `backend/features/defectos.feature`.
-- [ ] `[P1]` Pantalla "Defectos" en el frontend.
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` y `frontend/CLAUDE.md`.
+- [x] `[P1]` Defecto en `backend/dominio/`: validaciones (RN-2 a RN-5), cambio de estado con Sprint de resolución (RN-6 a RN-9) y conteo de detectados y resueltos (RN-10, RN-11) (TDD).
+- [x] `[P1]` Casos de uso registrar, listar, ver, cambiar estado y métricas, con la verificación de proyecto, historia y Sprints (RN-1, RN-12, RN-13), y repositorio en memoria.
+- [x] `[P1]` Regla del backlog: no eliminar una historia con defectos (RN-14).
+- [x] `[P1]` Tabla `10_defectos.sql`, repositorio PostgreSQL y rutas REST (`/api/proyectos/{id}/defectos` y `/api/proyectos/{id}/metricas/defectos`), con escenarios de `backend/features/defectos.feature`.
+- [x] `[P1]` Pantalla "Defectos" en el frontend.
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` y `frontend/CLAUDE.md`.
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
-- [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented`.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
+- [x] CI en verde (gofmt / vet / tests / lint / build).
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] Spec en estado `implemented`.

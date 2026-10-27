@@ -35,7 +35,7 @@ func nuevoEstado(t *testing.T) estadoDePrueba {
 	sprints := memoria.NuevoRepositorioSprints()
 	return estadoDePrueba{
 		servicio: dominio.NuevoServicioEstado(proyectos, historias, sprints, func() time.Time { return hoy }),
-		backlog:  dominio.NuevoServicioBacklog(proyectos, historias, sprints, memoria.NuevoRepositorioEsfuerzo()),
+		backlog:  dominio.NuevoServicioBacklog(proyectos, historias, sprints, memoria.NuevoRepositorioEsfuerzo(), memoria.NuevoRepositorioDefectos()),
 		sprints:  dominio.NuevoServicioSprints(proyectos, historias, sprints),
 		hoy:      &hoy,
 		tienda:   tienda,

@@ -32,7 +32,7 @@ func nuevosSprints(t *testing.T) sprintsDePrueba {
 	turnos, _ := proyectos.Guardar(ctx, dominio.Proyecto{Nombre: "App Turnos", Descripcion: "Turnos médicos", FechaInicio: f("2026-11-01"), FechaFin: f("2027-01-20")})
 	return sprintsDePrueba{
 		servicio: dominio.NuevoServicioSprints(proyectos, historias, sprints),
-		backlog:  dominio.NuevoServicioBacklog(proyectos, historias, sprints, memoria.NuevoRepositorioEsfuerzo()),
+		backlog:  dominio.NuevoServicioBacklog(proyectos, historias, sprints, memoria.NuevoRepositorioEsfuerzo(), memoria.NuevoRepositorioDefectos()),
 		sprints:  sprints,
 		tienda:   tienda.ID,
 		turnos:   turnos.ID,

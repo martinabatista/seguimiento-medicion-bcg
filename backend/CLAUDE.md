@@ -67,9 +67,14 @@ Endpoints disponibles:
 | `GET /api/proyectos/{id}/backlog/{historiaID}/esfuerzo` | Esfuerzo de la historia por fecha, con el total | 200 · 404 |
 | `DELETE …/esfuerzo/{registroID}` | Eliminar un registro de esfuerzo | 204 · 404 |
 | `GET /api/proyectos/{id}/dashboard` | Indicadores y datos de los 3 gráficos del Dashboard (spec 13) | 200 · 404 |
+| `POST /api/proyectos/{id}/defectos` | Registrar un defecto `{"descripcion", "severidad", "historia_id", "sprint_deteccion_id"}` (spec 11) | 201 defecto · 400 · 404 |
+| `GET /api/proyectos/{id}/defectos` | Defectos del proyecto en orden de registro | 200 · 404 |
+| `GET /api/proyectos/{id}/defectos/{defectoID}` | Ver un defecto | 200 · 404 |
+| `PUT …/defectos/{defectoID}/estado` | Cambiar el estado `{"estado", "sprint_resolucion_id"}` (el Sprint solo cuenta al resolver) | 200 defecto · 400 · 404 |
+| `GET /api/proyectos/{id}/metricas/defectos` | Defectos detectados y resueltos del proyecto y por Sprint (spec 11 CA-4) | 200 · 404 |
 
 `DELETE /api/proyectos/{id}/backlog/{historiaID}` responde 409 si la historia está en un Sprint abierto (spec 05 CA-6)
-o si tiene esfuerzo registrado (spec 09 CA-7).
+o si tiene esfuerzo registrado (spec 09 CA-7) o defectos registrados (spec 11 CA-6).
 `PUT /api/proyectos/{id}/backlog/{historiaID}` responde 409 si pone o saca `Completada` a una historia de un
 Sprint abierto: se completa desde el Sprint (spec 06 CA-5).
 
@@ -121,6 +126,11 @@ Esfuerzo en JSON: registro `{"id", "proyecto_id", "historia_id", "integrante_id"
 "actividad", "horas"}`; consulta `{"registros": [...], "total_horas"}`. `horas` y `total_horas` son números
 con hasta 2 decimales (`2.5`, `0.3`), exactos: se arman desde centésimas enteras. Los registros van por
 fecha y, a igual fecha, por orden de carga.
+
+Defectos en JSON: `{"id", "proyecto_id", "descripcion", "severidad", "estado", "historia_id", "historia_titulo",
+"sprint_deteccion": {"id", "numero"}, "sprint_resolucion": {"id", "numero"} | null}`. Métricas de defectos:
+`{"detectados", "resueltos", "sprints": [{"sprint_id", "numero", "detectados", "resueltos"}]}`, con todos los
+Sprints por fecha de inicio (0 si no tienen defectos).
 
 Métricas de esfuerzo en JSON: `{"historias": [{"historia_id", "titulo", "estado", "horas_estimadas", "horas_reales",
 "desviacion"}], "sprints": [{"sprint_id", "numero", "estado", "parcial", "horas_estimadas", "horas_reales", "desviacion",
@@ -258,6 +268,11 @@ al frontend: actualizar la spec correspondiente y `frontend/` en el mismo PR.
   (pasos en `features/metricas_esfuerzo_test.go`). Usa el esfuerzo de la spec 09 (horas reales) y lo completado en
   cada Sprint de la spec 06. Las horas estimadas, como los Story Points, no se cambian en una historia completada
   (`cambiarSiNoEstaCompletada`). La spec 14 (reporte) va a usar estas métricas.
+- `docs/specs/sprint-03/11-defectos.md` — defectos: `dominio/defecto.go` (`NuevoDefecto`, `ParsearEstadoDefecto`,
+  `CambiarEstadoDefecto`, `ContarDefectos`), `dominio/servicio_defectos.go`, la regla al eliminar en
+  `ServicioBacklog.Eliminar` (RN-14), `memoria/defectos.go`, `postgres/defectos.go`, `postgres/tablas/10_defectos.sql`,
+  `api/defectos.go`, `features/defectos.feature` (pasos en `features/defectos_test.go`). La spec 14 (reporte) va a
+  usar los defectos y sus métricas.
 
 ## Cómo testear
 
@@ -330,9 +345,13 @@ negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobe
   `horas_estimadas_centesimas`). La desviación se calcula **sobre las sumas** de un Sprint o del proyecto, no promediando
   la de cada historia, y su porcentaje redondea la mitad **alejándose de cero** (−12,5 % → −13 %). `Modificar` del
   backlog conserva las horas estimadas, igual que los Story Points: si se agrega otro dato que se carga aparte, conservarlo ahí.
+- Defectos (spec 11): el Sprint de resolución es `0` en el dominio y `NULL` en la tabla mientras no está `Resuelto`
+  (un `CHECK` lo exige). "Anterior al de detección" se compara por **fecha de inicio**, no por número. Los resueltos
+  cuentan el estado **actual**: un defecto reabierto deja de contar. `defectos.historia_id` tampoco tiene
+  `ON DELETE CASCADE` (como el esfuerzo). La tabla `10_defectos.sql` obliga a recrear la base local.
 - La velocidad se calcula en **décimas con enteros** (`CalcularVelocidad`: 65 = 6,5) para no tener errores
   de coma flotante; recién `api/metricas.go` la pasa a decimal para el JSON.
 
 ## Estado
 
-Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-26 (spec 12).
+Origen: bootstrap del flujo (spec 00). Última revisión: 2026-10-27 (spec 11).
