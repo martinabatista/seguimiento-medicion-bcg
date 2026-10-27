@@ -26,19 +26,23 @@ frontend/
     ├── estilos.css      # todos los estilos
     └── paginas/         # una pantalla por archivo
         ├── Proyectos.tsx       # listar, crear y elegir proyecto (spec 01)
+        ├── Estado.tsx          # estado por fechas, Sprint en curso y avance del backlog (spec 03)
         ├── Backlog.tsx         # backlog con Story Points (specs 04 y 07)
+        ├── Integrantes.tsx     # listar y agregar integrantes con su rol (spec 02)
         ├── Sprints.tsx         # crear Sprints, asignar y completar historias, cerrar y consultar (specs 05 y 06)
         ├── PlanningPoker.tsx   # votar en secreto, revelar, nueva ronda y acordar (spec 08)
+        ├── Esfuerzo.tsx        # registrar, consultar y eliminar horas por historia (spec 09)
         ├── Metricas.tsx        # avance (spec 10) y esfuerzo, con la carga de horas estimadas (spec 12)
-        ├── Dashboard.tsx       # indicadores y 3 gráficos en HTML y CSS (spec 13)
-        └── EnConstruccion.tsx  # lugar de las secciones que todavía no tienen pantalla
+        └── Dashboard.tsx       # indicadores y 3 gráficos en HTML y CSS (spec 13)
 ```
+
+Todas las secciones del menú tienen su pantalla (la de "En construcción" se quitó al completar la #15).
 
 ## Cómo agregar una pantalla
 
 1. Crear `src/paginas/MiPantalla.tsx` (tomar `Proyectos.tsx` como modelo). Recibe el proyecto elegido.
 2. Sumar en `api.ts` los tipos de los datos que usa (copiando el JSON de `backend/CLAUDE.md`).
-3. En `App.tsx`, cambiar su línea de `secciones`: `pantalla: (proyecto) => <MiPantalla proyecto={proyecto} />`.
+3. En `App.tsx`, agregar su línea en `secciones`: `{ titulo: 'Mi sección', pantalla: (proyecto) => <MiPantalla proyecto={proyecto} /> }`.
 4. Para los pedidos, `pedir<Tipo>('GET', '/proyectos/' + proyecto.id + '/…')`. Mostrar la carga con
    `<Cargando />` y los errores con `<MensajeError mensaje={mensajeDe(e)} />`.
 
@@ -67,6 +71,10 @@ Acordadas al crear la unidad (Issue #15, 2026-10-26):
 - Si se cambia de rama con `npm run dev` andando y la rama no tiene `frontend/` (por ejemplo, una vieja), Vite
   se reinicia sin su configuración y **pierde el proxy**: los pedidos a `/api` devuelven la página. Solución:
   frenar `npm run dev` (Ctrl+C) y volver a lanzarlo.
+- Algunos campos del navegador **validan solos** y no dejan enviar el formulario, así nunca se ve el mensaje
+  del backend: `type="email"` (formato), `step` en `type="number"` (decimales), `required`, `min`/`max`.
+  Para que la validación sea la de Go: email como texto común (`inputMode="email"`) y números con
+  `type="number" step="any"` (Integrantes y Esfuerzo).
 
 ## Contratos públicos
 
@@ -85,4 +93,4 @@ npm run build       # la CI corre lint, typecheck y build
 
 ## Estado
 
-Origen: interfaz web base (Issue #15). Última revisión: 2026-10-26.
+Origen: interfaz web base (Issue #15). Última revisión: 2026-10-27 (pantallas de Integrantes, Estado y Esfuerzo).

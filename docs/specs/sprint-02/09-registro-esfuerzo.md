@@ -280,6 +280,10 @@ Característica: Registrar esfuerzo
 
 Los pasos que no indican proyecto se refieren al de los Antecedentes, "Tienda Online". Las horas se escriben con coma decimal, como se leen; en la API viajan como número (`2.5`). En las tablas, `(vacío)` representa un texto vacío, igual que en las specs 01 y 04. El paso "que hoy es …" es el de la spec 03 y "elimino la historia …" el de la spec 04.
 
+## Pantalla
+
+`frontend/src/paginas/Esfuerzo.tsx` (sección "Esfuerzo" del menú): se elige una historia del backlog y se ven sus registros en el orden del backend, con el total de horas, y un botón para eliminar cada uno (con confirmación). El formulario carga integrante (desplegable con los del proyecto), fecha, actividad y horas. No valida nada: el campo de horas solo acepta números (`step="any"`, sin límite de decimales ni de rango) y los errores son los mensajes del backend (por ejemplo, "La fecha no puede ser posterior a hoy"). Si falta el integrante o las horas no se mandan, así el backend informa cuál falta.
+
 ## Dependencias
 
 - Spec 01 (proyectos): fechas del proyecto. Spec 02 (integrantes) y spec 04 (backlog): el integrante y la historia. Las tres están implementadas: esta historia no espera a ninguna otra.
