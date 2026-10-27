@@ -96,6 +96,24 @@ export interface EstadoProyecto {
   sprint_en_curso: Sprint | null
 }
 
+// Registro de esfuerzo sobre una historia (spec 09). Las horas son un número con hasta 2 decimales.
+export interface RegistroEsfuerzo {
+  id: number
+  proyecto_id: number
+  historia_id: number
+  integrante_id: number
+  integrante_nombre: string
+  fecha: string // AAAA-MM-DD
+  actividad: string
+  horas: number
+}
+
+// Esfuerzo de una historia (spec 09): los registros por fecha y el total, sumado por el backend.
+export interface EsfuerzoDeHistoria {
+  registros: RegistroEsfuerzo[]
+  total_horas: number
+}
+
 // Un Sprint con sus historias (specs 05 y 06): llega al verlo y como respuesta de cada cambio.
 // completada_en_sprint dice si se completó en ese Sprint; en uno cerrado ya no cambia.
 export interface DetalleSprint extends Sprint {
