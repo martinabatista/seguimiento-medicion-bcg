@@ -34,6 +34,37 @@ export async function pedir<T>(metodo: string, ruta: string, cuerpo?: unknown): 
   return datos as T
 }
 
+// descargar baja el archivo de /api + ruta (por ejemplo, un PDF) con el nombre que manda el backend.
+// Si hay un error, lanza ErrorAPI con el mensaje del backend, igual que pedir().
+export async function descargar(ruta: string): Promise<void> {
+  let respuesta: Response
+  try {
+    respuesta = await fetch(`/api${ruta}`)
+  } catch {
+    throw new ErrorAPI('No se pudo conectar con el servidor', 0)
+  }
+  if (!respuesta.ok) {
+    const datos = await respuesta.json().catch(() => null)
+    throw new ErrorAPI(datos?.error ?? `Error del servidor (${respuesta.status})`, respuesta.status)
+  }
+  const url = URL.createObjectURL(await respuesta.blob())
+  const enlace = document.createElement('a')
+  enlace.href = url
+  enlace.download = nombreDeArchivo(respuesta.headers.get('Content-Disposition'))
+  enlace.click()
+  URL.revokeObjectURL(url)
+}
+
+// nombreDeArchivo lee el nombre del encabezado Content-Disposition. Con tildes llega codificado
+// (filename*=utf-8''Reporte%20Gesti%C3%B3n.pdf); sin tildes, entre comillas (filename="Reporte.pdf").
+export function nombreDeArchivo(encabezado: string | null): string {
+  const codificado = encabezado?.match(/filename\*=utf-8''([^;]+)/i)
+  if (codificado) {
+    return decodeURIComponent(codificado[1])
+  }
+  return encabezado?.match(/filename="([^"]+)"/)?.[1] ?? 'reporte.pdf'
+}
+
 // Tipos de los datos que devuelve el backend (los JSON están en backend/CLAUDE.md).
 // Cada integrante suma acá los de sus pantallas.
 
@@ -197,6 +228,64 @@ export interface MetricasDefectos {
   detectados: number
   resueltos: number
   sprints: { sprint_id: number; numero: number; detectados: number; resueltos: number }[]
+}
+
+// Reporte (spec 14), ya armado por el backend con los cálculos de las specs 03, 10, 11 y 12.
+// completada_en_sprint solo llega en el reporte de un Sprint.
+export interface HistoriaDeReporte {
+  historia_id: number
+  titulo: string
+  estado: Historia['estado']
+  story_points: number | null
+  horas_estimadas: number | null
+  horas_reales: number
+  desviacion: Desviacion | null
+  completada_en_sprint?: boolean
+}
+
+export interface SprintDeReporte {
+  sprint_id: number
+  numero: number
+  fecha_inicio: string
+  fecha_fin: string
+  sprint_goal: string
+  estado: Sprint['estado']
+  parcial: boolean
+  avance: Metricas['sprints'][number]
+  esfuerzo: MetricasEsfuerzo['sprints'][number]
+}
+
+export interface DefectosDeReporte {
+  detectados: number
+  resueltos: number
+  lista: Defecto[]
+}
+
+export interface ReporteProyecto {
+  proyecto: Proyecto
+  estado: 'No iniciado' | 'En curso' | 'Finalizado'
+  generado_el: string
+  integrantes: { nombre: string; rol: Integrante['rol'] }[]
+  historias: HistoriaDeReporte[]
+  sprints: SprintDeReporte[]
+  metricas: {
+    sprints_cerrados: number
+    velocidad: number | null
+    totales: Metricas['totales']
+    horas_estimadas: number
+    horas_reales: number
+    desviacion: Desviacion | null
+    completadas_sin_horas_estimadas: number
+  }
+  defectos: DefectosDeReporte
+}
+
+export interface ReporteSprint {
+  proyecto: Proyecto
+  generado_el: string
+  sprint: SprintDeReporte
+  historias: HistoriaDeReporte[]
+  defectos: DefectosDeReporte
 }
 
 // Votación de Planning Poker (spec 08). Los valores de los votos solo aparecen en "rondas", que trae

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { mensajeDe, pedir, type Desviacion, type Metricas as TipoMetricas, type MetricasEsfuerzo, type Proyecto } from '../api'
+import { mensajeDe, pedir, type Metricas as TipoMetricas, type MetricasEsfuerzo, type Proyecto } from '../api'
 import { Cargando, MensajeError } from '../componentes'
+import { decimal, desviacion, horas } from '../formato'
 
 // Metricas muestra las métricas de avance del proyecto y de cada Sprint (spec 10). Pide la consulta
 // una sola vez y muestra lo que llega: todos los cálculos (porcentajes, velocidad, totales) son del backend.
@@ -256,23 +257,4 @@ function Tarjeta({ numero, etiqueta }: { numero: string; etiqueta: string }) {
       <span className="suave">{etiqueta}</span>
     </div>
   )
-}
-
-// decimal muestra la velocidad con coma y un decimal, como llega del backend (6.5 → "6,5").
-function decimal(n: number): string {
-  return n.toLocaleString('es-AR', { maximumFractionDigits: 1 })
-}
-
-// horas muestra horas con coma y hasta 2 decimales, como llegan del backend (2.25 → "2,25").
-function horas(n: number): string {
-  return n.toLocaleString('es-AR', { maximumFractionDigits: 2 })
-}
-
-// desviacion muestra la desviación con su signo: "+2 h (+25 %)". Sin datos, "—".
-function desviacion(d: Desviacion | null): string {
-  if (d === null) {
-    return '—'
-  }
-  const signo = (n: number) => (n > 0 ? '+' : '')
-  return `${signo(d.horas)}${horas(d.horas)} h (${signo(d.porcentaje)}${d.porcentaje} %)`
 }

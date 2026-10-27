@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ErrorAPI, pedir } from './api'
+import { ErrorAPI, nombreDeArchivo, pedir } from './api'
 
 // Reemplaza fetch del navegador por uno de prueba que devuelve la respuesta indicada.
 function responder(respuesta: Response | Error) {
@@ -56,5 +56,19 @@ describe('pedir', () => {
     responder(new Response('<html>Bad Gateway</html>', { status: 502 }))
 
     await expect(pedir('GET', '/proyectos')).rejects.toThrow('Error del servidor (502)')
+  })
+})
+
+describe('nombreDeArchivo', () => {
+  it('lee el nombre entre comillas', () => {
+    expect(nombreDeArchivo('attachment; filename="Reporte Tienda Online.pdf"')).toBe('Reporte Tienda Online.pdf')
+  })
+
+  it('decodifica el nombre con tildes que manda el backend', () => {
+    expect(nombreDeArchivo("attachment; filename*=utf-8''Reporte%20Gesti%C3%B3n%20de%20Turnos.pdf")).toBe('Reporte Gestión de Turnos.pdf')
+  })
+
+  it('usa un nombre por defecto si no llega el encabezado', () => {
+    expect(nombreDeArchivo(null)).toBe('reporte.pdf')
   })
 })
