@@ -9,16 +9,18 @@ import (
 )
 
 // historiaJSON es una historia del backlog tal como sale por la API (spec 04).
-// story_points es null mientras la historia está sin estimar.
+// story_points es null mientras la historia está sin estimar; horas_estimadas, mientras no tiene
+// horas estimadas (spec 12).
 type historiaJSON struct {
-	ID          int64  `json:"id"`
-	ProyectoID  int64  `json:"proyecto_id"`
-	Titulo      string `json:"titulo"`
-	Descripcion string `json:"descripcion"`
-	Prioridad   int    `json:"prioridad"`
-	Criterios   string `json:"criterios_aceptacion"`
-	Estado      string `json:"estado"`
-	StoryPoints *int   `json:"story_points"`
+	ID             int64        `json:"id"`
+	ProyectoID     int64        `json:"proyecto_id"`
+	Titulo         string       `json:"titulo"`
+	Descripcion    string       `json:"descripcion"`
+	Prioridad      int          `json:"prioridad"`
+	Criterios      string       `json:"criterios_aceptacion"`
+	Estado         string       `json:"estado"`
+	StoryPoints    *int         `json:"story_points"`
+	HorasEstimadas *json.Number `json:"horas_estimadas"`
 }
 
 // historiaEntrada es lo que llega al crear o modificar. La prioridad se lee como json.Number para
@@ -158,13 +160,14 @@ func leerIDs(r *http.Request) (proyectoID, historiaID int64, err error) {
 
 func historiaAJSON(h dominio.Historia) historiaJSON {
 	return historiaJSON{
-		ID:          h.ID,
-		ProyectoID:  h.ProyectoID,
-		Titulo:      h.Titulo,
-		Descripcion: h.Descripcion,
-		Prioridad:   h.Prioridad,
-		Criterios:   h.Criterios,
-		Estado:      string(h.Estado),
-		StoryPoints: h.StoryPoints,
+		ID:             h.ID,
+		ProyectoID:     h.ProyectoID,
+		Titulo:         h.Titulo,
+		Descripcion:    h.Descripcion,
+		Prioridad:      h.Prioridad,
+		Criterios:      h.Criterios,
+		Estado:         string(h.Estado),
+		StoryPoints:    h.StoryPoints,
+		HorasEstimadas: horasOpcionales(h.HorasEstimadas),
 	}
 }
