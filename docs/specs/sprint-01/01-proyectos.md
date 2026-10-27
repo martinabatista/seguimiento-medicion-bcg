@@ -207,6 +207,10 @@ Característica: Crear y modificar proyectos
 
 En el `Esquema del escenario` del CA-4, el primer ejemplo es un nombre vacío y el segundo un nombre con solo espacios (`"   "`); al pasarlo al `.feature` se escriben explícitamente.
 
+## Pantalla
+
+`frontend/src/paginas/Proyectos.tsx` (la pantalla de entrada, antes de elegir un proyecto): la lista de proyectos con sus fechas y su descripción, y un formulario para crear uno. Cada proyecto tiene "Elegir" y "Modificar": "Modificar" carga sus datos en el mismo formulario, que pasa a "Guardar cambios" (con "Cancelar"). No valida nada: muestra los mensajes de error del backend (por ejemplo, el de una fecha de fin anterior a la de inicio).
+
 ## Dependencias
 
 Ninguna (base del resto del sistema). Las specs 02, 03, 04 y 05 dependen de esta.

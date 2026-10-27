@@ -26,7 +26,7 @@ frontend/
     ├── formato.ts       # formatos de números (horas, velocidad, desviación) de Métricas y Reporte
     ├── estilos.css      # todos los estilos
     └── paginas/         # una pantalla por archivo
-        ├── Proyectos.tsx       # listar, crear y elegir proyecto (spec 01)
+        ├── Proyectos.tsx       # listar, crear, modificar y elegir proyecto (spec 01)
         ├── Estado.tsx          # estado por fechas, Sprint en curso y avance del backlog (spec 03)
         ├── Backlog.tsx         # backlog con Story Points (specs 04 y 07)
         ├── Integrantes.tsx     # listar y agregar integrantes con su rol (spec 02)
