@@ -20,9 +20,10 @@ frontend/
 └── src/
     ├── main.tsx         # arranca React
     ├── App.tsx          # layout: encabezado, lista de proyectos o menú de secciones del proyecto elegido
-    ├── api.ts           # pedir(): todos los pedidos a la API; ErrorAPI; tipos de los datos
+    ├── api.ts           # pedir() y descargar(): los pedidos a la API; ErrorAPI; tipos de los datos
     ├── api.test.ts      # tests del cliente de la API (Vitest)
     ├── componentes.tsx  # Cargando y MensajeError, comunes a todas las pantallas
+    ├── formato.ts       # formatos de números (horas, velocidad, desviación) de Métricas y Reporte
     ├── estilos.css      # todos los estilos
     └── paginas/         # una pantalla por archivo
         ├── Proyectos.tsx       # listar, crear y elegir proyecto (spec 01)
@@ -34,7 +35,8 @@ frontend/
         ├── Esfuerzo.tsx        # registrar, consultar y eliminar horas por historia (spec 09)
         ├── Defectos.tsx        # métricas de defectos, lista con cambio de estado y registro (spec 11)
         ├── Metricas.tsx        # avance (spec 10) y esfuerzo, con la carga de horas estimadas (spec 12)
-        └── Dashboard.tsx       # indicadores y 3 gráficos en HTML y CSS (spec 13)
+        ├── Dashboard.tsx       # indicadores y 3 gráficos en HTML y CSS (spec 13)
+        └── Reporte.tsx         # reporte del proyecto o de un Sprint y descarga del PDF que arma el backend (spec 14)
 ```
 
 Todas las secciones del menú tienen su pantalla (la de "En construcción" se quitó al completar la #15).
@@ -94,4 +96,4 @@ npm run build       # la CI corre lint, typecheck y build
 
 ## Estado
 
-Origen: interfaz web base (Issue #15). Última revisión: 2026-10-27 (pantalla de Defectos, spec 11).
+Origen: interfaz web base (Issue #15). Última revisión: 2026-10-27 (pantalla de Reporte, spec 14).

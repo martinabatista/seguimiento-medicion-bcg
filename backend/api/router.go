@@ -9,7 +9,7 @@ import (
 )
 
 // NewRouter arma las rutas de la API.
-func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBacklog, integrantes *dominio.ServicioIntegrantes, estado *dominio.ServicioEstado, sprints *dominio.ServicioSprints, poker *dominio.ServicioPlanningPoker, metricas *dominio.ServicioMetricas, esfuerzo *dominio.ServicioEsfuerzo, dashboard *dominio.ServicioDashboard, metricasEsfuerzo *dominio.ServicioMetricasEsfuerzo, defectos *dominio.ServicioDefectos) http.Handler {
+func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBacklog, integrantes *dominio.ServicioIntegrantes, estado *dominio.ServicioEstado, sprints *dominio.ServicioSprints, poker *dominio.ServicioPlanningPoker, metricas *dominio.ServicioMetricas, esfuerzo *dominio.ServicioEsfuerzo, dashboard *dominio.ServicioDashboard, metricasEsfuerzo *dominio.ServicioMetricasEsfuerzo, defectos *dominio.ServicioDefectos, reporte *dominio.ServicioReporte) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", health)
 
@@ -80,6 +80,12 @@ func NewRouter(proyectos *dominio.ServicioProyectos, backlog *dominio.ServicioBa
 	mux.HandleFunc("GET /api/proyectos/{id}/defectos/{defectoID}", de.ver)
 	mux.HandleFunc("PUT /api/proyectos/{id}/defectos/{defectoID}/estado", de.cambiarEstado)
 	mux.HandleFunc("GET /api/proyectos/{id}/metricas/defectos", de.metricas)
+
+	rp := reporteHandler{servicio: reporte}
+	mux.HandleFunc("GET /api/proyectos/{id}/reporte", rp.proyecto)
+	mux.HandleFunc("GET /api/proyectos/{id}/reporte/pdf", rp.proyectoPDF)
+	mux.HandleFunc("GET /api/proyectos/{id}/sprints/{sprintID}/reporte", rp.sprint)
+	mux.HandleFunc("GET /api/proyectos/{id}/sprints/{sprintID}/reporte/pdf", rp.sprintPDF)
 	return mux
 }
 

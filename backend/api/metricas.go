@@ -59,18 +59,7 @@ func (h metricasHandler) consultar(w http.ResponseWriter, r *http.Request) {
 		Totales:         totalesJSON(m.Totales),
 	}
 	for _, s := range m.Sprints {
-		respuesta.Sprints = append(respuesta.Sprints, metricasSprintJSON{
-			SprintID:                s.SprintID,
-			Numero:                  s.Numero,
-			Estado:                  string(s.Estado),
-			Parcial:                 s.Parcial,
-			HistoriasPlanificadas:   s.HistoriasPlanificadas,
-			HistoriasCompletadas:    s.HistoriasCompletadas,
-			PorcentajeCompletadas:   s.PorcentajeCompletadas,
-			SinEstimar:              s.SinEstimar,
-			StoryPointsPlanificados: s.StoryPointsPlanificados,
-			StoryPointsCompletados:  s.StoryPointsCompletados,
-		})
+		respuesta.Sprints = append(respuesta.Sprints, metricasSprintAJSON(s))
 	}
 	respuesta.Velocidad = velocidadAJSON(m.HayVelocidad, m.VelocidadDecimas)
 	writeJSON(w, http.StatusOK, respuesta)
@@ -85,4 +74,21 @@ func velocidadAJSON(hay bool, decimas int) *float64 {
 	}
 	v := float64(decimas) / 10
 	return &v
+}
+
+// metricasSprintAJSON pasa las métricas de avance de un Sprint al JSON. La usan las métricas y el
+// reporte (spec 14), así un Sprint sale igual en las dos rutas.
+func metricasSprintAJSON(s dominio.MetricasSprint) metricasSprintJSON {
+	return metricasSprintJSON{
+		SprintID:                s.SprintID,
+		Numero:                  s.Numero,
+		Estado:                  string(s.Estado),
+		Parcial:                 s.Parcial,
+		HistoriasPlanificadas:   s.HistoriasPlanificadas,
+		HistoriasCompletadas:    s.HistoriasCompletadas,
+		PorcentajeCompletadas:   s.PorcentajeCompletadas,
+		SinEstimar:              s.SinEstimar,
+		StoryPointsPlanificados: s.StoryPointsPlanificados,
+		StoryPointsCompletados:  s.StoryPointsCompletados,
+	}
 }

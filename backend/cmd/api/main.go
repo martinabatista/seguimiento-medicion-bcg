@@ -48,10 +48,12 @@ func main() {
 	dashboard := dominio.NuevoServicioDashboard(estado, metricas, time.Now)
 	metricasEsfuerzo := dominio.NuevoServicioMetricasEsfuerzo(repoProyectos, repoHistorias, repoSprints, repoEsfuerzo)
 	defectos := dominio.NuevoServicioDefectos(repoProyectos, repoHistorias, repoSprints, repoDefectos)
+	// El reporte (spec 14) reutiliza el estado, las métricas y los defectos, con la misma fecha de hoy.
+	reporte := dominio.NuevoServicioReporte(estado, metricas, metricasEsfuerzo, defectos, repoIntegrantes, repoHistorias, repoSprints, time.Now)
 
 	addr := ":" + port
 	log.Printf("API escuchando en http://localhost%s", addr)
-	if err := http.ListenAndServe(addr, api.NewRouter(proyectos, backlog, integrantes, estado, sprints, poker, metricas, esfuerzo, dashboard, metricasEsfuerzo, defectos)); err != nil {
+	if err := http.ListenAndServe(addr, api.NewRouter(proyectos, backlog, integrantes, estado, sprints, poker, metricas, esfuerzo, dashboard, metricasEsfuerzo, defectos, reporte)); err != nil {
 		log.Fatal(err)
 	}
 }

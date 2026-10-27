@@ -9,6 +9,7 @@ import Integrantes from './paginas/Integrantes'
 import Metricas from './paginas/Metricas'
 import PlanningPoker from './paginas/PlanningPoker'
 import Proyectos from './paginas/Proyectos'
+import Reporte from './paginas/Reporte'
 import Sprints from './paginas/Sprints'
 
 // Las secciones del menú de un proyecto. Para sumar una pantalla: crear el archivo en paginas/ y
@@ -23,6 +24,7 @@ const secciones: { titulo: string; pantalla: (proyecto: Proyecto) => ReactNode }
   { titulo: 'Defectos', pantalla: (proyecto) => <Defectos proyecto={proyecto} /> },
   { titulo: 'Métricas', pantalla: (proyecto) => <Metricas proyecto={proyecto} /> },
   { titulo: 'Dashboard', pantalla: (proyecto) => <Dashboard proyecto={proyecto} /> },
+  { titulo: 'Reporte', pantalla: (proyecto) => <Reporte proyecto={proyecto} /> },
 ]
 
 // App es el layout: el encabezado y, según haya un proyecto elegido o no, la lista de proyectos o

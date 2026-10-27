@@ -1,11 +1,11 @@
 ---
 titulo: Reporte de proyecto o Sprint exportable a PDF
-estado: in-review        # draft | in-review | approved | implemented
+estado: implemented      # draft | in-review | approved | implemented
 unidad: global
 issue: "#21"
 sprint: 04
 autor: Luana Guajardo
-aprobada_por: ""
+aprobada_por: "Martina Batista"
 fecha: 2026-10-27
 specs_relacionadas: ["03-estado-proyecto", "05-crear-sprints", "06-cerrar-sprint", "07-story-points", "09-registro-esfuerzo", "10-metricas-avance", "11-defectos", "12-metricas-esfuerzo-calidad"]
 ---
@@ -310,18 +310,18 @@ Los pasos que no indican proyecto se refieren al de los Antecedentes, "Tienda On
 
 ## Tareas
 
-- [ ] `[P1]` Armado del reporte del proyecto y del de un Sprint en `backend/dominio/` (RN-3 a RN-7), reutilizando los cálculos de las specs 03, 10, 11 y 12 (TDD).
-- [ ] `[P1]` Casos de uso de los dos reportes, con la verificación de proyecto y Sprint (RN-1).
-- [ ] `[P1]` Generación del PDF en el backend (RN-8, RN-10), con la librería justificada en el PR.
-- [ ] `[P1]` Rutas REST de la vista previa y de la descarga del PDF, con los escenarios de `backend/features/reporte.feature`.
-- [ ] `[P1]` Pantalla "Reporte" en el frontend (CA-8).
-- [ ] `[P2]` Actualizar `backend/CLAUDE.md` y `frontend/CLAUDE.md`.
+- [x] `[P1]` Armado del reporte del proyecto y del de un Sprint en `backend/dominio/` (RN-3 a RN-7), reutilizando los cálculos de las specs 03, 10, 11 y 12 (TDD).
+- [x] `[P1]` Casos de uso de los dos reportes, con la verificación de proyecto y Sprint (RN-1).
+- [x] `[P1]` Generación del PDF en el backend (RN-8, RN-10), con la librería justificada en el PR.
+- [x] `[P1]` Rutas REST de la vista previa y de la descarga del PDF, con los escenarios de `backend/features/reporte.feature`.
+- [x] `[P1]` Pantalla "Reporte" en el frontend (CA-8).
+- [x] `[P2]` Actualizar `backend/CLAUDE.md` y `frontend/CLAUDE.md`.
 
 ## Definition of Done
 
-- [ ] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
-- [ ] Escenarios BDD automatizados y en verde.
-- [ ] CI en verde (gofmt / vet / tests / lint / build).
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
-- [ ] Spec en estado `implemented`.
+- [x] Tests unitarios Go escritos primero (commits `test:` → `feat:` → `refactor:` visibles en el historial).
+- [x] Escenarios BDD automatizados y en verde.
+- [x] CI en verde (gofmt / vet / tests / lint / build).
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de la unidad actualizado (specs relacionadas, trampas).
+- [x] Spec en estado `implemented`.
