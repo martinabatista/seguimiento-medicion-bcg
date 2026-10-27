@@ -278,6 +278,10 @@ Los pasos que no indican proyecto ("el proyecto tiene", "agrego al integrante", 
 
 Al implementar, el email con un espacio adelante del CA-3 (`" ana@mail.com"`) pasó de la tabla del `Esquema del escenario` a un escenario propio en `backend/features/integrantes.feature` ("El mismo email con un espacio adelante también está repetido"), porque Gherkin recorta los espacios de las celdas: entre comillas en el paso, el espacio se conserva.
 
+## Pantalla
+
+`frontend/src/paginas/Integrantes.tsx` (sección "Integrantes" del menú): la lista de integrantes en el orden en que se agregaron, con su rol y su email (ya normalizado por el backend), y un formulario para agregar uno con el rol en un desplegable. No valida nada: el email es un campo de texto común (no `type="email"`) para que el formato lo informe el backend, y muestra sus mensajes de error (por ejemplo, "El integrante ya está registrado en el proyecto").
+
 ## Dependencias
 
 - Spec 01 (proyectos): el integrante pertenece a un proyecto existente.

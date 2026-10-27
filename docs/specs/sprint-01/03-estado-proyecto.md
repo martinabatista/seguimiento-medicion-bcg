@@ -210,6 +210,10 @@ Los escenarios del CA-2 que estaban en el borrador de esta spec se reemplazaron 
 
 Los escenarios del CA-3 que cargan historias **con** Story Points ("con 5 Story Points") estiman la historia con la spec 07 antes de pasarla a su estado, porque una historia completada ya no se puede estimar. Se automatizaron en el segundo PR, cuando la spec 07 estuvo implementada; hasta entonces la suma de Story Points (RN-6) se verificaba solo con tests unitarios del dominio.
 
+## Pantalla
+
+`frontend/src/paginas/Estado.tsx` (sección "Estado" del menú, la primera al elegir un proyecto). Pide el estado una sola vez y muestra lo que llega, sin calcular nada: el estado del proyecto con sus fechas, el Sprint en curso con su Sprint Goal (o "No hay un Sprint en curso", spec 05 CA-5) y una tabla con el avance del backlog (historias por estado, porcentaje de completadas, Story Points y sin estimar).
+
 ## Dependencias
 
 - Spec 01 (proyectos): datos y fechas del proyecto.
