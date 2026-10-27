@@ -1,6 +1,9 @@
 package dominio
 
-import "context"
+import (
+	"context"
+	"slices"
+)
 
 // RepositorioHistorias guarda y lee las historias del backlog. Lo implementan postgres/ (base
 // real) y memoria/ (tests). Las búsquedas por historia reciben también el proyecto: una
@@ -20,17 +23,18 @@ type RepositorioHistorias interface {
 
 // ServicioBacklog son los casos de uso de la spec 04. Usa el repositorio de proyectos solo para
 // verificar que el proyecto exista (RN-1), el de Sprints para no eliminar una historia de un
-// Sprint abierto (spec 05 RN-11) y el de esfuerzo para no eliminar una historia con horas
-// registradas (spec 09 RN-10).
+// Sprint abierto (spec 05 RN-11), y los de esfuerzo y defectos para no eliminar una historia con
+// horas registradas (spec 09 RN-10) o con defectos (spec 11 RN-14).
 type ServicioBacklog struct {
 	proyectos RepositorioProyectos
 	historias RepositorioHistorias
 	sprints   RepositorioSprints
 	esfuerzo  RepositorioEsfuerzo
+	defectos  RepositorioDefectos
 }
 
-func NuevoServicioBacklog(proyectos RepositorioProyectos, historias RepositorioHistorias, sprints RepositorioSprints, esfuerzo RepositorioEsfuerzo) *ServicioBacklog {
-	return &ServicioBacklog{proyectos: proyectos, historias: historias, sprints: sprints, esfuerzo: esfuerzo}
+func NuevoServicioBacklog(proyectos RepositorioProyectos, historias RepositorioHistorias, sprints RepositorioSprints, esfuerzo RepositorioEsfuerzo, defectos RepositorioDefectos) *ServicioBacklog {
+	return &ServicioBacklog{proyectos: proyectos, historias: historias, sprints: sprints, esfuerzo: esfuerzo, defectos: defectos}
 }
 
 // Crear valida los datos y registra la historia en el backlog del proyecto (CA-1).
@@ -104,6 +108,14 @@ func (s *ServicioBacklog) Eliminar(ctx context.Context, proyectoID, id int64) er
 	}
 	if len(registros) > 0 {
 		return ErrHistoriaConEsfuerzo
+	}
+	// spec 11 RN-14: con defectos registrados tampoco, para no perderlos.
+	defectos, err := s.defectos.Listar(ctx, proyectoID)
+	if err != nil {
+		return err
+	}
+	if slices.ContainsFunc(defectos, func(d Defecto) bool { return d.HistoriaID == id }) {
+		return ErrHistoriaConDefectos
 	}
 	return s.historias.Eliminar(ctx, proyectoID, id)
 }
