@@ -77,6 +77,7 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 			metricas,
 			dominio.NuevoServicioEsfuerzo(proyectos, historias, integrantes, esfuerzo, m.fechaDeHoy),
 			dominio.NuevoServicioDashboard(estado, metricas, m.fechaDeHoy),
+			dominio.NuevoServicioMetricasEsfuerzo(proyectos, historias, sprints, esfuerzo),
 		)}
 		return ctx, nil
 	})
@@ -137,6 +138,9 @@ func inicializarEscenario(sc *godog.ScenarioContext) {
 
 	// Dashboard (spec 13)
 	m.registrarPasosDashboard(sc)
+
+	// Métricas de esfuerzo (spec 12)
+	m.registrarPasosMetricasEsfuerzo(sc)
 }
 
 // ---------- helpers ----------
