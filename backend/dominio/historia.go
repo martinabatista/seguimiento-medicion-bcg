@@ -65,6 +65,8 @@ type Historia struct {
 	Criterios   string
 	Estado      EstadoHistoria
 	StoryPoints *int // nil = sin estimar; se asignan en las specs 07 y 08
+	// HorasEstimadas en centésimas (8 h = 800); nil = sin horas estimadas. Se cargan en la spec 12.
+	HorasEstimadas *int
 }
 
 // NuevaHistoria arma una historia del backlog validando las reglas de la spec 04.

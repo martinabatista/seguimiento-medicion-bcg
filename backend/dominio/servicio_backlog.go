@@ -74,8 +74,9 @@ func (s *ServicioBacklog) Modificar(ctx context.Context, proyectoID, id int64, d
 			return Historia{}, ErrCompletarDesdeSprint
 		}
 	}
-	h.ID = id                          // RN-10: el identificador no cambia.
-	h.StoryPoints = actual.StoryPoints // Los Story Points no se modifican acá (specs 07 y 08).
+	h.ID = id                                // RN-10: el identificador no cambia.
+	h.StoryPoints = actual.StoryPoints       // Los Story Points no se modifican acá (specs 07 y 08).
+	h.HorasEstimadas = actual.HorasEstimadas // Las horas estimadas tampoco (spec 12 RN-4).
 	if err := s.historias.Actualizar(ctx, h); err != nil {
 		return Historia{}, err
 	}
