@@ -1,11 +1,11 @@
 ---
 titulo: Setup inicial del proyecto
-estado: draft
+estado: implemented
 unidad: global
 issue: "#1"
 sprint: 00
 autor: Martina Batista
-aprobada_por: ""
+aprobada_por: "Luana Guajardo"
 fecha: 2026-10-17
 specs_relacionadas: []
 ---
@@ -56,6 +56,7 @@ No aplica.
 
 - El núcleo y las reglas de negocio en Go (consigna).
 - Cualquier integrante debe poder levantar el entorno siguiendo instrucciones escritas.
+- Cobertura mínima de tests: **90 % en el dominio** (reglas de negocio y cálculos) y **80 % en el total del backend**, medido con `go test -p 1 -coverpkg=./... ./...`. Se fijó con los valores alcanzados al terminar las historias (dominio 93,6 %, total 88,7 %, ver `docs/informe-metricas.md`) y es una regla del equipo: la CI no la controla.
 
 ## Casos límite
 
@@ -83,19 +84,19 @@ No aplica (configuración). El escenario de ejemplo de CA-3 solo valida la integ
 
 ## Tareas
 
-- [ ] `[P1]` Instalar Go, Node y Docker en las máquinas del equipo (hecho en la de Martina).
+- [x] `[P1]` Instalar Go, Node y Docker en las máquinas del equipo.
 - [x] `[P1]` Inicializar el módulo Go y la estructura de `backend/`.
-- [ ] `[P1]` Inicializar el frontend con Vite + React + TS.
+- [x] `[P1]` Inicializar el frontend con Vite + React + TS (hecho con la interfaz web base, #60).
 - [x] `[P1]` Definir cómo se levanta PostgreSQL localmente (docker compose, puerto 5434).
 - [x] `[P1]` Integrar godog con un escenario de ejemplo.
 - [x] `[P1]` Configurar la protección de la rama `main`.
 - [x] `[P1]` Crear Project, Milestones y labels en GitHub.
-- [ ] `[P2]` Definir % mínimo de cobertura.
+- [x] `[P2]` Definir % mínimo de cobertura (ver Restricciones).
 - [x] `[P2]` Actualizar el README con instrucciones de setup.
 
 ## Definition of Done
 
-- [ ] CI en verde.
-- [ ] Criterios de aceptación verificados.
-- [ ] `CLAUDE.md` de cada unidad actualizado.
-- [ ] Spec en estado `implemented`.
+- [x] CI en verde.
+- [x] Criterios de aceptación verificados.
+- [x] `CLAUDE.md` de cada unidad actualizado.
+- [x] Spec en estado `implemented`.
