@@ -309,7 +309,9 @@ Escenarios BDD: se escriben en `features/<funcionalidad>.feature` con `# languag
 `features/features_test.go`. Cada escenario indica en su nombre el criterio que cubre: `(CA-3)`.
 
 Umbrales de calidad: tests unitarios obligatorios para métricas, cálculos de estimación, reglas de
-negocio y validaciones (exigencia de la cátedra). TODO: fijar % mínimo de cobertura en la spec de setup.
+negocio y validaciones (exigencia de la cátedra). Cobertura mínima (spec 00): 90 % en `dominio/` y 80 % en el
+total del backend, medido con `go test -p 1 -coverpkg=./... ./...` (lo que cada paquete ejecuta desde los tests de
+otro). No lo controla la CI: revisarlo antes de cada entrega (`docs/informe-metricas.md`).
 
 ## Trampas conocidas
 
