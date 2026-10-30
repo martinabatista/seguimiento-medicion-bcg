@@ -7,6 +7,8 @@ Integrantes: Batista Martina, Cabeza Florencia, Guajardo Luana
 
 - Reglas del equipo y arquitectura: [`CLAUDE.md`](CLAUDE.md)
 - Especificaciones (SDD) por Sprint: [`docs/specs/`](docs/specs/)
+- Documentación técnica: [`docs/documentacion-tecnica.md`](docs/documentacion-tecnica.md)
+- Manual de usuario: [`docs/manual-usuario.md`](docs/manual-usuario.md)
 - Tablero Scrum: [GitHub Projects](https://github.com/users/martinabatista/projects/4)
 
 ## Requisitos

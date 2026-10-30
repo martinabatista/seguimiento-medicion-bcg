@@ -80,6 +80,7 @@ TypeScript (frontend) · godog (BDD con Gherkin) · `go test` (TDD) · GitHub Ac
 ## Mapa de la documentación
 
 - [`docs/specs/_template.md`](docs/specs/_template.md) — plantilla de spec (campos que pide la cátedra).
+- [`docs/documentacion-tecnica.md`](docs/documentacion-tecnica.md) y [`docs/manual-usuario.md`](docs/manual-usuario.md) — entregable 12.
 - [`.github/pull_request_template.md`](.github/pull_request_template.md) — checklist de cada PR.
 - `.documentacion-clase/` — consigna de la cátedra (local, **no se versiona**).
 
