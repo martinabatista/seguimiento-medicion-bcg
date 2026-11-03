@@ -5,7 +5,7 @@ Cómo está construida: [documentación técnica](documentacion-tecnica.md).
 
 ## Antes de empezar
 
-La aplicación se abre en el navegador, en **http://localhost:5173**. Para que funcione tienen que
+La aplicación se abre en el navegador, en **http://software-metrics.localhost:5173**. Para que funcione tienen que
 estar andando la base de datos, el backend y el frontend (ver [Levantar el proyecto](../README.md#levantar-el-proyecto)).
 
 Si algo no se puede hacer, la pantalla lo avisa con un mensaje en rojo que explica por qué (por
