@@ -32,3 +32,6 @@ coverage.out
 # Node (frontend)
 node_modules/
 frontend/dist/
+
+# Archivos de trabajo de la skill design-taste-frontend (capturas y estilo elegido)
+.taste-skill/
