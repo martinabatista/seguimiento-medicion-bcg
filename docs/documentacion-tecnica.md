@@ -161,7 +161,7 @@ Los pasos completos están en el [README](../README.md#levantar-el-proyecto). En
 |---|---|---|---|
 | Base de datos | Docker Desktop abierto | `docker compose up -d` | `localhost:5434` |
 | Backend | Go y la variable `DATABASE_URL` | `cd backend && go run ./cmd/api` | `http://localhost:8080` |
-| Frontend | Node.js 24 | `cd frontend && npm install && npm run dev` | `http://localhost:5173` |
+| Frontend | Node.js 24 | `cd frontend && npm install && npm run dev` | `http://software-metrics.localhost:5173` |
 
 Si cambian las tablas, hay que recrear la base: `docker compose down -v && docker compose up -d` (borra los datos de prueba).
 

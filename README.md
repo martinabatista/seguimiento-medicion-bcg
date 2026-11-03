@@ -51,7 +51,7 @@ Frontend (con el backend andando, en otra terminal):
 ```bash
 cd frontend
 npm install                 # solo la primera vez, o cuando cambian las dependencias
-npm run dev                 # la app en http://localhost:5173 (los pedidos a /api van al backend)
+npm run dev                 # la app en http://software-metrics.localhost:5173 (los pedidos a /api van al backend)
 ```
 
 ## Tests
