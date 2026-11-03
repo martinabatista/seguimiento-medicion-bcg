@@ -1,155 +1,377 @@
-/* Estilos de toda la app, en un solo archivo y sin librerías. */
+/* Estilos de toda la app, en un solo archivo y sin librerías.
+   Tema oscuro (estilo "true-black-flat" de la skill taste, Issue #79): fondo casi negro, tarjetas un
+   tono más claras sin bordes ni sombras, un solo color de acento (celeste) y solo en los datos de los
+   gráficos. Los nombres de las variables y de las clases son los que usan las pantallas: cambiar sus
+   valores cambia el aspecto sin tocar ningún .tsx. */
 
 :root {
-  --texto: #1f2937;
-  --suave: #6b7280;
-  --borde: #d1d5db;
-  --fondo: #f9fafb;
-  --primario: #2563eb;
-  --error: #b91c1c;
-  /* Colores de los gráficos (validados para daltonismo sobre blanco; el aqua lleva siempre su número) */
-  --serie-1: #2a78d6;
-  --serie-2: #eb6834;
-  --serie-3: #1baf7a;
-  font-family: system-ui, sans-serif;
+  /* Superficies: la separación es solo un paso de tono */
+  --fondo: #0c0d0f; /* el piso de la app */
+  --superficie: #15171a; /* las tarjetas */
+  --elevado: #1e2125; /* filas y bloques dentro de una tarjeta */
+  --activo: #26292e;
+  --linea: #22252a; /* reglas de tablas y separadores */
+  --control: #3a3e44; /* bordes de campos y botones secundarios */
+
+  /* Texto en tres niveles (todos con contraste 4.5:1 o más sobre las superficies) */
+  --texto: #ffffff;
+  --suave: #b4b4b4;
+  --tenue: #949494;
+
+  /* El único color de la app, solo en los datos */
+  --acento: #4cb3f0;
+
+  /* Los nombres que usan las pantallas */
+  --borde: var(--control);
+  --primario: #ffffff; /* el botón principal: blanco con texto negro */
+  --error: #f08a8f;
+  --error-fondo: #2c1a1d;
+
+  /* Colores de los gráficos: un solo tono (el acento) y grises para el resto */
+  --serie-1: var(--acento);
+  --serie-2: #e6e6e6;
+  --serie-3: #6b6f76;
+
+  --radio-tarjeta: 20px;
+  --radio-fila: 14px;
+  --radio-campo: 12px;
+  --espacio: 14px;
+  --relleno: 22px;
+
+  color-scheme: dark;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
   color: var(--texto);
   background: var(--fondo);
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
+  min-height: 100vh;
+  background: var(--fondo);
 }
+
+/* ---------- Estructura: barra superior, menú lateral y contenido ---------- */
 
 header {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.75rem 1.5rem;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.5rem;
-  background: white;
-  border-bottom: 1px solid var(--borde);
+  min-height: 64px;
+  padding: 0.75rem 29px;
+  border-bottom: 1px solid var(--linea);
+}
+
+/* La marca: un ciclo abierto, como la iteración de un Sprint */
+h1 {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h1::before {
+  content: '';
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--acento);
+  border-right-color: transparent;
+  border-radius: 50%;
+  transform: rotate(-45deg);
 }
 
 header p {
   margin: 0;
+  color: var(--suave);
 }
 
-h1 {
-  margin: 0;
-  font-size: 1.4rem;
+header p strong {
+  color: var(--texto);
+  font-weight: 500;
 }
 
-h2 {
-  font-size: 1.15rem;
+/* Con un proyecto elegido: el menú pasa a ser una columna a la izquierda */
+#raiz:has(> nav) {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
 }
 
-main {
-  max-width: 60rem;
-  margin: 0 auto;
-  padding: 0 1.5rem 2rem;
+#raiz:has(> nav) > header {
+  grid-column: 1 / -1;
 }
 
-/* Menú de secciones */
 nav {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  padding: 0.5rem 1.5rem;
-  background: white;
-  border-bottom: 1px solid var(--borde);
+  flex-direction: column;
+  gap: 2px;
+  padding: 20px 12px;
+  border-right: 1px solid var(--linea);
 }
 
 nav button {
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 14px;
+  color: #bbbbbb;
+  font-weight: 400;
+  text-align: left;
   background: none;
+  border: none;
+  border-radius: 10px;
+}
+
+nav button:hover {
   color: var(--texto);
-  border-color: transparent;
+  background: var(--superficie);
 }
 
 nav button[aria-current='page'] {
-  color: var(--primario);
-  border-color: var(--primario);
+  color: var(--texto);
+  font-weight: 500;
+  background: var(--superficie);
 }
 
-/* Formularios y botones */
+main {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 29px 48px;
+}
+
+#raiz:has(> nav) > main {
+  max-width: none;
+  margin: 0;
+}
+
+/* Cada sección es una tarjeta */
+main > section,
+main > div > section {
+  margin-bottom: var(--espacio);
+  padding: var(--relleno);
+  background: var(--superficie);
+  border-radius: var(--radio-tarjeta);
+}
+
+h2 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  margin: 20px 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+h4 {
+  margin: 16px 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--suave);
+}
+
+p {
+  margin: 0 0 10px;
+}
+
+/* ---------- Formularios y botones ---------- */
+
+/* Dos columnas: los textos ocupan el ancho entero; fechas, números y desplegables, una columna. */
 form {
   display: grid;
-  gap: 0.75rem;
-  max-width: 28rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espacio) 16px;
+  align-items: end;
+  max-width: 48rem;
+}
+
+form > label:has(textarea),
+form > label:has(input:not([type='date']):not([type='number'])),
+form > .acciones,
+form > button {
+  grid-column: 1 / -1;
+}
+
+form > button {
+  justify-self: start;
 }
 
 label {
   display: grid;
-  gap: 0.25rem;
-  font-weight: 600;
+  gap: 8px;
+  color: var(--suave);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Un campo suelto en una sección (fuera de un formulario), como elegir la historia: aire antes de
+   lo que muestra debajo. */
+section > label {
+  margin-bottom: 20px;
 }
 
 input,
 textarea,
 select {
+  min-height: 40px;
+  padding: 9px 13px;
+  color: var(--texto);
   font: inherit;
-  padding: 0.4rem 0.5rem;
-  border: 1px solid var(--borde);
-  border-radius: 4px;
-  font-weight: normal;
+  font-size: 14px;
+  font-weight: 400;
+  background: var(--fondo);
+  border: 1px solid var(--control);
+  border-radius: var(--radio-campo);
+}
+
+textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--tenue);
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: #50555c;
+}
+
+select option {
+  color: var(--texto);
+  background: var(--superficie);
 }
 
 button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 18px;
+  color: #000000;
   font: inherit;
-  padding: 0.4rem 0.9rem;
-  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
   background: var(--primario);
   border: 1px solid var(--primario);
-  border-radius: 4px;
+  border-radius: 999px;
   cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+button:hover {
+  background: #e4e4e4;
+}
+
+button:active {
+  transform: scale(0.98);
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: default;
+  transform: none;
 }
 
 button.secundario {
   color: var(--texto);
-  background: white;
-  border-color: var(--borde);
+  background: transparent;
+  border-color: var(--control);
+}
+
+button.secundario:hover {
+  background: var(--elevado);
+  border-color: #50555c;
+}
+
+button.enlace {
+  min-height: 0;
+  padding: 0;
+  color: var(--texto);
+  font-weight: 400;
+  text-decoration: underline;
+  text-decoration-color: var(--tenue);
+  text-underline-offset: 3px;
+  background: none;
+  border: none;
+}
+
+button.enlace:hover {
+  text-decoration-color: var(--texto);
+}
+
+:focus-visible {
+  outline: 2px solid var(--texto);
+  outline-offset: 2px;
 }
 
 .acciones {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 8px;
   align-items: end;
 }
 
-button.enlace {
-  padding: 0;
-  color: var(--primario);
-  background: none;
-  border: none;
-  text-decoration: underline;
+.acciones label {
+  min-width: 9rem;
 }
 
-/* Listas y mensajes */
+/* ---------- Listas, tablas y mensajes ---------- */
+
 .lista {
+  display: grid;
+  gap: 6px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .lista li {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 12px 20px;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  background: white;
-  border: 1px solid var(--borde);
-  border-radius: 4px;
+  min-height: 64px;
+  padding: 14px 18px;
+  background: var(--elevado);
+  border-radius: var(--radio-fila);
+}
+
+.lista li > div:first-child {
+  flex: 1 1 18rem;
+  min-width: 0;
 }
 
 .lista p {
-  margin: 0.25rem 0 0;
+  margin: 4px 0 0;
+}
+
+.lista strong {
+  font-weight: 500;
 }
 
 .suave {
@@ -157,48 +379,81 @@ button.enlace {
 }
 
 .error {
-  padding: 0.5rem 0.75rem;
+  margin: 0 0 var(--espacio);
+  padding: 10px 14px;
   color: var(--error);
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 4px;
+  background: var(--error-fondo);
+  border-radius: var(--radio-campo);
 }
 
-/* Tablas (Métricas) */
+details summary {
+  color: var(--suave);
+  cursor: pointer;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  border: 1px solid var(--borde);
+  font-variant-numeric: tabular-nums;
 }
 
-th,
-td {
-  padding: 0.5rem 0.75rem;
+th {
+  padding: 0 12px 10px;
+  color: var(--tenue);
+  font-size: 12px;
+  font-weight: 400;
   text-align: left;
-  border-bottom: 1px solid var(--borde);
 }
 
-/* ---------- Dashboard (spec 13) ---------- */
+td {
+  padding: 13px 12px;
+  text-align: left;
+  border-top: 1px solid var(--linea);
+}
+
+th:first-child,
+td:first-child {
+  padding-left: 0;
+}
+
+table + p {
+  margin-top: 14px;
+}
+
+/* ---------- Indicadores (Dashboard, Métricas, Estado) ---------- */
 
 .tarjetas {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-  gap: 0.75rem;
+  gap: var(--espacio);
+  margin-bottom: var(--espacio);
 }
 
 .tarjeta {
-  display: grid;
-  gap: 0.25rem;
-  padding: 0.75rem 1rem;
-  background: white;
-  border: 1px solid var(--borde);
-  border-radius: 4px;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 6px;
+  min-height: 96px;
+  padding: 18px;
+  background: var(--elevado);
+  border-radius: 16px;
 }
 
 .tarjeta strong {
-  font-size: 1.5rem;
+  font-size: 26px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
 }
+
+.tarjeta .suave {
+  color: var(--tenue);
+  font-size: 13px;
+}
+
+/* ---------- Gráficos del Dashboard (spec 13) ---------- */
 
 .serie-1 {
   background: var(--serie-1);
@@ -214,23 +469,27 @@ td {
 
 .leyenda {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
+  color: var(--suave);
+  font-size: 13px;
 }
 
 .muestra {
   display: inline-block;
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 2px;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
   vertical-align: middle;
 }
 
 /* Barras: el área tiene alto fijo y cada barra ocupa el % de su valor sobre el mayor. */
 .grafico {
-  padding: 1rem;
-  background: white;
-  border: 1px solid var(--borde);
-  border-radius: 4px;
+  padding: 18px;
+  background: var(--elevado);
+  border-radius: 16px;
 }
 
 .area {
@@ -240,13 +499,13 @@ td {
   align-items: end;
   height: 12rem;
   padding-top: 1.5rem;
-  border-bottom: 1px solid var(--suave);
+  border-bottom: 1px solid var(--control);
 }
 
 .grupo {
   display: flex;
   flex: 1;
-  gap: 2px;
+  gap: 3px;
   height: 100%;
 }
 
@@ -260,7 +519,10 @@ td {
 }
 
 .valor {
-  font-size: 0.85rem;
+  margin-bottom: 4px;
+  color: var(--suave);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
   text-align: center;
 }
 
@@ -271,9 +533,9 @@ td {
 .ejes {
   display: flex;
   gap: 1.5rem;
-  padding-top: 0.25rem;
-  font-size: 0.85rem;
-  color: var(--suave);
+  padding-top: 8px;
+  color: var(--tenue);
+  font-size: 12px;
 }
 
 .ejes span {
@@ -284,20 +546,21 @@ td {
   position: absolute;
   right: 0;
   left: 0;
-  border-top: 2px dashed var(--texto);
+  border-top: 1px dashed var(--texto);
   pointer-events: none;
 }
 
 .promedio span {
   position: absolute;
   right: 0;
-  bottom: 0.15rem;
-  padding: 0 0.25rem;
-  font-size: 0.8rem;
-  background: white;
+  bottom: 4px;
+  padding: 0 6px;
+  color: var(--texto);
+  font-size: 12px;
+  background: var(--elevado);
 }
 
-/* Dona: un degradado circular con un agujero blanco en el medio. */
+/* Dona: un degradado circular con un agujero en el medio, del color de la tarjeta. */
 .dona-y-leyenda {
   display: flex;
   flex-wrap: wrap;
@@ -316,18 +579,75 @@ td {
 .dona span {
   display: grid;
   place-items: center;
-  width: 6rem;
-  height: 6rem;
+  width: 7.4rem;
+  height: 7.4rem;
   text-align: center;
-  background: white;
+  background: var(--superficie);
   border-radius: 50%;
 }
 
 .leyenda-dona {
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .leyenda-dona li {
-  margin-bottom: 0.4rem;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Celular y tablet ---------- */
+
+@media (max-width: 760px) {
+  header {
+    padding: 12px 16px;
+  }
+
+  /* El menú lateral se vuelve una fila que se desliza de costado */
+  #raiz:has(> nav) {
+    display: block;
+  }
+
+  nav {
+    flex-direction: row;
+    gap: 4px;
+    padding: 10px 16px;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  nav button {
+    flex: none;
+    width: auto;
+    min-height: 40px;
+  }
+
+  main {
+    padding: 16px 16px 40px;
+  }
+
+  form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  main > section,
+  main > div > section {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+
+  button {
+    min-height: 44px;
+  }
+
+  .tarjetas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+  }
 }
