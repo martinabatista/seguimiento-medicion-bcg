@@ -127,7 +127,8 @@ export default function Backlog({ proyecto }: { proyecto: Proyecto }) {
 
       <section>
         <h2>{editando === null ? 'Nueva historia' : 'Modificar historia'}</h2>
-        <form onSubmit={guardar}>
+        {/* noValidate: el navegador no bloquea el envío, así el error lo informa el backend (spec 04 RN-4). */}
+        <form onSubmit={guardar} noValidate>
           <label>
             Título
             <input value={formulario.titulo} onChange={(e) => setFormulario({ ...formulario, titulo: e.target.value })} />
@@ -138,7 +139,14 @@ export default function Backlog({ proyecto }: { proyecto: Proyecto }) {
           </label>
           <label>
             Prioridad (1 es la más importante)
-            <input type="number" value={formulario.prioridad} onChange={(e) => setFormulario({ ...formulario, prioridad: e.target.value })} />
+            {/* min y step solo guían las flechas: no bajan de 1 ni pasan por decimales. */}
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={formulario.prioridad}
+              onChange={(e) => setFormulario({ ...formulario, prioridad: e.target.value })}
+            />
           </label>
           <label>
             Criterios de aceptación (opcional)

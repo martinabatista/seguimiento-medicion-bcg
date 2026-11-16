@@ -78,6 +78,9 @@ Acordadas al crear la unidad (Issue #15, 2026-10-26):
   del backend: `type="email"` (formato), `step` en `type="number"` (decimales), `required`, `min`/`max`.
   Para que la validación sea la de Go: email como texto común (`inputMode="email"`) y números con
   `type="number" step="any"` (Integrantes y Esfuerzo).
+- Si un número tiene un mínimo y conviene que las **flechas** no lo pasen (prioridad del Backlog, ≥ 1), se pone
+  `min`/`step` en el campo **y `noValidate` en el `<form>`**: las flechas respetan el mínimo, pero el navegador no
+  bloquea el envío y un valor escrito a mano lo sigue rechazando el backend con su mensaje.
 
 ## Contratos públicos
 
